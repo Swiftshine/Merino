@@ -9,13 +9,13 @@ pub enum Tab {
 impl Tab {
     fn get_name(&self) -> String {
         match self {
-            Self::Archive => EmojiMessage::folder_msg("Archive")
+            Self::Archive => EmojiMessage::folder_msg("Archive"),
         }
     }
 }
 
 pub struct TabViewer<'a> {
-    archive_viewer: &'a mut ArchiveViewer
+    archive_viewer: &'a mut ArchiveViewer,
 }
 
 impl<'a> TabViewer<'a> {
