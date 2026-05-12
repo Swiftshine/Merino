@@ -1,16 +1,32 @@
 mod ui;
+mod contexts;
+pub(crate) mod docking;
 
-use crate::merino::game::mapbin::Mapdata;
+use crate::merino::{archive_viewer::level_editor::{contexts::canvas_context::CanvasContext, docking::LevelEditorTab}, game::mapbin::Mapdata};
 use anyhow::Result;
 
 pub struct LevelEditor {
-    mapdata: Option<Mapdata>
+    // data
+    mapdata: Option<Mapdata>,
+
+    // contexts
+    canvas_context: CanvasContext,
+
+    // docking
+    dock_state: Option<egui_dock::DockState<LevelEditorTab>>,
+    tab_to_open: Option<LevelEditorTab>,
 }
 
 impl LevelEditor {
     pub fn new() -> Self {
+        // todo! load from file
+        let dock_state = Some(Self::default_dock());
+
         Self {
             mapdata: None,
+            canvas_context: CanvasContext::new(),
+            dock_state,
+            tab_to_open: None,
         }
     }
 
@@ -18,7 +34,6 @@ impl LevelEditor {
         match Mapdata::read(bytes) {
             Ok(mapdata) => {
                 self.mapdata = Some(mapdata);
-                println!("ok!");
             }
 
             Err(e) => {
@@ -32,4 +47,8 @@ impl LevelEditor {
     // pub fn save_mapdata() -> Result<Vec<u8>> {
     //     todo!()
     // }
+
+    pub fn has_mapdata(&self) -> bool {
+        self.mapdata.is_some()
+    }
 }

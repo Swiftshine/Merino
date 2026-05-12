@@ -1,4 +1,4 @@
-use crate::merino::archive_viewer::{docking::Tab, viewer::ArchiveViewer};
+use crate::merino::archive_viewer::{docking::ArchiveViewerTab, viewer::ArchiveViewer};
 
 impl ArchiveViewer {
     pub fn show_archive_ui(&mut self, ui: &mut egui::Ui) {
@@ -52,7 +52,7 @@ impl ArchiveViewer {
 
                     // open tab based on type
                     if name.ends_with(".mapbin") {
-                        tab_to_open = Some(Tab::LevelEditor);
+                        tab_to_open = Some(ArchiveViewerTab::LevelEditor);
                         let _ = self.level_editor.load_mapdata(bytes);
                     }
                 }
