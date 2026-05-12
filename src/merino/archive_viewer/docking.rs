@@ -33,6 +33,10 @@ impl<'a> egui_dock::TabViewer for ArchiveViewerTabViewer<'a> {
         tab.get_name().into()
     }
 
+    fn is_closeable(&self, tab: &ArchiveViewerTab) -> bool {
+        *tab != ArchiveViewerTab::Archive
+    }
+
     fn ui(&mut self, ui: &mut egui::Ui, tab: &mut Self::Tab) {
         match tab {
             ArchiveViewerTab::Archive => {
