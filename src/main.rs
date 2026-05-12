@@ -1,3 +1,6 @@
-fn main() {
-    println!("Hello, world!");
+mod merino;
+use merino::MerinoApp;
+
+fn main() -> Result<(), eframe::Error> {
+    MerinoApp::run()
 }
