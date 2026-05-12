@@ -1,0 +1,6 @@
+/target
+.zed/
+.vscode/
+scratch/
+*.gfa
+*.mapbin
