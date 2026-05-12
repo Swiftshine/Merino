@@ -35,12 +35,12 @@ impl FileContext {
 }
 
 impl FileContext {
-    pub fn open_archive(&mut self) -> Result<()> {
+    pub fn open_archive(&mut self) -> Result<bool> {
         let Some(path) = FileDialog::new()
             .add_filter("Good-Feel Archive", &["gfa"])
             .pick_file()
         else {
-            return Ok(()); // user exited
+            return Ok(false); // user exited
         };
 
         let data = fs::read(path)?;
@@ -50,7 +50,7 @@ impl FileContext {
         // if we have archive contents then clear everything
         self.clear_all();
 
-        Ok(())
+        Ok(true)
     }
 
     /// Clears selections, etc.

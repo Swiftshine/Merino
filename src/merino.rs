@@ -1,5 +1,6 @@
 mod archive_viewer;
 mod util;
+mod game;
 
 use eframe::NativeOptions;
 

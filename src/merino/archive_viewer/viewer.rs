@@ -1,14 +1,16 @@
 use crate::merino::archive_viewer::{
-    archive::contexts::file_context::FileContext,
-    docking::{Tab, TabViewer},
+    contexts::file_context::FileContext, docking::{Tab, TabViewer}, level_editor::LevelEditor
 };
 
 /// View and edit mapbin or bson files.
 pub struct ArchiveViewer {
+    // editors
+    pub level_editor: LevelEditor,
     // contexts
     pub file_context: FileContext,
     // dock state
-    dock_state: egui_dock::DockState<Tab>,
+    pub dock_state: egui_dock::DockState<Tab>,
+    tab_to_open: Option<Tab>,
 }
 
 impl ArchiveViewer {
@@ -17,8 +19,10 @@ impl ArchiveViewer {
         let dock_state = Self::default_dock();
 
         Self {
+            level_editor: LevelEditor::new(),
             file_context: FileContext::new(),
             dock_state,
+            tab_to_open: None,
         }
     }
 
@@ -37,5 +41,14 @@ impl ArchiveViewer {
 
         // put it back
         self.dock_state = dock_state;
+
+        // tab adding
+        if let Some(tab) = self.tab_to_open.take() {
+            self.open_tab(tab);
+        }
+    }
+
+    pub fn schedule_open_tab(&mut self, tab: Tab) {
+        self.tab_to_open = Some(tab);
     }
 }
