@@ -61,7 +61,6 @@ impl ArchiveViewer {
             .iter()
             .any(|node| node.tabs().is_some_and(|tabs| tabs.contains(&tab)))
         {
-            println!("opening tab");
             self.dock_state.main_surface_mut().push_to_first_leaf(tab);
         }
     }

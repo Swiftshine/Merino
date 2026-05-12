@@ -36,7 +36,7 @@ impl ArchiveViewer {
         let mut selected_file = None;
         let mut tab_to_open = None;
 
-        for (name, _) in self.file_context.archive_contents() {
+        for (name, bytes) in self.file_context.archive_contents() {
             // make sure the file is something we're looking for
             let can_select = valid_extensions.iter().any(|ext| name.ends_with(ext));
 
@@ -53,6 +53,7 @@ impl ArchiveViewer {
                     // open tab based on type
                     if name.ends_with(".mapbin") {
                         tab_to_open = Some(Tab::LevelEditor);
+                        let _ = self.level_editor.load_mapdata(bytes);
                     }
                 }
             } else {

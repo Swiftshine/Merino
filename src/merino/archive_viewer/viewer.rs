@@ -48,6 +48,8 @@ impl ArchiveViewer {
         }
     }
 
+    /// Opens a tab.
+    /// Note: needs to be delayed due to ownership of the dock state.
     pub fn schedule_open_tab(&mut self, tab: Tab) {
         self.tab_to_open = Some(tab);
     }
