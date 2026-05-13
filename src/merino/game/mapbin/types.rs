@@ -1,6 +1,5 @@
 use std::fmt::Display;
 
-
 #[derive(Debug, Clone, Copy, Default)]
 pub struct Vec2f {
     pub x: f32,
@@ -14,7 +13,23 @@ pub struct Vec3f {
     pub z: f32,
 }
 
-#[derive(Debug)]
+pub trait Vec2Like {
+    fn x_mut(&mut self) -> &mut f32;
+    fn y_mut(&mut self) -> &mut f32;
+}
+
+impl Vec2Like for Vec2f {
+    fn x_mut(&mut self) -> &mut f32 { &mut self.x }
+    fn y_mut(&mut self) -> &mut f32 { &mut self.y }
+}
+
+impl Vec2Like for Vec3f {
+    fn x_mut(&mut self) -> &mut f32 { &mut self.x }
+    fn y_mut(&mut self) -> &mut f32 { &mut self.y }
+}
+
+
+#[derive(Debug, Clone)]
 pub struct Params<const N: usize> {
     pub int_values: [i32; N],
     pub float_values: [f32; N],
@@ -30,6 +45,53 @@ impl<const N: usize> Default for Params<N> {
         }
     }
 }
+
+pub enum AnyParams<'a> {
+    Params3(&'a Params<3>),
+    Params5(&'a Params<5>),
+}
+
+impl<'a> From<&'a Params<3>> for AnyParams<'a> {
+    fn from(p: &'a Params<3>) -> Self {
+        Self::Params3(p)
+    }
+}
+
+impl<'a> From<&'a Params<5>> for AnyParams<'a> {
+    fn from(p: &'a Params<5>) -> Self {
+        Self::Params5(p)
+    }
+}
+
+// impl AnyParams {
+//     pub fn len(&self) -> usize {
+//         match self {
+//             Self::Params3(_) => 3,
+//             Self::Params5(_) => 5
+//         }
+//     }
+
+//     pub fn int_params(&self) -> &[i32] {
+//         match self {
+//             Self::Params3(p) => &p.int_values,
+//             Self::Params5(p) => &p.int_values,
+//         }
+//     }
+
+//     pub fn float_params(&self) -> &[f32] {
+//         match self {
+//             Self::Params3(p) => &p.float_values,
+//             Self::Params5(p) => &p.float_values,
+//         }
+//     }
+
+//     pub fn string_params(&self) -> &[String64] {
+//         match self {
+//             Self::Params3(p) => &p.string_values,
+//             Self::Params5(p) => &p.string_values,
+//         }
+//     }
+// }
 
 /// A string with a char limit
 #[derive(Debug, Clone, Default, PartialEq)]
@@ -56,3 +118,9 @@ impl<const N: usize> Display for LimitedString<N> {
 pub type String16 = LimitedString<16>;
 pub type String32 = LimitedString<32>;
 pub type String64 = LimitedString<64>;
+
+// pub enum AnyLimitedString {
+//     String16(String16),
+//     String32(String32),
+//     String64(String64),
+// }

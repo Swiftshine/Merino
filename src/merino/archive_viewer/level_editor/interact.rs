@@ -1,4 +1,4 @@
-use crate::merino::{archive_viewer::level_editor::{LevelEditor, contexts::{canvas_context::CanvasContext, message_context::{Command, MessageContext}}}, game::mapbin::{MapDataNode, MapNodeType, NodeData, NodePath, types::Vec2f}};
+use crate::merino::{archive_viewer::level_editor::{LevelEditor, contexts::{canvas_context::CanvasContext, message_context::{Command, MessageContext}}}, game::mapbin::{MapDataNode, MapNodeType, NodeData, NodePath, types::{AnyParams, Vec2Like, Vec2f}}};
 
 impl LevelEditor {
     pub fn interact_with_all_nodes(&mut self, ui: &mut egui::Ui, canvas_rect: egui::Rect) {
@@ -48,14 +48,23 @@ impl MapDataNode {
                         egui::Color32::WHITE
                     );
                 },
-                MapNodeType::MapObjSet => {},
-                MapNodeType::MapItemSet => {},
-                MapNodeType::MapEnemySet => {},
-                MapNodeType::MapLocator => {},
+                MapNodeType::MapObjSet
+                | MapNodeType::MapItemSet
+                | MapNodeType::MapEnemySet
+                | MapNodeType::MapLocator
+                | MapNodeType::MapTerrain => {
+                    self.interact_basic(
+                        ui,
+                        canvas_rect,
+                        current_path,
+                        canvas_context,
+                        messages,
+                        can_edit
+                    );
+                },
                 MapNodeType::MapPath => {},
                 MapNodeType::MapRect => {},
                 MapNodeType::MapCircle => {},
-                MapNodeType::MapTerrain => {},
             }
         }
 
@@ -69,18 +78,87 @@ impl MapDataNode {
 
     /* generic editors */
 
-    // /// "basic node" as in a node that contains position and parameter data
-    // fn interact_basic(
-    //     &mut self,
-    //     ui: &mut egui::Ui,
-    //     current_path: &mut NodePath,
-    //     canvas_context: &mut CanvasContext,
-    //     messages: &mut MessageContext,
-    //     can_edit: bool,
-    //     color: egui::Color32,
-    // ) {
+    /// "basic node" as in a node that contains position and parameter data
+    fn interact_basic(
+        &mut self,
+        ui: &mut egui::Ui,
+        canvas_rect: egui::Rect,
+        current_path: &mut NodePath,
+        canvas_context: &mut CanvasContext,
+        messages: &mut MessageContext,
+        can_edit: bool,
+    ) {
+        let (name, position, _params, color) = match &mut self.node_data {
+            NodeData::MapObjSet { name, position, params, .. } => {
+                (name.as_str(), position, AnyParams::from(&*params), egui::Color32::WHITE)
+            }
+            
+            NodeData::MapItemSet { name, position, params, .. } => {
+                (name.as_str(), position, AnyParams::from(&*params), egui::Color32::GOLD)
+            }
 
-    // }
+            NodeData::MapLocator { name, position, params, .. } => {
+                (name.as_str(), position, AnyParams::from(&*params), egui::Color32::LIGHT_BLUE)
+            }
+
+            NodeData::MapEnemySet { name, position, params, .. } => {
+                (name.as_str(), position, AnyParams::from(&*params), egui::Color32::RED)
+            }
+
+            NodeData::MapTerrain { collision_type, position, params, .. } => {
+                (collision_type.as_str(), position, AnyParams::from(&*params), egui::Color32::LIGHT_GREEN)
+            }
+            _ => return,
+        };
+
+        let selection_highlight = egui::Color32::from_rgba_unmultiplied(0xFF, 0xFF, 0xFF, 0x10);
+        let square_size = 0.7;
+
+        let draw_pos = canvas_rect.min + canvas_context.convert_to_camera(Vec2f::from(*position).into());
+        let mut positions = [position];
+        let (_, rects, responses) = handle_drag_and_selections(
+            ui,
+            &[draw_pos],
+            &mut positions,
+            canvas_rect,
+            current_path,
+            canvas_context,
+            messages,
+            square_size,
+            false,
+            color,
+            can_edit,
+        );
+
+        // draw name
+        let painter = ui.painter_at(canvas_rect);
+
+        let rect = rects[0];
+        let response = &responses[0];
+
+        let selected = canvas_context.is_node_selected(current_path);
+
+        if response.hovered() || selected {
+            let text_pos = rect.center_top() - egui::Vec2::new(0.0, 5.0);
+
+            let label = if !name.is_empty() { name.to_string() } else { String::from("<unnamed>") };
+            let galley = painter.layout_no_wrap(label, egui::FontId::monospace(12.0), color);
+
+            let text_rect = egui::Align2::CENTER_BOTTOM.anchor_size(text_pos, galley.size());
+
+            painter.rect_filled(
+                text_rect.expand(2.0),
+                2.0,
+                egui::Color32::from_rgba_unmultiplied(0, 0, 0, 100)
+            );
+
+            painter.galley(text_rect.min, galley, color);
+        }
+
+        if selected {
+            painter.rect_filled(rect, 0.0, selection_highlight);
+        }
+    }
 
     /* specific editors */
 
@@ -110,13 +188,9 @@ impl MapDataNode {
 
         painter.line_segment([draw_start, draw_end], egui::Stroke::new(0.5, color));
 
-        if !can_edit {
-            return;
-        }
-
         let points = [draw_start, draw_end];
 
-        let changed = handle_drag_and_selections(
+        let (changed, _, _) = handle_drag_and_selections(
             ui,
             &points,
             &mut [start, end],
@@ -125,7 +199,9 @@ impl MapDataNode {
             canvas_context,
             messages,
             0.5,
-            color
+            true,
+            color,
+            can_edit
         );
 
 
@@ -146,18 +222,20 @@ impl MapDataNode {
 /* helpers */
 
 /// Handles mouse inputs (dragging, clicking) for any number of points.
-/// Returns if any changes were made.
-fn handle_drag_and_selections(
+/// Returns if any changes were made, as well as any rects and responses that were created.
+fn handle_drag_and_selections<T: Vec2Like>(
     ui: &mut egui::Ui,
     draw_points: &[egui::Pos2],
-    positions: &mut [&mut Vec2f],
+    positions: &mut [&mut T],
     canvas_rect: egui::Rect,
     current_path: &NodePath,
     canvas_context: &mut CanvasContext,
     messages: &mut MessageContext,
     size: f32,
+    fill_in: bool,
     mut color: egui::Color32,
-) -> bool {
+    can_drag: bool,
+) -> (bool, Vec<egui::Rect>, Vec<egui::Response>) {
     assert_eq!(draw_points.len(), positions.len());
 
     let painter = ui.painter_at(canvas_rect);
@@ -172,7 +250,11 @@ fn handle_drag_and_selections(
     }
 
     for rect in rects.iter() {
-        painter.rect_filled(*rect, 0.0, color);
+        if fill_in {
+            painter.rect_filled(*rect, 0.0, color);
+        } else {
+            painter.rect_stroke(*rect, 0.0, egui::Stroke::new(1.0, color), egui::StrokeKind::Middle);
+        }
     }
 
     // handle inputs
@@ -183,7 +265,7 @@ fn handle_drag_and_selections(
 
     let shift_held = ui.input(|i| i.modifiers.shift);
 
-    let changed= responses.into_iter().enumerate().any(|(index, resp)|{
+    let changed= responses.iter().enumerate().any(|(index, resp)|{
         if resp.clicked_by(egui::PointerButton::Primary) {
             let command = if shift_held {
                 Command::add_to_selection(current_path.clone())
@@ -202,7 +284,7 @@ fn handle_drag_and_selections(
         }
     });
 
-    changed
+    (changed, rects, responses)
 }
 
 fn make_handle_rect(
@@ -227,13 +309,17 @@ fn make_handle_response(
     )
 }
 
-fn drag_world_delta(response: egui::Response, canvas_context: &CanvasContext) -> egui::Vec2 {
+fn drag_world_delta(response: &egui::Response, canvas_context: &CanvasContext) -> egui::Vec2 {
     response.drag_delta() / canvas_context.camera_zoom()
 }
 
-fn drag_position(value: &mut Vec2f, response: egui::Response, canvas_context: &CanvasContext) {
+fn drag_position<T: Vec2Like>(
+    value: &mut T,
+    response: &egui::Response,
+    canvas_context: &CanvasContext,
+) {
     let world_delta = drag_world_delta(response, canvas_context);
 
-    value.x += world_delta.x;
-    value.y -= world_delta.y;
+    *value.x_mut() += world_delta.x;
+    *value.y_mut() -= world_delta.y;
 }
