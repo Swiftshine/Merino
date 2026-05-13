@@ -1,5 +1,8 @@
 use crate::merino::{archive_viewer::level_editor::{LevelEditor, contexts::{canvas_context::CanvasContext, message_context::{Command, MessageContext}}}, game::mapbin::{MapDataNode, MapNodeType, NodeData, NodePath, types::{AnyParams, Vec2Like, Vec2f}}};
 
+pub const SELECTION_HIGHLIGHT: egui::Color32 =
+    egui::Color32::from_rgba_unmultiplied_const(0xFF, 0xFF, 0xFF, 0x10);
+
 impl LevelEditor {
     pub fn interact_with_all_nodes(&mut self, ui: &mut egui::Ui, canvas_rect: egui::Rect) {
         let Self {
@@ -73,7 +76,17 @@ impl MapDataNode {
                         can_edit
                     );
                 },
-                MapNodeType::MapCircle => {},
+                MapNodeType::MapCircle => {
+                    self.interact_mapcircle(
+                        ui,
+                        canvas_rect,
+                        current_path,
+                        canvas_context,
+                        messages,
+                        can_edit,
+                        egui::Color32::PURPLE
+                    );
+                },
             }
         }
 
@@ -120,15 +133,13 @@ impl MapDataNode {
             _ => return,
         };
 
-        let selection_highlight = egui::Color32::from_rgba_unmultiplied(0xFF, 0xFF, 0xFF, 0x10);
         let square_size = 0.7;
 
         let draw_pos = canvas_rect.min + canvas_context.convert_to_camera(Vec2f::from(*position).into());
-        let mut positions = [position];
         let (_, rects, responses) = handle_drag_and_selections(
             ui,
             &[draw_pos],
-            &mut positions,
+            &mut [position],
             canvas_rect,
             current_path,
             canvas_context,
@@ -148,24 +159,11 @@ impl MapDataNode {
         let selected = canvas_context.is_node_selected(current_path);
 
         if response.hovered() || selected {
-            let text_pos = rect.center_top() - egui::Vec2::new(0.0, 5.0);
-
-            let label = if !name.is_empty() { name.to_string() } else { String::from("<unnamed>") };
-            let galley = painter.layout_no_wrap(label, egui::FontId::monospace(12.0), color);
-
-            let text_rect = egui::Align2::CENTER_BOTTOM.anchor_size(text_pos, galley.size());
-
-            painter.rect_filled(
-                text_rect.expand(2.0),
-                2.0,
-                egui::Color32::from_rgba_unmultiplied(0, 0, 0, 100)
-            );
-
-            painter.galley(text_rect.min, galley, color);
+            draw_text_above_point(ui, canvas_rect, rect, name, color);
         }
 
         if selected {
-            painter.rect_filled(rect, 0.0, selection_highlight);
+            painter.rect_filled(rect, 0.0, SELECTION_HIGHLIGHT);
         }
     }
 
@@ -205,10 +203,9 @@ impl MapDataNode {
             egui::StrokeKind::Middle
         );
 
-        let points = [draw_bounds_start, draw_bounds_end];
         handle_drag_and_selections(
             ui,
-            &points,
+            &[draw_bounds_start, draw_bounds_end],
             &mut [start, end],
             canvas_rect,
             current_path,
@@ -275,6 +272,97 @@ impl MapDataNode {
 
             collision_normal.x = -normalized.1;
             collision_normal.y = normalized.0;
+        }
+    }
+
+    fn interact_mapcircle(
+        &mut self,
+        ui: &mut egui::Ui,
+        canvas_rect: egui::Rect,
+        current_path: &NodePath,
+        canvas_context: &mut CanvasContext,
+        messages: &mut MessageContext,
+        do_edit: bool,
+        color: egui::Color32,
+    ) {
+        let NodeData::MapCircle {
+            name,
+            position,
+            radius, ..
+        } = &mut self.node_data else { return; };
+
+        let painter = ui.painter_at(canvas_rect);
+        let draw_center = canvas_rect.min + canvas_context.convert_to_camera(position.into());
+        let draw_radius = *radius * canvas_context.camera_zoom();
+        
+        painter.circle_stroke(draw_center, draw_radius, egui::Stroke::new(1.0, color));
+
+        let square_size = 0.5;
+
+        // center handle
+        let (_, rects, responses) = handle_drag_and_selections(
+            ui,
+            &[draw_center],
+            &mut [position],
+            canvas_rect,
+            current_path,
+            canvas_context,
+            messages,
+            square_size,
+            true,
+            color,
+            do_edit
+        );
+
+        // radius handle
+        let draw_radius_pos = egui::Pos2::new(draw_center.x + draw_radius, draw_center.y);
+
+        let radius_rect = egui::Rect::from_center_size(draw_radius_pos, egui::Vec2::splat(square_size * canvas_context.camera_zoom()));
+
+        painter.rect_filled(radius_rect, 0.0, color);
+
+        let radius_resp = ui.interact(
+            canvas_rect.intersect(radius_rect),
+            egui::Id::new(&current_path).with("radius"),
+            egui::Sense::click_and_drag()
+        );
+
+        if radius_resp.clicked_by(egui::PointerButton::Primary) {
+            let shift_held = ui.input(|i| i.modifiers.shift);
+
+            let command = if shift_held {
+                Command::add_to_selection(current_path.clone())
+            } else {
+                Command::select_node(current_path.clone())
+            };
+
+            messages.push_command(command);
+        }
+
+        if radius_resp.dragged_by(egui::PointerButton::Primary) {
+            let pointer = ui.input(|i| i.pointer.hover_pos());
+
+            if let Some(pointer) = pointer {
+                let dx = pointer.x - draw_center.x;
+                let dy = pointer.y - draw_center.y;
+
+                *radius = (dx * dx + dy * dy).sqrt() / canvas_context.camera_zoom();
+            }
+        }
+
+        // draw text
+
+        let center_rect = rects[0];
+        let center_resp = &responses[0];
+        let selected = canvas_context.is_node_selected(current_path);
+
+        if center_resp.hovered() || radius_resp.hovered() || selected {
+            draw_text_above_point(ui, canvas_rect, center_rect, name.as_str(), color);
+        }
+
+        if canvas_context.is_node_selected(current_path) {
+            painter.circle_filled(draw_center, draw_radius, SELECTION_HIGHLIGHT);
+            painter.rect_filled(radius_rect, 0.0, egui::Color32::LIGHT_RED);
         }
     }
 }
@@ -382,4 +470,26 @@ fn drag_position<T: Vec2Like>(
 
     *value.x_mut() += world_delta.x;
     *value.y_mut() -= world_delta.y;
+}
+
+fn draw_text_above_point(
+    ui: &mut egui::Ui,
+    canvas_rect: egui::Rect,
+    target_rect: egui::Rect,
+    text: &str,
+    color: egui::Color32,
+) {
+    let painter = ui.painter_at(canvas_rect);
+    let text_pos = target_rect.center_top() - egui::Vec2::new(0.0, 5.0);
+    let label = if !text.is_empty() { text.to_string() } else { String::from("<unnamed>") };
+    let galley = painter.layout_no_wrap(label, egui::FontId::monospace(12.0), color);
+    let text_rect = egui::Align2::CENTER_BOTTOM.anchor_size(text_pos, galley.size());
+
+    painter.rect_filled(
+        text_rect.expand(2.0),
+        2.0,
+        egui::Color32::from_rgba_unmultiplied(0, 0, 0, 100)
+    );
+
+    painter.galley(text_rect.min, galley, color);
 }

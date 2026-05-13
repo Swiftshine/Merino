@@ -62,7 +62,9 @@ impl CanvasContext {
 
     /// Add given path to the list of selections.
     pub fn add_node_to_selection(&mut self, path: NodePath) {
-        self.selected_node_paths.push(path);
+        if !self.selected_node_paths.contains(&path) {
+            self.selected_node_paths.push(path);
+        }
     }
 
     /// Removes all selections
