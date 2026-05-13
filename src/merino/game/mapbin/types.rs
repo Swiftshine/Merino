@@ -19,15 +19,22 @@ pub trait Vec2Like {
 }
 
 impl Vec2Like for Vec2f {
-    fn x_mut(&mut self) -> &mut f32 { &mut self.x }
-    fn y_mut(&mut self) -> &mut f32 { &mut self.y }
+    fn x_mut(&mut self) -> &mut f32 {
+        &mut self.x
+    }
+    fn y_mut(&mut self) -> &mut f32 {
+        &mut self.y
+    }
 }
 
 impl Vec2Like for Vec3f {
-    fn x_mut(&mut self) -> &mut f32 { &mut self.x }
-    fn y_mut(&mut self) -> &mut f32 { &mut self.y }
+    fn x_mut(&mut self) -> &mut f32 {
+        &mut self.x
+    }
+    fn y_mut(&mut self) -> &mut f32 {
+        &mut self.y
+    }
 }
-
 
 #[derive(Debug, Clone)]
 pub struct Params<const N: usize> {

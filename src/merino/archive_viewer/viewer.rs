@@ -1,5 +1,7 @@
 use crate::merino::archive_viewer::{
-    contexts::file_context::FileContext, docking::{ArchiveViewerTab, ArchiveViewerTabViewer}, level_editor::LevelEditor
+    contexts::file_context::FileContext,
+    docking::{ArchiveViewerTab, ArchiveViewerTabViewer},
+    level_editor::LevelEditor,
 };
 
 /// View and edit mapbin or bson files.

@@ -1,10 +1,10 @@
 use std::io::{Cursor, Read};
 
+use super::types::*;
+use super::*;
 use crate::merino::game::mapbin::Mapdata;
 use anyhow::{Result, anyhow};
 use byteorder::{BigEndian, ReadBytesExt};
-use super::types::*;
-use super::*;
 
 impl Mapdata {
     pub fn read(bytes: &[u8]) -> Result<Self> {
@@ -188,7 +188,6 @@ impl<'a> MapdataReader<'a> {
     //     self.get_string_by_index(&self.unk_types_1, index, "Terrain")
     // }
 }
-
 
 /* Readable impls */
 
@@ -429,5 +428,3 @@ impl Readable for MapDataNode {
         })
     }
 }
-
-    

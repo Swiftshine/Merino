@@ -1,5 +1,4 @@
 #[allow(unused_variables)] // todo! get rid of this when it's no longer needed.
-
 mod read;
 pub(crate) mod types;
 mod write;
@@ -7,8 +6,8 @@ mod write;
 use strum::EnumIter;
 use types::*;
 
-use strum::{AsRefStr, Display, EnumString, FromRepr};
 use enum_map::Enum;
+use strum::{AsRefStr, Display, EnumString, FromRepr};
 
 #[derive(
     FromRepr, Debug, Default, Display, AsRefStr, Copy, Clone, EnumString, PartialEq, Enum, Hash, Eq,
@@ -74,15 +73,12 @@ impl From<NodeChildType> for MapNodeType {
 #[derive(Debug, Hash, PartialEq, Clone, Copy)]
 pub struct NodeStep {
     node_type: NodeChildType,
-    index: usize
+    index: usize,
 }
 
 impl NodeStep {
     pub fn new(node_type: NodeChildType, index: usize) -> Self {
-        Self {
-            node_type,
-            index
-        }
+        Self { node_type, index }
     }
 }
 

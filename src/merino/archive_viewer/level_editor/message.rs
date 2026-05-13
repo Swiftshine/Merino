@@ -1,4 +1,6 @@
-use crate::merino::archive_viewer::level_editor::{LevelEditor, contexts::message_context::Command, docking::LevelEditorTab};
+use crate::merino::archive_viewer::level_editor::{
+    LevelEditor, contexts::message_context::Command, docking::LevelEditorTab,
+};
 
 impl LevelEditor {
     pub fn process_messages(&mut self) {
@@ -11,7 +13,7 @@ impl LevelEditor {
                     self.canvas_context.select_node(path);
                     self.open_tab(LevelEditorTab::ObjectProperties);
                 }
-                
+
                 Command::AddToSelection(path) => {
                     self.canvas_context.add_node_to_selection(path);
                 }

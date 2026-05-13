@@ -27,7 +27,7 @@ impl ArchiveViewer {
         if !self.file_context.has_files() {
             return;
         }
-        
+
         let valid_extensions = [
             ".mapbin",
             // ".bson" // later

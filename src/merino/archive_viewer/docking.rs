@@ -36,7 +36,7 @@ impl<'a> egui_dock::TabViewer for ArchiveViewerTabViewer<'a> {
     fn is_closeable(&self, tab: &ArchiveViewerTab) -> bool {
         *tab != ArchiveViewerTab::Archive
     }
-    
+
     fn allowed_in_windows(&self, tab: &mut ArchiveViewerTab) -> bool {
         *tab != ArchiveViewerTab::Archive
     }
@@ -63,12 +63,21 @@ impl ArchiveViewer {
     /// Opens a specified tab.
     pub fn open_tab(&mut self, tab: ArchiveViewerTab) {
         let found = {
-            self.dock_state.as_ref().unwrap().main_surface().iter().any(|node| node.tabs().is_some_and(|tabs| tabs.contains(&tab)))
+            self.dock_state
+                .as_ref()
+                .unwrap()
+                .main_surface()
+                .iter()
+                .any(|node| node.tabs().is_some_and(|tabs| tabs.contains(&tab)))
         };
 
         // check if it's not already open first
         if !found {
-            self.dock_state.as_mut().unwrap().main_surface_mut().push_to_first_leaf(tab);
+            self.dock_state
+                .as_mut()
+                .unwrap()
+                .main_surface_mut()
+                .push_to_first_leaf(tab);
         }
     }
 

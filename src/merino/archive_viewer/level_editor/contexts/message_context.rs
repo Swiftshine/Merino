@@ -5,7 +5,7 @@ pub enum Command {
     /// Clear selections and select this node
     SelectNode(NodePath),
     /// Add this node to the list of selections
-    AddToSelection(NodePath)
+    AddToSelection(NodePath),
 }
 
 impl Command {
@@ -30,7 +30,7 @@ impl MessageContext {
             commands: Vec::new(),
         }
     }
-    
+
     /// The caller takes ownership of all commands.
     pub fn take_commands(&mut self) -> Vec<Command> {
         std::mem::take(&mut self.commands)

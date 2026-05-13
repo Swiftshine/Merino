@@ -1,4 +1,16 @@
-use crate::merino::{archive_viewer::level_editor::{LevelEditor, contexts::{canvas_context::CanvasContext, message_context::{Command, MessageContext}}}, game::mapbin::{MapDataNode, MapNodeType, NodeData, NodePath, types::{AnyParams, Vec2Like, Vec2f}}};
+use crate::merino::{
+    archive_viewer::level_editor::{
+        LevelEditor,
+        contexts::{
+            canvas_context::CanvasContext,
+            message_context::{Command, MessageContext},
+        },
+    },
+    game::mapbin::{
+        MapDataNode, MapNodeType, NodeData, NodePath,
+        types::{AnyParams, Vec2Like, Vec2f},
+    },
+};
 
 pub const SELECTION_HIGHLIGHT: egui::Color32 =
     egui::Color32::from_rgba_unmultiplied_const(0xFF, 0xFF, 0xFF, 0x10);
@@ -20,7 +32,7 @@ impl LevelEditor {
             canvas_rect,
             &mut node_path,
             canvas_context,
-            message_context
+            message_context,
         );
     }
 }
@@ -39,17 +51,16 @@ impl MapDataNode {
             let can_edit = canvas_context.can_edit(self.node_type);
 
             match self.node_type {
-                MapNodeType::MapSet
-                | MapNodeType::MapRect => {
+                MapNodeType::MapSet | MapNodeType::MapRect => {
                     self.interact_rect(
                         ui,
                         canvas_rect,
                         current_path,
                         canvas_context,
                         messages,
-                        can_edit
+                        can_edit,
                     );
-                },
+                }
                 MapNodeType::MapPolySet => {
                     self.interact_mappolyset(
                         ui,
@@ -58,9 +69,9 @@ impl MapDataNode {
                         canvas_context,
                         messages,
                         can_edit,
-                        egui::Color32::WHITE
+                        egui::Color32::WHITE,
                     );
-                },
+                }
                 MapNodeType::MapObjSet
                 | MapNodeType::MapItemSet
                 | MapNodeType::MapEnemySet
@@ -72,9 +83,9 @@ impl MapDataNode {
                         current_path,
                         canvas_context,
                         messages,
-                        can_edit
+                        can_edit,
                     );
-                },
+                }
                 MapNodeType::MapPath => {
                     self.interact_mappath(
                         ui,
@@ -83,9 +94,9 @@ impl MapDataNode {
                         canvas_context,
                         messages,
                         can_edit,
-                        egui::Color32::from_rgb(0x31, 0x5C, 0x2B)
+                        egui::Color32::from_rgb(0x31, 0x5C, 0x2B),
                     );
-                },
+                }
                 MapNodeType::MapCircle => {
                     self.interact_mapcircle(
                         ui,
@@ -94,9 +105,9 @@ impl MapDataNode {
                         canvas_context,
                         messages,
                         can_edit,
-                        egui::Color32::PURPLE
+                        egui::Color32::PURPLE,
                     );
-                },
+                }
             }
         }
 
@@ -121,31 +132,72 @@ impl MapDataNode {
         can_edit: bool,
     ) {
         let (name, position, _params, color) = match &mut self.node_data {
-            NodeData::MapObjSet { name, position, params, .. } => {
-                (name.as_str(), position, AnyParams::from(&*params), egui::Color32::WHITE)
-            }
-            
-            NodeData::MapItemSet { name, position, params, .. } => {
-                (name.as_str(), position, AnyParams::from(&*params), egui::Color32::GOLD)
-            }
+            NodeData::MapObjSet {
+                name,
+                position,
+                params,
+                ..
+            } => (
+                name.as_str(),
+                position,
+                AnyParams::from(&*params),
+                egui::Color32::WHITE,
+            ),
 
-            NodeData::MapLocator { name, position, params, .. } => {
-                (name.as_str(), position, AnyParams::from(&*params), egui::Color32::LIGHT_BLUE)
-            }
+            NodeData::MapItemSet {
+                name,
+                position,
+                params,
+                ..
+            } => (
+                name.as_str(),
+                position,
+                AnyParams::from(&*params),
+                egui::Color32::GOLD,
+            ),
 
-            NodeData::MapEnemySet { name, position, params, .. } => {
-                (name.as_str(), position, AnyParams::from(&*params), egui::Color32::RED)
-            }
+            NodeData::MapLocator {
+                name,
+                position,
+                params,
+                ..
+            } => (
+                name.as_str(),
+                position,
+                AnyParams::from(&*params),
+                egui::Color32::LIGHT_BLUE,
+            ),
 
-            NodeData::MapTerrain { collision_type, position, params, .. } => {
-                (collision_type.as_str(), position, AnyParams::from(&*params), egui::Color32::LIGHT_GREEN)
-            }
+            NodeData::MapEnemySet {
+                name,
+                position,
+                params,
+                ..
+            } => (
+                name.as_str(),
+                position,
+                AnyParams::from(&*params),
+                egui::Color32::RED,
+            ),
+
+            NodeData::MapTerrain {
+                collision_type,
+                position,
+                params,
+                ..
+            } => (
+                collision_type.as_str(),
+                position,
+                AnyParams::from(&*params),
+                egui::Color32::LIGHT_GREEN,
+            ),
             _ => return,
         };
 
         let square_size = 0.7;
 
-        let draw_pos = canvas_rect.min + canvas_context.convert_to_camera(Vec2f::from(*position).into());
+        let draw_pos =
+            canvas_rect.min + canvas_context.convert_to_camera(Vec2f::from(*position).into());
         let (_, rects, responses) = handle_drag_and_selections(
             ui,
             &[draw_pos],
@@ -188,15 +240,23 @@ impl MapDataNode {
     ) {
         let (start, end, color) = {
             match &mut self.node_data {
-                NodeData::MapSet { bounds_start, bounds_end, ..} => {
-                    (bounds_start, bounds_end, egui::Color32::LIGHT_GRAY)
-                }
+                NodeData::MapSet {
+                    bounds_start,
+                    bounds_end,
+                    ..
+                } => (bounds_start, bounds_end, egui::Color32::LIGHT_GRAY),
 
-                NodeData::MapRect { bounds_start, bounds_end, ..} => {
-                    (bounds_start, bounds_end, egui::Color32::from_rgb(0x6E, 0x7D, 0xAB))
-                }
+                NodeData::MapRect {
+                    bounds_start,
+                    bounds_end,
+                    ..
+                } => (
+                    bounds_start,
+                    bounds_end,
+                    egui::Color32::from_rgb(0x6E, 0x7D, 0xAB),
+                ),
 
-                _ => return
+                _ => return,
             }
         };
 
@@ -210,7 +270,7 @@ impl MapDataNode {
             rect,
             0.0,
             egui::Stroke::new(1.0, color),
-            egui::StrokeKind::Middle
+            egui::StrokeKind::Middle,
         );
 
         handle_drag_and_selections(
@@ -224,7 +284,7 @@ impl MapDataNode {
             0.3,
             true,
             color,
-            do_edit
+            do_edit,
         );
     }
 
@@ -245,7 +305,8 @@ impl MapDataNode {
             end,
             collision_normal,
             ..
-        } = &mut self.node_data else {
+        } = &mut self.node_data
+        else {
             return;
         };
 
@@ -269,7 +330,7 @@ impl MapDataNode {
             0.5,
             true,
             color,
-            can_edit
+            can_edit,
         );
 
         if changed {
@@ -295,7 +356,7 @@ impl MapDataNode {
         can_edit: bool,
         color: egui::Color32,
     ) {
-        let NodeData::MapPath { name, points, ..} = &mut self.node_data else {
+        let NodeData::MapPath { name, points, .. } = &mut self.node_data else {
             return;
         };
 
@@ -303,7 +364,10 @@ impl MapDataNode {
 
         let painter = ui.painter_at(canvas_rect);
 
-        let draw_points: Vec<egui::Pos2> = points.iter().map(|point| canvas_rect.min + canvas_context.convert_to_camera(point.into())).collect();
+        let draw_points: Vec<egui::Pos2> = points
+            .iter()
+            .map(|point| canvas_rect.min + canvas_context.convert_to_camera(point.into()))
+            .collect();
 
         // draw lines in between points
         for window in draw_points.windows(2) {
@@ -324,7 +388,7 @@ impl MapDataNode {
             square_size,
             true,
             color,
-            can_edit
+            can_edit,
         );
 
         assert_eq!(rects.len(), responses.len());
@@ -359,13 +423,17 @@ impl MapDataNode {
         let NodeData::MapCircle {
             name,
             position,
-            radius, ..
-        } = &mut self.node_data else { return; };
+            radius,
+            ..
+        } = &mut self.node_data
+        else {
+            return;
+        };
 
         let painter = ui.painter_at(canvas_rect);
         let draw_center = canvas_rect.min + canvas_context.convert_to_camera(position.into());
         let draw_radius = *radius * canvas_context.camera_zoom();
-        
+
         painter.circle_stroke(draw_center, draw_radius, egui::Stroke::new(1.0, color));
 
         let square_size = 0.5;
@@ -382,20 +450,23 @@ impl MapDataNode {
             square_size,
             true,
             color,
-            do_edit
+            do_edit,
         );
 
         // radius handle
         let draw_radius_pos = egui::Pos2::new(draw_center.x + draw_radius, draw_center.y);
 
-        let radius_rect = egui::Rect::from_center_size(draw_radius_pos, egui::Vec2::splat(square_size * canvas_context.camera_zoom()));
+        let radius_rect = egui::Rect::from_center_size(
+            draw_radius_pos,
+            egui::Vec2::splat(square_size * canvas_context.camera_zoom()),
+        );
 
         painter.rect_filled(radius_rect, 0.0, color);
 
         let radius_resp = ui.interact(
             canvas_rect.intersect(radius_rect),
             egui::Id::new(&current_path).with("radius"),
-            egui::Sense::click_and_drag()
+            egui::Sense::click_and_drag(),
         );
 
         if radius_resp.clicked_by(egui::PointerButton::Primary) {
@@ -458,9 +529,10 @@ fn handle_drag_and_selections<T: Vec2Like>(
     assert_eq!(draw_points.len(), positions.len());
 
     let painter = ui.painter_at(canvas_rect);
-    let rects: Vec<egui::Rect> = draw_points.iter().map(|p|{
-        make_handle_rect(*p, size, canvas_context)
-    }).collect();
+    let rects: Vec<egui::Rect> = draw_points
+        .iter()
+        .map(|p| make_handle_rect(*p, size, canvas_context))
+        .collect();
 
     // paint rects
 
@@ -472,19 +544,26 @@ fn handle_drag_and_selections<T: Vec2Like>(
         if fill_in {
             painter.rect_filled(*rect, 0.0, color);
         } else {
-            painter.rect_stroke(*rect, 0.0, egui::Stroke::new(1.0, color), egui::StrokeKind::Middle);
+            painter.rect_stroke(
+                *rect,
+                0.0,
+                egui::Stroke::new(1.0, color),
+                egui::StrokeKind::Middle,
+            );
         }
     }
 
     // handle inputs
 
-    let responses: Vec<egui::Response> = rects.iter().enumerate().map(|(index, r)|{
-        make_handle_response(ui, canvas_rect, *r, current_path, index)
-    }).collect();
+    let responses: Vec<egui::Response> = rects
+        .iter()
+        .enumerate()
+        .map(|(index, r)| make_handle_response(ui, canvas_rect, *r, current_path, index))
+        .collect();
 
     let shift_held = ui.input(|i| i.modifiers.shift);
 
-    let changed= responses.iter().enumerate().any(|(index, resp)|{
+    let changed = responses.iter().enumerate().any(|(index, resp)| {
         if resp.clicked_by(egui::PointerButton::Primary) {
             let command = if shift_held {
                 Command::add_to_selection(current_path.clone())
@@ -506,12 +585,11 @@ fn handle_drag_and_selections<T: Vec2Like>(
     (changed, rects, responses)
 }
 
-fn make_handle_rect(
-    center: egui::Pos2,
-    size: f32,
-    canvas_context: &CanvasContext
-) -> egui::Rect {
-    egui::Rect::from_center_size(center, egui::Vec2::splat(size * canvas_context.camera_zoom()))
+fn make_handle_rect(center: egui::Pos2, size: f32, canvas_context: &CanvasContext) -> egui::Rect {
+    egui::Rect::from_center_size(
+        center,
+        egui::Vec2::splat(size * canvas_context.camera_zoom()),
+    )
 }
 
 fn make_handle_response(
@@ -524,7 +602,7 @@ fn make_handle_response(
     ui.interact(
         canvas_rect.intersect(target_rect),
         egui::Id::new(current_path).with(index),
-        egui::Sense::click_and_drag()
+        egui::Sense::click_and_drag(),
     )
 }
 
@@ -552,14 +630,18 @@ fn draw_text_above_point(
 ) {
     let painter = ui.painter_at(canvas_rect);
     let text_pos = target_rect.center_top() - egui::Vec2::new(0.0, 5.0);
-    let label = if !text.is_empty() { text.to_string() } else { String::from("<unnamed>") };
+    let label = if !text.is_empty() {
+        text.to_string()
+    } else {
+        String::from("<unnamed>")
+    };
     let galley = painter.layout_no_wrap(label, egui::FontId::monospace(12.0), color);
     let text_rect = egui::Align2::CENTER_BOTTOM.anchor_size(text_pos, galley.size());
 
     painter.rect_filled(
         text_rect.expand(2.0),
         2.0,
-        egui::Color32::from_rgba_unmultiplied(0, 0, 0, 100)
+        egui::Color32::from_rgba_unmultiplied(0, 0, 0, 100),
     );
 
     painter.galley(text_rect.min, galley, color);

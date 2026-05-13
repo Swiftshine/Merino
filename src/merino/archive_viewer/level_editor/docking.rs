@@ -10,13 +10,13 @@ impl LevelEditorTab {
     fn get_name(&self) -> String {
         match self {
             Self::Canvas => EmojiMessage::palette_msg("Canvas"),
-            Self::ObjectProperties => EmojiMessage::memo_msg("Object Properties")
+            Self::ObjectProperties => EmojiMessage::memo_msg("Object Properties"),
         }
     }
 }
 
 pub struct LevelEditorTabViewer<'a> {
-    level_editor: &'a mut LevelEditor
+    level_editor: &'a mut LevelEditor,
 }
 
 impl<'a> LevelEditorTabViewer<'a> {
@@ -54,12 +54,21 @@ impl LevelEditor {
     /// Opens a specified tab.
     pub fn open_tab(&mut self, tab: LevelEditorTab) {
         let found = {
-            self.dock_state.as_ref().unwrap().main_surface().iter().any(|node| node.tabs().is_some_and(|tabs| tabs.contains(&tab)))
+            self.dock_state
+                .as_ref()
+                .unwrap()
+                .main_surface()
+                .iter()
+                .any(|node| node.tabs().is_some_and(|tabs| tabs.contains(&tab)))
         };
 
         // check if it's not already open first
         if !found {
-            self.dock_state.as_mut().unwrap().main_surface_mut().push_to_first_leaf(tab);
+            self.dock_state
+                .as_mut()
+                .unwrap()
+                .main_surface_mut()
+                .push_to_first_leaf(tab);
         }
     }
 
@@ -67,9 +76,9 @@ impl LevelEditor {
         let mut dock_state = self.dock_state.take().unwrap();
 
         egui_dock::DockArea::new(&mut dock_state)
-        .style(egui_dock::Style::from_egui(ui.style()))
-        .id(ui.auto_id_with("le_dock"))
-        .show_inside(ui, &mut LevelEditorTabViewer::new(self));
+            .style(egui_dock::Style::from_egui(ui.style()))
+            .id(ui.auto_id_with("le_dock"))
+            .show_inside(ui, &mut LevelEditorTabViewer::new(self));
 
         self.dock_state = Some(dock_state);
 

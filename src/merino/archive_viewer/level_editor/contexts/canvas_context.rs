@@ -1,6 +1,10 @@
 use enum_map::EnumMap;
 
-use crate::merino::{archive_viewer::level_editor::settings::NodeEditSettings, game::mapbin::{MapNodeType, NodePath}, util::camera::CanvasCamera};
+use crate::merino::{
+    archive_viewer::level_editor::settings::NodeEditSettings,
+    game::mapbin::{MapNodeType, NodePath},
+    util::camera::CanvasCamera,
+};
 
 #[derive(Default)]
 struct CanvasSettings {
@@ -21,7 +25,7 @@ impl CanvasContext {
             settings: CanvasSettings::default(),
         }
     }
-    
+
     pub fn camera_mut(&mut self) -> &mut CanvasCamera {
         &mut self.camera
     }
@@ -49,7 +53,7 @@ impl CanvasContext {
     pub fn camera_zoom(&self) -> f32 {
         self.camera.zoom
     }
-    
+
     pub fn is_node_selected(&self, path: &NodePath) -> bool {
         self.selected_node_paths.contains(path)
     }

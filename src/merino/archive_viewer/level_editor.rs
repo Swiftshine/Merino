@@ -1,14 +1,20 @@
-mod ui;
-mod contexts;
 mod canvas;
+mod contexts;
 pub(crate) mod docking;
-mod interact;
-mod settings;
 mod input;
+mod interact;
 mod message;
 mod object_properties;
+mod settings;
+mod ui;
 
-use crate::merino::{archive_viewer::level_editor::{contexts::{canvas_context::CanvasContext, message_context::MessageContext}, docking::LevelEditorTab}, game::mapbin::Mapdata};
+use crate::merino::{
+    archive_viewer::level_editor::{
+        contexts::{canvas_context::CanvasContext, message_context::MessageContext},
+        docking::LevelEditorTab,
+    },
+    game::mapbin::Mapdata,
+};
 use anyhow::Result;
 
 pub struct LevelEditor {
