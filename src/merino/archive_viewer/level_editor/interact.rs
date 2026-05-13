@@ -276,7 +276,7 @@ fn handle_drag_and_selections<T: Vec2Like>(
             messages.push_command(command);
         }
 
-        if resp.dragged_by(egui::PointerButton::Primary) {
+        if resp.dragged_by(egui::PointerButton::Primary) && can_drag {
             drag_position(positions[index], resp, canvas_context);
             true
         } else {
