@@ -63,7 +63,16 @@ impl MapDataNode {
                     );
                 },
                 MapNodeType::MapPath => {},
-                MapNodeType::MapRect => {},
+                MapNodeType::MapRect => {
+                    self.interact_rect(
+                        ui,
+                        canvas_rect,
+                        current_path,
+                        canvas_context,
+                        messages,
+                        can_edit
+                    );
+                },
                 MapNodeType::MapCircle => {},
             }
         }
@@ -160,6 +169,58 @@ impl MapDataNode {
         }
     }
 
+    fn interact_rect(
+        &mut self,
+        ui: &mut egui::Ui,
+        canvas_rect: egui::Rect,
+        current_path: &NodePath,
+        canvas_context: &mut CanvasContext,
+        messages: &mut MessageContext,
+        do_edit: bool,
+    ) {
+        let (start, end, color) = {
+            match &mut self.node_data {
+                NodeData::MapSet { bounds_start, bounds_end, ..} => {
+                    (bounds_start, bounds_end, egui::Color32::LIGHT_GRAY)
+                }
+
+                NodeData::MapRect { bounds_start, bounds_end, ..} => {
+                    (bounds_start, bounds_end, egui::Color32::from_rgb(0x6E, 0x7D, 0xAB))
+                }
+
+                _ => return
+            }
+        };
+
+        let painter = ui.painter_at(canvas_rect);
+        let draw_bounds_start = canvas_rect.min + canvas_context.convert_to_camera(start.into());
+        let draw_bounds_end = canvas_rect.min + canvas_context.convert_to_camera(end.into());
+
+        let rect = egui::Rect::from_two_pos(draw_bounds_start, draw_bounds_end);
+
+        painter.rect_stroke(
+            rect,
+            0.0,
+            egui::Stroke::new(1.0, color),
+            egui::StrokeKind::Middle
+        );
+
+        let points = [draw_bounds_start, draw_bounds_end];
+        handle_drag_and_selections(
+            ui,
+            &points,
+            &mut [start, end],
+            canvas_rect,
+            current_path,
+            canvas_context,
+            messages,
+            0.3,
+            true,
+            color,
+            do_edit
+        );
+    }
+
     /* specific editors */
 
     fn interact_mappolyset(
@@ -203,7 +264,6 @@ impl MapDataNode {
             color,
             can_edit
         );
-
 
         if changed {
             // update collision normals
