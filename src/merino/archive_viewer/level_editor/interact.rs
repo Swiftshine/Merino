@@ -39,7 +39,17 @@ impl MapDataNode {
             let can_edit = canvas_context.can_edit(self.node_type);
 
             match self.node_type {
-                MapNodeType::MapSet => {},
+                MapNodeType::MapSet
+                | MapNodeType::MapRect => {
+                    self.interact_rect(
+                        ui,
+                        canvas_rect,
+                        current_path,
+                        canvas_context,
+                        messages,
+                        can_edit
+                    );
+                },
                 MapNodeType::MapPolySet => {
                     self.interact_mappolyset(
                         ui,
@@ -65,15 +75,15 @@ impl MapDataNode {
                         can_edit
                     );
                 },
-                MapNodeType::MapPath => {},
-                MapNodeType::MapRect => {
-                    self.interact_rect(
+                MapNodeType::MapPath => {
+                    self.interact_mappath(
                         ui,
                         canvas_rect,
                         current_path,
                         canvas_context,
                         messages,
-                        can_edit
+                        can_edit,
+                        egui::Color32::from_rgb(0x31, 0x5C, 0x2B)
                     );
                 },
                 MapNodeType::MapCircle => {
@@ -272,6 +282,67 @@ impl MapDataNode {
 
             collision_normal.x = -normalized.1;
             collision_normal.y = normalized.0;
+        }
+    }
+
+    fn interact_mappath(
+        &mut self,
+        ui: &mut egui::Ui,
+        canvas_rect: egui::Rect,
+        current_path: &NodePath,
+        canvas_context: &mut CanvasContext,
+        messages: &mut MessageContext,
+        can_edit: bool,
+        color: egui::Color32,
+    ) {
+        let NodeData::MapPath { name, points, ..} = &mut self.node_data else {
+            return;
+        };
+
+        assert!(points.len() >= 2);
+
+        let painter = ui.painter_at(canvas_rect);
+
+        let draw_points: Vec<egui::Pos2> = points.iter().map(|point| canvas_rect.min + canvas_context.convert_to_camera(point.into())).collect();
+
+        // draw lines in between points
+        for window in draw_points.windows(2) {
+            painter.line_segment([window[0], window[1]], egui::Stroke::new(1.0, color));
+        }
+
+        let square_size = 0.5;
+        let mut positions: Vec<&mut Vec2f> = points.iter_mut().collect();
+
+        let (_, rects, responses) = handle_drag_and_selections(
+            ui,
+            &draw_points,
+            positions.as_mut_slice(),
+            canvas_rect,
+            current_path,
+            canvas_context,
+            messages,
+            square_size,
+            true,
+            color,
+            can_edit
+        );
+
+        assert_eq!(rects.len(), responses.len());
+
+        let selected = canvas_context.is_node_selected(current_path);
+
+        if selected {
+            // pick the first one for simplicity's sake
+            let rect = rects[0];
+            draw_text_above_point(ui, canvas_rect, rect, name.as_str(), color);
+        } else {
+            for (index, resp) in responses.iter().enumerate() {
+                if resp.hovered() {
+                    let rect = rects[index];
+                    draw_text_above_point(ui, canvas_rect, rect, name.as_str(), color);
+                    break; // don't render the name more than once
+                }
+            }
         }
     }
 
