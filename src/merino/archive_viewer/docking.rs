@@ -1,4 +1,4 @@
-use crate::merino::{archive_viewer::{level_editor::{LevelEditor, docking::{LevelEditorTab, LevelEditorTabViewer}}, viewer::ArchiveViewer}, util::emoji::EmojiMessage};
+use crate::merino::{archive_viewer::viewer::ArchiveViewer, util::emoji::EmojiMessage};
 
 #[derive(PartialEq, Eq, Clone, Debug)]
 pub enum ArchiveViewerTab {
@@ -34,6 +34,10 @@ impl<'a> egui_dock::TabViewer for ArchiveViewerTabViewer<'a> {
     }
 
     fn is_closeable(&self, tab: &ArchiveViewerTab) -> bool {
+        *tab != ArchiveViewerTab::Archive
+    }
+    
+    fn allowed_in_windows(&self, tab: &mut ArchiveViewerTab) -> bool {
         *tab != ArchiveViewerTab::Archive
     }
 

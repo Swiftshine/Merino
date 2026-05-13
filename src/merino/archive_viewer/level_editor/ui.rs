@@ -13,8 +13,4 @@ impl LevelEditor {
 
         self.update_dock(ui);
     }
-
-    pub fn show_canvas(&mut self, ui: &mut egui::Ui) {
-        ui.label("Canvas!");
-    }
 }

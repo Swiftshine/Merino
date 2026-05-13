@@ -1,8 +1,12 @@
 mod ui;
 mod contexts;
+mod canvas;
 pub(crate) mod docking;
+mod interact;
+mod settings;
+mod input;
 
-use crate::merino::{archive_viewer::level_editor::{contexts::canvas_context::CanvasContext, docking::LevelEditorTab}, game::mapbin::Mapdata};
+use crate::merino::{archive_viewer::level_editor::{contexts::{canvas_context::CanvasContext, message_context::MessageContext}, docking::LevelEditorTab}, game::mapbin::Mapdata};
 use anyhow::Result;
 
 pub struct LevelEditor {
@@ -11,6 +15,7 @@ pub struct LevelEditor {
 
     // contexts
     canvas_context: CanvasContext,
+    message_context: MessageContext,
 
     // docking
     dock_state: Option<egui_dock::DockState<LevelEditorTab>>,
@@ -25,6 +30,7 @@ impl LevelEditor {
         Self {
             mapdata: None,
             canvas_context: CanvasContext::new(),
+            message_context: MessageContext::new(),
             dock_state,
             tab_to_open: None,
         }

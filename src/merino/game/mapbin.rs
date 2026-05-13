@@ -1,9 +1,10 @@
 #[allow(unused_variables)] // todo! get rid of this when it's no longer needed.
 
 mod read;
-mod types;
+pub(crate) mod types;
 mod write;
 
+use strum::EnumIter;
 use types::*;
 
 use strum::{AsRefStr, Display, EnumString, FromRepr};
@@ -41,6 +42,80 @@ pub enum MapNodeFlag {
     MapTerrain = 0x100,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, EnumIter, Display)]
+pub enum NodeChildType {
+    MapPolySet,
+    MapObjSet,
+    MapItemSet,
+    MapEnemySet,
+    MapLocator,
+    MapPath,
+    MapRect,
+    MapCircle,
+    MapTerrain,
+}
+
+impl From<NodeChildType> for MapNodeType {
+    fn from(value: NodeChildType) -> Self {
+        match value {
+            NodeChildType::MapPolySet => Self::MapPolySet,
+            NodeChildType::MapObjSet => Self::MapObjSet,
+            NodeChildType::MapItemSet => Self::MapItemSet,
+            NodeChildType::MapEnemySet => Self::MapEnemySet,
+            NodeChildType::MapLocator => Self::MapLocator,
+            NodeChildType::MapPath => Self::MapPath,
+            NodeChildType::MapRect => Self::MapRect,
+            NodeChildType::MapCircle => Self::MapCircle,
+            NodeChildType::MapTerrain => Self::MapTerrain,
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct NodeStep {
+    node_type: NodeChildType,
+    index: usize
+}
+
+impl NodeStep {
+    pub fn new(node_type: NodeChildType, index: usize) -> Self {
+        Self {
+            node_type,
+            index
+        }
+    }
+}
+
+/// A path to any given node in the tree.
+/// This is indicated in sequential traversal order.
+/// e.g. ```[[MapPolySet, 0], [MapObjSet, 0], [MapItemSet, 1]]``` would be:
+/// ```MapPolySet[0].MapObjSet[0].MapItemSet[1]```.
+/// A path to root is an empty vec.
+#[derive(Debug)]
+pub struct NodePath(Vec<NodeStep>);
+
+impl NodePath {
+    pub fn push(&mut self, step: NodeStep) {
+        self.0.push(step);
+    }
+
+    pub fn pop(&mut self) -> Option<NodeStep> {
+        self.0.pop()
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = &NodeStep> {
+        self.0.iter()
+    }
+
+    pub fn root() -> Self {
+        Self(Vec::new())
+    }
+
+    pub fn is_root(&self) -> bool {
+        self.0.is_empty()
+    }
+}
+
 #[derive(Default)]
 pub struct Mapdata {
     pub version: f32,
@@ -68,6 +143,36 @@ pub struct MapDataNode {
     pub children_mapterrain: Option<Vec<MapDataNode>>, // MapTerrain
 }
 
+impl MapDataNode {
+    /// On children.
+    pub fn iter_mut(&mut self) -> impl Iterator<Item = (NodeStep, &mut MapDataNode)> {
+        let mut items = Vec::new();
+
+        // helper macro to reduce boilerplate
+        macro_rules! collect_children {
+            ($child_type:ident, $field:ident) => {
+                if let Some(vec) = &mut self.$field {
+                    for (i, node) in vec.iter_mut().enumerate() {
+                        let step = NodeStep::new(NodeChildType::$child_type, i);
+                        items.push((step, node));
+                    }
+                }
+            };
+        }
+
+        collect_children!(MapPolySet, children_mappolyset);
+        collect_children!(MapObjSet, children_mapobjset);
+        collect_children!(MapItemSet, children_mapitemset);
+        collect_children!(MapEnemySet, children_mapenemyset);
+        collect_children!(MapLocator, children_maplocator);
+        collect_children!(MapPath, children_mappath);
+        collect_children!(MapRect, children_maprect);
+        collect_children!(MapCircle, children_mapcircle);
+        collect_children!(MapTerrain, children_mapterrain);
+
+        items.into_iter()
+    }
+}
 
 #[derive(Debug, Default)]
 pub enum NodeData {
