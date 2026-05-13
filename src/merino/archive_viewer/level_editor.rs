@@ -6,6 +6,7 @@ mod interact;
 mod settings;
 mod input;
 mod message;
+mod object_properties;
 
 use crate::merino::{archive_viewer::level_editor::{contexts::{canvas_context::CanvasContext, message_context::MessageContext}, docking::LevelEditorTab}, game::mapbin::Mapdata};
 use anyhow::Result;

@@ -2,13 +2,15 @@ use crate::merino::{archive_viewer::level_editor::LevelEditor, util::emoji::Emoj
 
 #[derive(PartialEq, Eq, Clone, Debug)]
 pub enum LevelEditorTab {
-    Canvas
+    Canvas,
+    ObjectProperties,
 }
 
 impl LevelEditorTab {
     fn get_name(&self) -> String {
         match self {
-            Self::Canvas => EmojiMessage::palette_msg("Canvas")
+            Self::Canvas => EmojiMessage::palette_msg("Canvas"),
+            Self::ObjectProperties => EmojiMessage::memo_msg("Object Properties")
         }
     }
 }
@@ -34,6 +36,10 @@ impl<'a> egui_dock::TabViewer for LevelEditorTabViewer<'a> {
         match tab {
             LevelEditorTab::Canvas => {
                 self.level_editor.show_canvas(ui);
+            }
+
+            LevelEditorTab::ObjectProperties => {
+                self.level_editor.show_object_properties(ui);
             }
         }
     }

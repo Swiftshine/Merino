@@ -71,4 +71,9 @@ impl CanvasContext {
     pub fn clear_selections(&mut self) {
         self.selected_node_paths.clear();
     }
+
+    /// Only one node can have its properties edited.
+    pub fn can_edit_node_properties(&mut self) -> bool {
+        self.selected_node_paths.len() == 1
+    }
 }
