@@ -71,7 +71,7 @@ impl From<NodeChildType> for MapNodeType {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Clone, Copy)]
 pub struct NodeStep {
     node_type: NodeChildType,
     index: usize
@@ -91,7 +91,7 @@ impl NodeStep {
 /// e.g. ```[[MapPolySet, 0], [MapObjSet, 0], [MapItemSet, 1]]``` would be:
 /// ```MapPolySet[0].MapObjSet[0].MapItemSet[1]```.
 /// A path to root is an empty vec.
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Clone)]
 pub struct NodePath(Vec<NodeStep>);
 
 impl NodePath {

@@ -10,7 +10,7 @@ impl LevelEditor {
             return;
         }
 
-
+        self.process_messages();
         self.update_dock(ui);
     }
 }

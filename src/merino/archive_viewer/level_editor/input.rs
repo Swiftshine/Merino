@@ -21,16 +21,18 @@ impl LevelEditor {
             self.canvas_context.camera_mut().reset();
         }
 
-        // // clear selections
-        // let escape_pressed = ui.input(|i| i.key_pressed(egui::Key::Escape));
+        // clear selections
+        let escape_pressed = ui.input(|i| i.key_pressed(egui::Key::Escape));
 
-        // if escape_pressed {
-        //     // only escape from one action at a time
-        //     if self.canvas_context.target.is_some() {
-        //         self.canvas_context.target = None;
-        //     } else {
-        //         self.canvas_context.selected_node_paths.clear();
-        //     }
-        // }
+        if escape_pressed {
+            // only escape from one action at a time
+            // if self.canvas_context.target.is_some() {
+            //     self.canvas_context.target = None;
+            // } else {
+            //     self.canvas_context.selected_node_paths.clear();
+            // }
+
+            self.canvas_context.clear_selections();
+        }
     }
 }
