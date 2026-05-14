@@ -1,6 +1,6 @@
 use crate::merino::archive_viewer::{
     contexts::file_context::FileContext,
-    docking::{ArchiveViewerTab, ArchiveViewerTabViewer},
+    docking::ArchiveViewerTab,
     level_editor::LevelEditor,
 };
 

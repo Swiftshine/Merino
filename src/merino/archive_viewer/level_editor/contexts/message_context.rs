@@ -6,6 +6,10 @@ pub enum Command {
     SelectNode(NodePath),
     /// Add this node to the list of selections
     AddToSelection(NodePath),
+    /// Remove this node from the tree
+    RemoveNode(NodePath),
+    /// Select the parent of this path
+    SelectParentOf(NodePath)
 }
 
 impl Command {
@@ -15,6 +19,14 @@ impl Command {
 
     pub fn add_to_selection(path: NodePath) -> Self {
         Self::AddToSelection(path)
+    }
+
+    pub fn remove_node(path: NodePath) -> Self {
+        Self::RemoveNode(path)
+    }
+
+    pub fn select_parent_of(path: NodePath) -> Self {
+        Self::SelectParentOf(path)
     }
 }
 // /// Tell the editor to retrieve data immediately.
@@ -41,8 +53,8 @@ impl MessageContext {
         self.commands.push(command);
     }
 
-    // /// Add multiple commands to the command list.
-    // pub fn push_commands(&mut self, commands: impl IntoIterator<Item = Command>) {
-    //     self.commands.extend(commands);
-    // }
+    /// Add multiple commands to the command list.
+    pub fn push_commands(&mut self, commands: impl IntoIterator<Item = Command>) {
+        self.commands.extend(commands);
+    }
 }

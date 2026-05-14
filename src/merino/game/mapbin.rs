@@ -124,6 +124,60 @@ pub struct Mapdata {
     pub root: MapDataNode,
 }
 
+impl Mapdata {
+    pub fn get_node_at_path(&mut self, path: &NodePath) -> Option<&mut MapDataNode> {
+        let mut current = &mut self.root;
+
+        for step in path.iter() {
+            let vec = match step.node_type {
+                NodeChildType::MapPolySet => &mut current.children_mappolyset,
+                NodeChildType::MapObjSet => &mut current.children_mapobjset,
+                NodeChildType::MapItemSet => &mut current.children_mapitemset,
+                NodeChildType::MapEnemySet => &mut current.children_mapenemyset,
+                NodeChildType::MapLocator => &mut current.children_maplocator,
+                NodeChildType::MapPath => &mut current.children_mappath,
+                NodeChildType::MapRect => &mut current.children_maprect,
+                NodeChildType::MapCircle => &mut current.children_mapcircle,
+                NodeChildType::MapTerrain => &mut current.children_mapterrain,
+            };
+
+            current = vec.as_mut()?.get_mut(step.index)?;
+        }
+
+        Some(current)
+    }
+
+
+    /// The path given should not point to root.
+    pub fn remove_node_at_path(&mut self, path: NodePath) -> Option<MapDataNode> {
+        assert!(!path.is_root());
+
+        let mut parent_path = path.clone();
+        let step = parent_path.pop()?;
+        
+        // get the parent of the node we want to remove
+        let parent = self.get_node_at_path(&parent_path)?;
+
+        let vec = match step.node_type {
+            NodeChildType::MapPolySet => &mut parent.children_mappolyset,
+            NodeChildType::MapObjSet => &mut parent.children_mapobjset,
+            NodeChildType::MapItemSet => &mut parent.children_mapitemset,
+            NodeChildType::MapEnemySet => &mut parent.children_mapenemyset,
+            NodeChildType::MapLocator => &mut parent.children_maplocator,
+            NodeChildType::MapPath => &mut parent.children_mappath,
+            NodeChildType::MapRect => &mut parent.children_maprect,
+            NodeChildType::MapCircle => &mut parent.children_mapcircle,
+            NodeChildType::MapTerrain => &mut parent.children_mapterrain,
+        };
+
+        if let Some(v) = vec && step.index < v.len() {
+            Some(v.remove(step.index))
+        } else {
+            None
+        }
+    }
+}
+
 #[derive(Debug, Default)]
 pub struct MapDataNode {
     pub node_type: MapNodeType,
@@ -292,4 +346,16 @@ pub enum NodeData {
         params: Params<3>,
         unk15: Option<[[String32; 2]; 3]>, // version >= 4.6
     },
+}
+
+pub fn recalculate_collision_normal(dst: &mut Vec2f, start: Vec2f, end: Vec2f) {
+    // update collision normals
+    let direction = (end.x - start.x, end.y - start.y);
+
+    let magnitude = f32::sqrt(direction.0.powf(2.0) + direction.1.powf(2.0));
+
+    let normalized = (direction.0 / magnitude, direction.1 / magnitude);
+
+    dst.x = -normalized.1;
+    dst.y = normalized.0;
 }

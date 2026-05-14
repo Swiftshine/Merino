@@ -7,6 +7,8 @@ mod message;
 mod object_properties;
 mod settings;
 mod ui;
+mod editable;
+mod params;
 
 use crate::merino::{
     archive_viewer::level_editor::{

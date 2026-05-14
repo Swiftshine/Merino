@@ -7,8 +7,7 @@ use crate::merino::{
         },
     },
     game::mapbin::{
-        MapDataNode, MapNodeType, NodeData, NodePath,
-        types::{AnyParams, Vec2Like, Vec2f},
+        MapDataNode, MapNodeType, NodeData, NodePath, recalculate_collision_normal, types::{AnyParams, Vec2Like, Vec2f}
     },
 };
 
@@ -335,14 +334,7 @@ impl MapDataNode {
 
         if changed {
             // update collision normals
-            let direction = (end.x - start.x, end.y - start.y);
-
-            let magnitude = f32::sqrt(direction.0.powf(2.0) + direction.1.powf(2.0));
-
-            let normalized = (direction.0 / magnitude, direction.1 / magnitude);
-
-            collision_normal.x = -normalized.1;
-            collision_normal.y = normalized.0;
+            recalculate_collision_normal(collision_normal, *start, *end);
         }
     }
 

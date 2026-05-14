@@ -80,4 +80,8 @@ impl CanvasContext {
     pub fn can_edit_node_properties(&mut self) -> bool {
         self.selected_node_paths.len() == 1
     }
+
+    pub fn selected_node_paths(&self) -> &Vec<NodePath> {
+        &self.selected_node_paths
+    }
 }

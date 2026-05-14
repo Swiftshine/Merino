@@ -1873,6 +1873,7 @@ dependencies = [
  "gfarch",
  "paste",
  "rfd",
+ "serde_json",
  "strum",
 ]
 
