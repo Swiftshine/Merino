@@ -1,8 +1,12 @@
-use crate::merino::archive_viewer::level_editor::editable::Editable;
 use crate::merino::archive_viewer::level_editor::editable::EditInfo;
+use crate::merino::archive_viewer::level_editor::editable::Editable;
 use crate::merino::game::mapbin::MapDataNode;
 use crate::merino::game::mapbin::recalculate_collision_normal;
-use crate::merino::{archive_viewer::level_editor::{LevelEditor, contexts::message_context::Command}, game::mapbin::{MapNodeType, NodeData}, util::emoji::EmojiMessage};
+use crate::merino::{
+    archive_viewer::level_editor::{LevelEditor, contexts::message_context::Command},
+    game::mapbin::{MapNodeType, NodeData},
+    util::emoji::EmojiMessage,
+};
 
 macro_rules! edit_fields {
     ($ui:expr, $( $field:expr => $label:expr ),* $(,)?) => {
@@ -44,22 +48,26 @@ impl LevelEditor {
         assert!(!matches!(node.node_data, NodeData::None));
 
         // properties heading
-        ui.horizontal(|ui|{
+        ui.horizontal(|ui| {
             ui.label(egui::RichText::new("Properties").strong());
             // - don't allow user to attempt to delete the root node
             // the root node doesn't have a parent
 
             if node.node_type != MapNodeType::MapSet {
-                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui|{
-                    if ui.button(EmojiMessage::discard())
-                    .on_hover_text("Delete node")
-                    .clicked() {
+                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                    if ui
+                        .button(EmojiMessage::discard())
+                        .on_hover_text("Delete node")
+                        .clicked()
+                    {
                         messages.push_command(Command::remove_node(path.clone()));
                     }
 
-                    if ui.button(EmojiMessage::target())
-                    .on_hover_text("Go to parent")
-                    .clicked() {
+                    if ui
+                        .button(EmojiMessage::target())
+                        .on_hover_text("Go to parent")
+                        .clicked()
+                    {
                         messages.push_command(Command::select_parent_of(path.clone()));
                     }
                 });
@@ -67,10 +75,10 @@ impl LevelEditor {
         });
 
         egui::ScrollArea::vertical()
-        .max_height(500.0)
-        .show(ui, |ui|{
-            node.edit_propertes(ui);
-        });
+            .max_height(500.0)
+            .show(ui, |ui| {
+                node.edit_propertes(ui);
+            });
 
         // todo! show children
     }
@@ -82,7 +90,7 @@ impl MapDataNode {
             NodeData::MapSet {
                 unk1,
                 bounds_start,
-                bounds_end
+                bounds_end,
             } => {
                 edit_fields!(ui,
                     unk1 => "Unk 1",
@@ -151,7 +159,7 @@ impl MapDataNode {
                     unk14 => "Unk 14"
                 );
             }
-            
+
             NodeData::MapItemSet {
                 name,
                 position,
@@ -185,7 +193,7 @@ impl MapDataNode {
                     params => "Params"
                 );
             }
-            
+
             NodeData::MapEnemySet {
                 name,
                 direction,
@@ -237,7 +245,7 @@ impl MapDataNode {
                     params => "Params"
                 );
             }
-            
+
             NodeData::MapLocator {
                 name,
                 position,
@@ -249,7 +257,7 @@ impl MapDataNode {
                     params => "Params"
                 );
             }
-            
+
             NodeData::MapPath {
                 name,
                 points,
@@ -261,7 +269,7 @@ impl MapDataNode {
                     params => "Params"
                 );
             }
-            
+
             NodeData::MapRect {
                 name,
                 bounds_start,
@@ -275,7 +283,7 @@ impl MapDataNode {
                     params => "Params"
                 );
             }
-            
+
             NodeData::MapCircle {
                 name,
                 position,
@@ -289,7 +297,7 @@ impl MapDataNode {
                     params => "Params"
                 );
             }
-            
+
             NodeData::MapTerrain {
                 collision_type,
                 position,
@@ -325,8 +333,8 @@ impl MapDataNode {
                     unk15 => "Unk 15"
                 );
             }
-            
-            _ => unreachable!()
+
+            _ => unreachable!(),
         }
     }
 }

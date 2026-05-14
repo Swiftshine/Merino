@@ -1,14 +1,14 @@
 mod canvas;
 mod contexts;
 pub(crate) mod docking;
+mod editable;
 mod input;
 mod interact;
 mod message;
 mod object_properties;
+mod params;
 mod settings;
 mod ui;
-mod editable;
-mod params;
 
 use crate::merino::{
     archive_viewer::level_editor::{

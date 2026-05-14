@@ -9,7 +9,7 @@ pub enum Command {
     /// Remove this node from the tree
     RemoveNode(NodePath),
     /// Select the parent of this path
-    SelectParentOf(NodePath)
+    SelectParentOf(NodePath),
 }
 
 impl Command {

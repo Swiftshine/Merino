@@ -1,4 +1,11 @@
-use crate::merino::{archive_viewer::level_editor::params::{ParameterDataType, ParameterObject}, game::mapbin::{MapNodeType, types::{LimitedString, Params, Vec2f, Vec3f}}, util::emoji::EmojiMessage};
+use crate::merino::{
+    archive_viewer::level_editor::params::{ParameterDataType, ParameterObject},
+    game::mapbin::{
+        MapNodeType,
+        types::{LimitedString, Params, Vec2f, Vec3f},
+    },
+    util::emoji::EmojiMessage,
+};
 
 /// A trait to simplify property parsing.
 pub trait Editable {
@@ -125,21 +132,12 @@ impl_editable_vec!(Vec2f, [x, y]);
 impl_editable_vec!(Vec3f, [x, y, z]);
 
 impl<const N: usize> Editable for LimitedString<N> {
-    fn edit_properties(
-        &mut self,
-        ui: &mut egui::Ui,
-        info: Option<EditInfo>,
-    ) -> bool {
+    fn edit_properties(&mut self, ui: &mut egui::Ui, info: Option<EditInfo>) -> bool {
         let mut changed = false;
 
-        let render = |ui: &mut egui::Ui,
-                      value: &mut LimitedString<N>,
-                      changed: &mut bool| {
+        let render = |ui: &mut egui::Ui, value: &mut LimitedString<N>, changed: &mut bool| {
             *changed |= ui
-                .add(
-                    egui::TextEdit::singleline(&mut value.0)
-                        .char_limit(N)
-                )
+                .add(egui::TextEdit::singleline(&mut value.0).char_limit(N))
                 .changed();
         };
 
@@ -156,11 +154,7 @@ impl<const N: usize> Editable for LimitedString<N> {
 }
 
 impl<const N: usize> Editable for Params<N> {
-    fn edit_properties(
-        &mut self,
-        ui: &mut egui::Ui,
-        info: Option<EditInfo>,
-    ) -> bool {
+    fn edit_properties(&mut self, ui: &mut egui::Ui, info: Option<EditInfo>) -> bool {
         let mut changed = false;
 
         if let Some(EditInfo::Params(param_object)) = info {
@@ -175,42 +169,28 @@ impl<const N: usize> Editable for Params<N> {
 
                         match &param.data_type {
                             ParameterDataType::Int => {
-                                if let Some(val) =
-                                    self.int_values.get_mut(param.slot)
-                                {
-                                    changed |=
-                                        val.edit_properties(ui, None);
+                                if let Some(val) = self.int_values.get_mut(param.slot) {
+                                    changed |= val.edit_properties(ui, None);
                                 }
                             }
 
                             ParameterDataType::Float => {
-                                if let Some(val) =
-                                    self.float_values.get_mut(param.slot)
-                                {
-                                    changed |=
-                                        val.edit_properties(ui, None);
+                                if let Some(val) = self.float_values.get_mut(param.slot) {
+                                    changed |= val.edit_properties(ui, None);
                                 }
                             }
 
                             ParameterDataType::String => {
-                                if let Some(val) =
-                                    self.string_values.get_mut(param.slot)
-                                {
-                                    changed |=
-                                        val.edit_properties(ui, None);
+                                if let Some(val) = self.string_values.get_mut(param.slot) {
+                                    changed |= val.edit_properties(ui, None);
                                 }
                             }
 
                             ParameterDataType::Bool => {
-                                if let Some(val) =
-                                    self.int_values.get_mut(param.slot)
-                                {
+                                if let Some(val) = self.int_values.get_mut(param.slot) {
                                     let mut bool_value = *val != 0;
 
-                                    if ui.checkbox(
-                                        &mut bool_value,
-                                        "Value",
-                                    ).changed() {
+                                    if ui.checkbox(&mut bool_value, "Value").changed() {
                                         *val = if bool_value { 1 } else { 0 };
                                         changed = true;
                                     }
@@ -218,41 +198,24 @@ impl<const N: usize> Editable for Params<N> {
                             }
 
                             ParameterDataType::DropdownInt => {
-                                if let Some(options) =
-                                    &param.dropdown_options
-                                    && let Some(val) =
-                                        self.int_values.get_mut(param.slot)
+                                if let Some(options) = &param.dropdown_options
+                                    && let Some(val) = self.int_values.get_mut(param.slot)
                                 {
                                     let selected_text = options
                                         .iter()
                                         .find(|o| o.value == *val)
-                                        .map(|o| {
-                                            format!(
-                                                "({}) {}",
-                                                o.value,
-                                                o.key
-                                            )
-                                        })
-                                        .unwrap_or_else(|| {
-                                            format!("Unknown ({})", *val)
-                                        });
+                                        .map(|o| format!("({}) {}", o.value, o.key))
+                                        .unwrap_or_else(|| format!("Unknown ({})", *val));
 
                                     egui::ComboBox::from_label("Value")
                                         .selected_text(selected_text)
                                         .show_ui(ui, |ui| {
                                             for option in options.iter() {
-                                                let label = format!(
-                                                    "({}) {}",
-                                                    option.value,
-                                                    option.key
-                                                );
+                                                let label =
+                                                    format!("({}) {}", option.value, option.key);
 
                                                 changed |= ui
-                                                    .selectable_value(
-                                                        val,
-                                                        option.value,
-                                                        label,
-                                                    )
+                                                    .selectable_value(val, option.value, label)
                                                     .changed();
                                             }
                                         });
@@ -270,14 +233,14 @@ impl<const N: usize> Editable for Params<N> {
                             notes[0].clone()
                         } else {
                             // bullet points
-                            notes.iter()
+                            notes
+                                .iter()
                                 .map(|n| format!("• {n}"))
                                 .collect::<Vec<_>>()
                                 .join("\n")
                         };
 
-                        resp.header_response =
-                            resp.header_response.on_hover_text(tooltip);
+                        resp.header_response = resp.header_response.on_hover_text(tooltip);
                     }
                 }
             });
@@ -315,16 +278,10 @@ impl<T, const N: usize> Editable for [T; N]
 where
     T: Editable,
 {
-    fn edit_properties(
-        &mut self,
-        ui: &mut egui::Ui,
-        info: Option<EditInfo>,
-    ) -> bool {
+    fn edit_properties(&mut self, ui: &mut egui::Ui, info: Option<EditInfo>) -> bool {
         let mut changed = false;
 
-        let render = |ui: &mut egui::Ui,
-                      values: &mut [T; N],
-                      changed: &mut bool| {
+        let render = |ui: &mut egui::Ui, values: &mut [T; N], changed: &mut bool| {
             for item in values.iter_mut() {
                 *changed |= item.edit_properties(ui, None);
             }
@@ -343,16 +300,10 @@ where
 }
 
 impl Editable for Vec<Vec2f> {
-    fn edit_properties(
-        &mut self,
-        ui: &mut egui::Ui,
-        info: Option<EditInfo>,
-    ) -> bool {
+    fn edit_properties(&mut self, ui: &mut egui::Ui, info: Option<EditInfo>) -> bool {
         let mut changed = false;
 
-        let render = |ui: &mut egui::Ui,
-                      values: &mut Vec<Vec2f>,
-                      changed: &mut bool| {
+        let render = |ui: &mut egui::Ui, values: &mut Vec<Vec2f>, changed: &mut bool| {
             let mut remove_index = None;
             let mut insert_index = None;
 
@@ -373,10 +324,7 @@ impl Editable for Vec<Vec2f> {
                     }
 
                     if ui
-                        .add_enabled(
-                            can_remove,
-                            egui::Button::new(EmojiMessage::cross())
-                        )
+                        .add_enabled(can_remove, egui::Button::new(EmojiMessage::cross()))
                         .on_disabled_hover_text("Remove")
                         .on_hover_text("Remove")
                         .clicked()
@@ -437,16 +385,10 @@ impl Editable for Vec<Vec2f> {
 }
 
 impl Editable for Vec<[Vec2f; 3]> {
-    fn edit_properties(
-        &mut self,
-        ui: &mut egui::Ui,
-        info: Option<EditInfo>,
-    ) -> bool {
+    fn edit_properties(&mut self, ui: &mut egui::Ui, info: Option<EditInfo>) -> bool {
         let mut changed = false;
 
-        let render = |ui: &mut egui::Ui,
-                      values: &mut Vec<[Vec2f; 3]>,
-                      changed: &mut bool| {
+        let render = |ui: &mut egui::Ui, values: &mut Vec<[Vec2f; 3]>, changed: &mut bool| {
             for (index, item) in values.iter_mut().enumerate() {
                 ui.collapsing(format!("[{}]", index), |ui| {
                     for (i, value) in item.iter_mut().enumerate() {

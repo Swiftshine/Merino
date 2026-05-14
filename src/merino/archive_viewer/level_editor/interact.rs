@@ -7,7 +7,8 @@ use crate::merino::{
         },
     },
     game::mapbin::{
-        MapDataNode, MapNodeType, NodeData, NodePath, recalculate_collision_normal, types::{AnyParams, Vec2Like, Vec2f}
+        MapDataNode, MapNodeType, NodeData, NodePath, recalculate_collision_normal,
+        types::{AnyParams, Vec2Like, Vec2f},
     },
 };
 

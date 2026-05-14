@@ -147,14 +147,13 @@ impl Mapdata {
         Some(current)
     }
 
-
     /// The path given should not point to root.
     pub fn remove_node_at_path(&mut self, path: NodePath) -> Option<MapDataNode> {
         assert!(!path.is_root());
 
         let mut parent_path = path.clone();
         let step = parent_path.pop()?;
-        
+
         // get the parent of the node we want to remove
         let parent = self.get_node_at_path(&parent_path)?;
 
@@ -170,7 +169,9 @@ impl Mapdata {
             NodeChildType::MapTerrain => &mut parent.children_mapterrain,
         };
 
-        if let Some(v) = vec && step.index < v.len() {
+        if let Some(v) = vec
+            && step.index < v.len()
+        {
             Some(v.remove(step.index))
         } else {
             None
