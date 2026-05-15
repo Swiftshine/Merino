@@ -80,6 +80,14 @@ impl NodeStep {
     pub fn new(node_type: NodeChildType, index: usize) -> Self {
         Self { node_type, index }
     }
+
+    pub fn node_type(&self) -> NodeChildType {
+        self.node_type
+    }
+
+    pub fn node_index(&self) -> usize {
+        self.index
+    }
 }
 
 /// A path to any given node in the tree.
@@ -109,6 +117,32 @@ impl NodePath {
 
     pub fn is_root(&self) -> bool {
         self.0.is_empty()
+    }
+
+    pub fn parent(&self) -> Self {
+        let mut prev = self.clone();
+        prev.pop();
+
+        prev
+    }
+
+    pub fn get_step(&self) -> Option<NodeStep> {
+        if let Some(last) = self.0.last() {
+            Some(*last)
+        } else {
+            None
+        }
+    }
+
+    pub fn with_step(&self, step: NodeStep) -> Self {
+        let mut path = self.clone();
+        path.push(step);
+
+        path
+    }
+
+    pub fn is_descendant_of(&self, ancestor: &Self) -> bool {
+        self != ancestor && self.0.starts_with(&ancestor.0)
     }
 }
 
@@ -151,8 +185,9 @@ impl Mapdata {
     pub fn remove_node_at_path(&mut self, path: NodePath) -> Option<MapDataNode> {
         assert!(!path.is_root());
 
-        let mut parent_path = path.clone();
-        let step = parent_path.pop()?;
+        let parent_path = path.parent();
+        let step = parent_path.get_step()?;
+
 
         // get the parent of the node we want to remove
         let parent = self.get_node_at_path(&parent_path)?;
@@ -176,6 +211,32 @@ impl Mapdata {
         } else {
             None
         }
+    }
+
+    pub fn move_node(&mut self, child: NodePath, parent: NodePath) {
+        if child.is_root() {
+            // can't move root node
+            return;
+        }
+
+        // prevent a node from moving into itself or its descendants
+        if parent.is_descendant_of(&child) {
+            return;
+        }
+
+        // get the list this node belongs to
+        let child_type = child.get_step().unwrap().node_type();
+
+        // remove node
+        let child_node = self.remove_node_at_path(child).unwrap();
+        
+        // get parent node
+        let parent_node = self.get_node_at_path(&parent).unwrap();
+
+        // push node
+        parent_node.children_vec_option_mut(child_type)
+        .get_or_insert_with(Vec::new)
+        .push(child_node);
     }
 }
 
@@ -222,6 +283,34 @@ impl MapDataNode {
         collect_children!(MapTerrain, children_mapterrain);
 
         items.into_iter()
+    }
+
+    pub fn children_vec_mut(&mut self, child_type: NodeChildType) -> Option<&mut Vec<MapDataNode>> {
+        match child_type {
+            NodeChildType::MapPolySet => self.children_mappolyset.as_mut(),
+            NodeChildType::MapObjSet => self.children_mapobjset.as_mut(),
+            NodeChildType::MapItemSet => self.children_mapitemset.as_mut(),
+            NodeChildType::MapEnemySet => self.children_mapenemyset.as_mut(),
+            NodeChildType::MapLocator => self.children_maplocator.as_mut(),
+            NodeChildType::MapPath => self.children_mappath.as_mut(),
+            NodeChildType::MapRect => self.children_maprect.as_mut(),
+            NodeChildType::MapCircle => self.children_mapcircle.as_mut(),
+            NodeChildType::MapTerrain => self.children_mapterrain.as_mut(),
+        }
+    }
+
+    fn children_vec_option_mut(&mut self, child_type: NodeChildType) -> &mut Option<Vec<MapDataNode>> {
+        match child_type {
+            NodeChildType::MapPolySet => &mut self.children_mappolyset,
+            NodeChildType::MapObjSet => &mut self.children_mapobjset,
+            NodeChildType::MapItemSet => &mut self.children_mapitemset,
+            NodeChildType::MapEnemySet => &mut self.children_mapenemyset,
+            NodeChildType::MapLocator => &mut self.children_maplocator,
+            NodeChildType::MapPath => &mut self.children_mappath,
+            NodeChildType::MapRect => &mut self.children_maprect,
+            NodeChildType::MapCircle => &mut self.children_mapcircle,
+            NodeChildType::MapTerrain => &mut self.children_mapterrain,
+        }
     }
 }
 

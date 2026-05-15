@@ -10,6 +10,8 @@ pub enum Command {
     RemoveNode(NodePath),
     /// Select the parent of this path
     SelectParentOf(NodePath),
+    /// Make one node the child of another.
+    MakeChildOf(NodePath, NodePath)
 }
 
 impl Command {
@@ -27,6 +29,14 @@ impl Command {
 
     pub fn select_parent_of(path: NodePath) -> Self {
         Self::SelectParentOf(path)
+    }
+
+    pub fn make_child_of(child: NodePath, new_parent: NodePath) -> Self {
+        Self::MakeChildOf(child, new_parent)
+    }
+
+    pub fn make_child_of_root(child: NodePath) -> Self {
+        Self::MakeChildOf(child, NodePath::root())
     }
 }
 // /// Tell the editor to retrieve data immediately.

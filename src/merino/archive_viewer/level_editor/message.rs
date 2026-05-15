@@ -23,12 +23,15 @@ impl LevelEditor {
                 }
 
                 Command::SelectParentOf(path) => {
-                    let mut parent_path = path.clone();
-                    parent_path.pop();
+                    let parent_path = path.parent();
 
                     if !parent_path.is_root() {
                         additional_commands.push(Command::SelectNode(parent_path));
                     }
+                }
+
+                Command::MakeChildOf(child, new_parent) => {
+                    self.mapdata.as_mut().unwrap().move_node(child, new_parent);
                 }
             }
         }

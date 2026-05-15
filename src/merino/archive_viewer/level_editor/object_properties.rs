@@ -1,6 +1,13 @@
+use strum::IntoEnumIterator;
+
+use crate::merino::archive_viewer::level_editor::contexts::canvas_context::CanvasContext;
+use crate::merino::archive_viewer::level_editor::contexts::message_context::MessageContext;
 use crate::merino::archive_viewer::level_editor::editable::EditInfo;
 use crate::merino::archive_viewer::level_editor::editable::Editable;
 use crate::merino::game::mapbin::MapDataNode;
+use crate::merino::game::mapbin::NodeChildType;
+use crate::merino::game::mapbin::NodePath;
+use crate::merino::game::mapbin::NodeStep;
 use crate::merino::game::mapbin::recalculate_collision_normal;
 use crate::merino::{
     archive_viewer::level_editor::{LevelEditor, contexts::message_context::Command},
@@ -30,6 +37,7 @@ impl LevelEditor {
 
         let LevelEditor {
             mapdata,
+            canvas_context,
             message_context,
             ..
         } = self;
@@ -77,15 +85,16 @@ impl LevelEditor {
         egui::ScrollArea::vertical()
             .max_height(500.0)
             .show(ui, |ui| {
-                node.edit_propertes(ui);
+                node.edit_properties(ui);
             });
 
-        // todo! show children
+        ui.add_space(4.0);
+        node.edit_children(ui, canvas_context, messages, &path);
     }
 }
 
 impl MapDataNode {
-    pub fn edit_propertes(&mut self, ui: &mut egui::Ui) {
+    pub fn edit_properties(&mut self, ui: &mut egui::Ui) {
         match &mut self.node_data {
             NodeData::MapSet {
                 unk1,
@@ -335,6 +344,90 @@ impl MapDataNode {
             }
 
             _ => unreachable!(),
+        }
+    }
+
+    fn edit_children(
+        &mut self,
+        ui: &mut egui::Ui,
+        canvas_context: &mut CanvasContext,
+        messages: &mut MessageContext,
+        node_path: &NodePath,
+    ) {
+        ui.label(egui::RichText::new("Children").strong().underline())
+            .on_hover_text("The parentheses indicate how many children of that type are present.");
+
+        for child_type in NodeChildType::iter() {
+            let children = self.children_vec_mut(child_type);
+            let child_count = children.as_ref().map(|v| v.len()).unwrap_or(0);
+
+            let header = format!("({}) {}", child_count, child_type);
+
+            egui::CollapsingHeader::new(header)
+            .default_open(false)
+            .show(ui, |ui|{
+                ui.vertical(|ui|{
+                    match children {
+                        None => {
+                            ui.label("No children.");
+                        }
+
+                        Some(children) => {
+                            ui.indent(ui.id().with(child_type), |ui|{
+                                for (index, child) in children.iter_mut().enumerate() {
+                                    ui.horizontal(|ui|{
+                                        if ui.label(egui::RichText::new(format!("Index {}", index)).strong().underline()).on_hover_text("Go to child").clicked() {
+                                            let child_path = node_path.with_step(NodeStep::new(child_type, index));
+                                            messages.push_command(Command::select_node(child_path));
+                                        }
+        
+                                        ui.with_layout(
+                                            egui::Layout::right_to_left(egui::Align::Center),
+                                            |ui|{
+                                                if ui
+                                                    .button(EmojiMessage::discard())
+                                                    .on_hover_text("Delete child")
+                                                    .clicked()
+                                                {
+                                                    let child_path = node_path.with_step(NodeStep::new(child_type, index));
+                                                    messages.push_command(Command::remove_node(child_path));
+                                                }
+                                                
+                                                if ui.button(EmojiMessage::cross()).on_hover_text("Detach child").clicked() {
+                                                    let child_path = node_path.with_step(NodeStep::new(child_type, index));
+                                                    messages.push_command(Command::make_child_of_root(child_path));
+                                                }
+        
+                                                if ui.button(EmojiMessage::target())
+                                                .on_hover_text("Go to child")
+                                                .clicked() {
+                                                    let child_path = node_path.with_step(NodeStep::new(child_type, index));
+                                                    messages.push_command(Command::select_node(child_path));
+                                                }
+                                            }
+                                        );
+                                    });
+                                }
+                            });
+                        }
+                    }
+      
+
+                    ui.horizontal(|ui|{
+                        if ui.button(EmojiMessage::add_msg("New Child"))
+                        .on_hover_text("Create a new node of this type.")
+                        .clicked() {
+                            todo!("make \"add new node\" command")
+                        }
+
+                        if ui.button(EmojiMessage::target_msg("Set Child"))
+                        .on_hover_text("Select an existing node of this type.")
+                        .clicked() {
+                            todo!("make a better search target and actually filter types on the canvas that do not match this type")
+                        }
+                    });
+                });
+            });
         }
     }
 }
