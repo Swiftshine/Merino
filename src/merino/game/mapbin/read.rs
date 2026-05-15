@@ -216,6 +216,23 @@ impl Readable for Vec3f {
     }
 }
 
+impl Readable for CollisionLine {
+    fn read(reader: &mut MapdataReader) -> Result<Self>
+    where
+        Self: Sized,
+    {
+        let start = reader.read_object::<Vec2f>()?;
+        let end = reader.read_object::<Vec2f>()?;
+        let collision_normal = reader.read_object::<Vec2f>()?;
+
+        Ok(Self {
+            start,
+            end,
+            collision_normal,
+        })
+    }
+}
+
 impl<const N: usize> Readable for LimitedString<N> {
     fn read(reader: &mut MapdataReader) -> Result<Self> {
         Ok(Self(reader.read_string(N)?))
@@ -262,9 +279,7 @@ impl Readable for MapDataNode {
             },
 
             MapNodeType::MapPolySet => NodeData::MapPolySet {
-                start: reader.read_object::<Vec2f>()?,
-                end: reader.read_object::<Vec2f>()?,
-                collision_normal: reader.read_object::<Vec2f>()?,
+                line: reader.read_object::<CollisionLine>()?,
                 collision_type: reader.read_collision_type()?,
                 unk3: reader.read_u32()?,
             },
@@ -383,13 +398,7 @@ impl Readable for MapDataNode {
                 unk10: reader.read_at_version(4.71, |r| r.read_i32())?,
                 unk11: reader.read_at_version(4.71, |r| r.read_i32())?,
                 unk12: reader.read_at_version(4.71, |r| r.read_i32())?,
-                unk13: reader.read_array(|r| {
-                    Ok([
-                        r.read_object::<Vec2f>()?,
-                        r.read_object::<Vec2f>()?,
-                        r.read_object::<Vec2f>()?,
-                    ])
-                })?,
+                lines: reader.read_array(|r| r.read_object::<CollisionLine>())?,
                 params: reader.read_object::<Params<3>>()?,
                 unk15: reader.read_at_version(4.6, |r| {
                     let mut outer = std::array::from_fn(|_| Default::default());

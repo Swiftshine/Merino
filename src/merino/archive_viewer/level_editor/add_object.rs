@@ -6,7 +6,7 @@ use crate::merino::{
         contexts::canvas_context::{CanvasContext, CanvasTarget},
     },
     game::mapbin::{
-        MapDataNode, NodeChildType, NodeData,
+        CollisionLine, MapDataNode, NodeChildType, NodeData,
         types::{String16, String32, Vec2f, Vec3f},
     },
 };
@@ -109,9 +109,9 @@ impl MapDataNode {
 
                 let len = egui::Vec2::new(4.0, 0.0);
 
-                if let NodeData::MapPolySet { start, end, .. } = &mut node_data {
-                    *start = pos.into();
-                    *end = (pos + len).into();
+                if let NodeData::MapPolySet { line, .. } = &mut node_data {
+                    line.start = pos.into();
+                    line.end = (pos + len).into();
                 }
 
                 node_data
@@ -212,9 +212,7 @@ impl MapDataNode {
 impl NodeData {
     pub fn default_mappolyset() -> Self {
         Self::MapPolySet {
-            start: Default::default(),
-            end: Default::default(),
-            collision_normal: Default::default(),
+            line: CollisionLine::default(),
             collision_type: Default::default(),
             unk3: 0,
         }
@@ -335,7 +333,7 @@ impl NodeData {
             unk10: (version >= 4.71).then_some(0),
             unk11: (version >= 4.71).then_some(0),
             unk12: (version >= 4.71).then_some(0),
-            unk13: Default::default(),
+            lines: Default::default(),
             params: Default::default(),
             unk15: (version >= 4.6).then(Default::default),
         }

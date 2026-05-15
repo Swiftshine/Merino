@@ -1,7 +1,7 @@
 use crate::merino::{
     archive_viewer::level_editor::params::{ParameterDataType, ParameterObject},
     game::mapbin::{
-        MapNodeType,
+        CollisionLine, MapNodeType,
         types::{LimitedString, Params, Vec2f, Vec3f},
     },
     util::emoji::EmojiMessage,
@@ -384,20 +384,142 @@ impl Editable for Vec<Vec2f> {
     }
 }
 
-impl Editable for Vec<[Vec2f; 3]> {
+impl Editable for CollisionLine {
     fn edit_properties(&mut self, ui: &mut egui::Ui, info: Option<EditInfo>) -> bool {
         let mut changed = false;
 
-        let render = |ui: &mut egui::Ui, values: &mut Vec<[Vec2f; 3]>, changed: &mut bool| {
-            for (index, item) in values.iter_mut().enumerate() {
-                ui.collapsing(format!("[{}]", index), |ui| {
-                    for (i, value) in item.iter_mut().enumerate() {
-                        ui.horizontal(|ui| {
-                            ui.label(format!("{}.{}", index, i));
+        let render = |ui: &mut egui::Ui, value: &mut CollisionLine, changed: &mut bool| {
+            ui.vertical(|ui| {
+                ui.horizontal(|ui| {
+                    ui.label("Start");
+                    *changed |= value.start.edit_properties(ui, None);
+                });
+
+                ui.horizontal(|ui| {
+                    ui.label("End  "); // extra two spaces for padding reasons
+                    *changed |= value.end.edit_properties(ui, None);
+                });
+            });
+        };
+
+        if let Some(EditInfo::Label(label)) = info {
+            ui.collapsing(label, |ui| {
+                render(ui, self, &mut changed);
+            });
+        } else {
+            render(ui, self, &mut changed);
+        }
+
+        if changed {
+            // don't allow user to modify manually
+            self.calculate_collision_normal();
+        }
+
+        changed
+    }
+}
+
+impl Editable for Vec<CollisionLine> {
+    fn edit_properties(&mut self, ui: &mut egui::Ui, info: Option<EditInfo>) -> bool {
+        let mut changed = false;
+
+        let render = |ui: &mut egui::Ui, values: &mut Vec<CollisionLine>, changed: &mut bool| {
+            let mut remove_index = None;
+            let mut insert_index = None;
+
+            let can_remove = values.len() > 1;
+
+            for (index, value) in values.iter_mut().enumerate() {
+                ui.push_id(index, |ui| {
+                    let id = ui.id().with("line");
+
+                    let mut open = ui
+                        .ctx()
+                        .data_mut(|d| d.get_persisted::<bool>(id))
+                        .unwrap_or(false);
+
+                    ui.horizontal(|ui| {
+                        let arrow = if open { "⏷" } else { "⏵" };
+
+                        if ui.button(arrow).clicked() {
+                            open = !open;
+
+                            ui.ctx().data_mut(|d| {
+                                d.insert_persisted(id, open);
+                            });
+                        }
+
+                        ui.label(format!("Line {}", index));
+
+                        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                            if ui
+                                .add_enabled(can_remove, egui::Button::new(EmojiMessage::cross()))
+                                .on_hover_text("Remove")
+                                .clicked()
+                            {
+                                remove_index = Some(index);
+                            }
+
+                            if ui
+                                .button(EmojiMessage::add())
+                                .on_hover_text("Insert after")
+                                .clicked()
+                            {
+                                insert_index = Some(index + 1);
+                            }
+                        });
+                    });
+
+                    if open {
+                        ui.indent("line_contents", |ui| {
                             *changed |= value.edit_properties(ui, None);
                         });
                     }
+
+                    ui.separator();
                 });
+            }
+
+            // remove
+            if let Some(index) = remove_index {
+                values.remove(index);
+                *changed = true;
+            }
+
+            // insert
+            if let Some(index) = insert_index {
+                let new_line = values
+                    .get(index.saturating_sub(1))
+                    .map(|prev| CollisionLine {
+                        start: prev.end,
+                        end: Vec2f {
+                            x: prev.end.x + 4.0,
+                            y: prev.end.y,
+                        },
+                        ..Default::default()
+                    })
+                    .unwrap_or_default();
+
+                values.insert(index, new_line);
+                *changed = true;
+            }
+
+            // append
+            if ui.button(EmojiMessage::add_msg("Add Line")).clicked() {
+                let new_line = values
+                    .last()
+                    .map(|last| CollisionLine {
+                        start: last.end,
+                        end: Vec2f {
+                            x: last.end.x + 4.0,
+                            y: last.end.y,
+                        },
+                        ..Default::default()
+                    })
+                    .unwrap_or_default();
+
+                values.push(new_line);
+                *changed = true;
             }
         };
 

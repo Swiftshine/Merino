@@ -7,7 +7,7 @@ use crate::merino::{
         },
     },
     game::mapbin::{
-        MapDataNode, MapNodeType, NodeData, NodePath, recalculate_collision_normal,
+        MapDataNode, MapNodeType, NodeData, NodePath,
         types::{AnyParams, Vec2Like, Vec2f},
     },
 };
@@ -75,8 +75,7 @@ impl MapDataNode {
                 MapNodeType::MapObjSet
                 | MapNodeType::MapItemSet
                 | MapNodeType::MapEnemySet
-                | MapNodeType::MapLocator
-                | MapNodeType::MapTerrain => {
+                | MapNodeType::MapLocator => {
                     self.interact_basic(
                         ui,
                         canvas_rect,
@@ -106,6 +105,17 @@ impl MapDataNode {
                         messages,
                         can_edit,
                         egui::Color32::PURPLE,
+                    );
+                }
+                MapNodeType::MapTerrain => {
+                    self.interact_mapterrain(
+                        ui,
+                        canvas_rect,
+                        current_path,
+                        canvas_context,
+                        messages,
+                        can_edit,
+                        egui::Color32::LIGHT_GREEN,
                     );
                 }
             }
@@ -210,6 +220,7 @@ impl MapDataNode {
             false,
             color,
             can_edit,
+            &current_path,
         );
 
         // draw name
@@ -285,6 +296,7 @@ impl MapDataNode {
             true,
             color,
             do_edit,
+            &current_path,
         );
     }
 
@@ -300,20 +312,14 @@ impl MapDataNode {
         can_edit: bool,
         color: egui::Color32,
     ) {
-        let NodeData::MapPolySet {
-            start,
-            end,
-            collision_normal,
-            ..
-        } = &mut self.node_data
-        else {
+        let NodeData::MapPolySet { line, .. } = &mut self.node_data else {
             return;
         };
 
         let painter = ui.painter_at(canvas_rect);
 
-        let draw_start = canvas_rect.min + canvas_context.convert_to_camera(start.into());
-        let draw_end = canvas_rect.min + canvas_context.convert_to_camera(end.into());
+        let draw_start = canvas_rect.min + canvas_context.convert_to_camera(line.start.into());
+        let draw_end = canvas_rect.min + canvas_context.convert_to_camera(line.end.into());
 
         painter.line_segment([draw_start, draw_end], egui::Stroke::new(0.5, color));
 
@@ -322,7 +328,7 @@ impl MapDataNode {
         let (changed, _, _) = handle_drag_and_selections(
             ui,
             &points,
-            &mut [start, end],
+            &mut [&mut line.start, &mut line.end],
             canvas_rect,
             current_path,
             canvas_context,
@@ -331,11 +337,12 @@ impl MapDataNode {
             true,
             color,
             can_edit,
+            &current_path,
         );
 
         if changed {
             // update collision normals
-            recalculate_collision_normal(collision_normal, *start, *end);
+            line.calculate_collision_normal();
         }
     }
 
@@ -382,6 +389,7 @@ impl MapDataNode {
             true,
             color,
             can_edit,
+            &current_path,
         );
 
         assert_eq!(rects.len(), responses.len());
@@ -444,6 +452,7 @@ impl MapDataNode {
             true,
             color,
             do_edit,
+            &current_path,
         );
 
         // radius handle
@@ -500,6 +509,91 @@ impl MapDataNode {
             painter.rect_filled(radius_rect, 0.0, egui::Color32::LIGHT_RED);
         }
     }
+
+    fn interact_mapterrain(
+        &mut self,
+        ui: &mut egui::Ui,
+        canvas_rect: egui::Rect,
+        current_path: &NodePath,
+        canvas_context: &mut CanvasContext,
+        messages: &mut MessageContext,
+        can_edit: bool,
+        color: egui::Color32,
+    ) {
+        let NodeData::MapTerrain {
+            collision_type,
+            position,
+            lines,
+            ..
+        } = &mut self.node_data
+        else {
+            return;
+        };
+
+        let draw_pos =
+            canvas_rect.min + canvas_context.convert_to_camera(Vec2f::from(*position).into());
+
+        let (_, rects, responses) = handle_drag_and_selections(
+            ui,
+            &[draw_pos],
+            &mut [position],
+            canvas_rect,
+            current_path,
+            canvas_context,
+            messages,
+            0.7,
+            false,
+            color,
+            can_edit,
+            &current_path,
+        );
+
+        let position_rect = rects[0];
+        let position_resp = &responses[0];
+
+        if position_resp.hovered() || canvas_context.is_node_selected(current_path) {
+            draw_text_above_point(
+                ui,
+                canvas_rect,
+                position_rect,
+                collision_type.as_str(),
+                color,
+            );
+        }
+
+        // render + edit lines
+
+        let painter = ui.painter_at(canvas_rect);
+
+        for (line_index, line) in lines.iter_mut().enumerate() {
+            let draw_start = canvas_rect.min + canvas_context.convert_to_camera(line.start.into());
+
+            let draw_end = canvas_rect.min + canvas_context.convert_to_camera(line.end.into());
+
+            painter.line_segment([draw_start, draw_end], egui::Stroke::new(1.0, color));
+
+            let points = [draw_start, draw_end];
+
+            let (changed, _, _) = handle_drag_and_selections(
+                ui,
+                &points,
+                &mut [&mut line.start, &mut line.end],
+                canvas_rect,
+                current_path,
+                canvas_context,
+                messages,
+                0.5,
+                true,
+                color,
+                can_edit,
+                &(current_path, line_index),
+            );
+
+            if changed {
+                line.calculate_collision_normal();
+            }
+        }
+    }
 }
 
 /* helpers */
@@ -518,6 +612,7 @@ fn handle_drag_and_selections<T: Vec2Like>(
     fill_in: bool,
     mut color: egui::Color32,
     can_drag: bool,
+    id_source: &impl std::hash::Hash,
 ) -> (bool, Vec<egui::Rect>, Vec<egui::Response>) {
     assert_eq!(draw_points.len(), positions.len());
 
@@ -551,7 +646,9 @@ fn handle_drag_and_selections<T: Vec2Like>(
     let responses: Vec<egui::Response> = rects
         .iter()
         .enumerate()
-        .map(|(index, r)| make_handle_response(ui, canvas_rect, *r, current_path, index))
+        .map(|(index, r)| {
+            make_handle_response(ui, canvas_rect, *r, current_path, (id_source, index))
+        })
         .collect();
 
     let shift_held = ui.input(|i| i.modifiers.shift);
@@ -590,11 +687,11 @@ fn make_handle_response(
     canvas_rect: egui::Rect,
     target_rect: egui::Rect,
     current_path: &NodePath,
-    index: usize, // for hashing
+    id_source: impl std::hash::Hash, // for hashing
 ) -> egui::Response {
     ui.interact(
         canvas_rect.intersect(target_rect),
-        egui::Id::new(current_path).with(index),
+        egui::Id::new(current_path).with(id_source),
         egui::Sense::click_and_drag(),
     )
 }

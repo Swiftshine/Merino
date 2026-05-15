@@ -146,6 +146,26 @@ impl NodePath {
     }
 }
 
+#[derive(Default, Debug)]
+pub struct CollisionLine {
+    pub start: Vec2f,
+    pub end: Vec2f,
+    pub collision_normal: Vec2f,
+}
+
+impl CollisionLine {
+    pub fn calculate_collision_normal(&mut self) {
+        let direction = (self.end.x - self.start.x, self.end.y - self.start.y);
+
+        let magnitude = f32::sqrt(direction.0.powf(2.0) + direction.1.powf(2.0));
+
+        let normalized = (direction.0 / magnitude, direction.1 / magnitude);
+
+        self.collision_normal.x = -normalized.1;
+        self.collision_normal.y = normalized.0;
+    }
+}
+
 #[derive(Default)]
 pub struct Mapdata {
     pub version: f32,
@@ -328,9 +348,7 @@ pub enum NodeData {
     },
 
     MapPolySet {
-        start: Vec2f,
-        end: Vec2f,
-        collision_normal: Vec2f,
+        line: CollisionLine,
         collision_type: String32,
         unk3: u32,
     },
@@ -435,20 +453,8 @@ pub enum NodeData {
         unk10: Option<i32>, // version >= 4.71
         unk11: Option<i32>, // version >= 4.71
         unk12: Option<i32>, // version >= 4.71
-        unk13: Vec<[Vec2f; 3]>,
+        lines: Vec<CollisionLine>,
         params: Params<3>,
         unk15: Option<[[String32; 2]; 3]>, // version >= 4.6
     },
-}
-
-pub fn recalculate_collision_normal(dst: &mut Vec2f, start: Vec2f, end: Vec2f) {
-    // update collision normals
-    let direction = (end.x - start.x, end.y - start.y);
-
-    let magnitude = f32::sqrt(direction.0.powf(2.0) + direction.1.powf(2.0));
-
-    let normalized = (direction.0 / magnitude, direction.1 / magnitude);
-
-    dst.x = -normalized.1;
-    dst.y = normalized.0;
 }

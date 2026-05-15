@@ -9,7 +9,7 @@ use crate::merino::game::mapbin::MapDataNode;
 use crate::merino::game::mapbin::NodeChildType;
 use crate::merino::game::mapbin::NodePath;
 use crate::merino::game::mapbin::NodeStep;
-use crate::merino::game::mapbin::recalculate_collision_normal;
+
 use crate::merino::{
     archive_viewer::level_editor::{LevelEditor, contexts::message_context::Command},
     game::mapbin::{MapNodeType, NodeData},
@@ -110,25 +110,14 @@ impl MapDataNode {
             }
 
             NodeData::MapPolySet {
-                start,
-                end,
-                collision_normal,
+                line,
                 collision_type,
                 unk3,
             } => {
                 // not allowing user to edit collision normal directly
                 // because that is to be auto-calculated
-
-                let mut changed = false;
-
-                changed |= start.edit_properties(ui, EditInfo::label("Start"));
-                changed |= end.edit_properties(ui, EditInfo::label("End"));
-
-                if changed {
-                    recalculate_collision_normal(collision_normal, *start, *end);
-                }
-
                 edit_fields!(ui,
+                    line => "Line",
                     collision_type => "Collision Type",
                     unk3 => "Unk 3"
                 );
@@ -321,7 +310,7 @@ impl MapDataNode {
                 unk10,
                 unk11,
                 unk12,
-                unk13,
+                lines,
                 params,
                 unk15,
             } => {
@@ -338,7 +327,7 @@ impl MapDataNode {
                     unk10 => "Unk 10",
                     unk11 => "Unk 11",
                     unk12 => "Unk 12",
-                    unk13 => "Unk 13",
+                    lines => "Lines",
                     params => "Params",
                     unk15 => "Unk 15"
                 );
