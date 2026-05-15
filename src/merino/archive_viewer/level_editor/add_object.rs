@@ -120,14 +120,12 @@ impl MapDataNode {
             NodeChildType::MapObjSet
             | NodeChildType::MapItemSet
             | NodeChildType::MapEnemySet
-            | NodeChildType::MapLocator
-            | NodeChildType::MapTerrain => {
+            | NodeChildType::MapLocator => {
                 let mut node_data = match child_type {
                     NodeChildType::MapObjSet => NodeData::default_mapobjset(version),
                     NodeChildType::MapItemSet => NodeData::default_mapitemset(version),
                     NodeChildType::MapEnemySet => NodeData::default_mapenemyset(version),
                     NodeChildType::MapLocator => NodeData::default_maplocator(),
-                    NodeChildType::MapTerrain => NodeData::default_mapterrain(version),
                     _ => return,
                 };
 
@@ -136,7 +134,6 @@ impl MapDataNode {
                     NodeData::MapItemSet { position, .. } => position,
                     NodeData::MapEnemySet { position, .. } => position,
                     NodeData::MapLocator { position, .. } => position,
-                    NodeData::MapTerrain { position, .. } => position,
                     _ => return,
                 };
 
@@ -187,6 +184,35 @@ impl MapDataNode {
                 {
                     *position = pos.into();
                     *radius = default_radius;
+                }
+
+                node_data
+            }
+
+            NodeChildType::MapTerrain => {
+                let mut node_data = NodeData::default_mapterrain(version);
+
+                if let NodeData::MapTerrain {
+                    position,
+                    lines,
+                    ..
+                } = &mut node_data {
+                    *position = pos.into();
+
+                    // make the default line below the position of the central node
+                    let mut line = CollisionLine::default();
+
+                    let line_length = 4.0;
+                    let half = line_length * 0.5;
+                    let base = egui::Vec2::new(pos.x, pos.y - 4.0);
+                    let offset = egui::Vec2::new(half, 0.0);
+
+                    line.start = (base - offset).into();
+                    line.end = (base + offset).into();
+
+                    line.calculate_collision_normal();
+
+                    lines.push(line);
                 }
 
                 node_data

@@ -6,6 +6,12 @@ pub struct Vec2f {
     pub y: f32,
 }
 
+impl Vec2f {
+    pub fn new(x: f32, y: f32) -> Self {
+        Self { x, y }
+    }
+}
+
 #[derive(Debug, Clone, Copy, Default)]
 pub struct Vec3f {
     pub x: f32,
