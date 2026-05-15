@@ -11,7 +11,7 @@ pub enum Command {
     /// Select the parent of this path
     SelectParentOf(NodePath),
     /// Make one node the child of another.
-    MakeChildOf(NodePath, NodePath)
+    MakeChildOf(NodePath, NodePath),
 }
 
 impl Command {

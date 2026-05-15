@@ -188,7 +188,6 @@ impl Mapdata {
         let parent_path = path.parent();
         let step = parent_path.get_step()?;
 
-
         // get the parent of the node we want to remove
         let parent = self.get_node_at_path(&parent_path)?;
 
@@ -229,14 +228,15 @@ impl Mapdata {
 
         // remove node
         let child_node = self.remove_node_at_path(child).unwrap();
-        
+
         // get parent node
         let parent_node = self.get_node_at_path(&parent).unwrap();
 
         // push node
-        parent_node.children_vec_option_mut(child_type)
-        .get_or_insert_with(Vec::new)
-        .push(child_node);
+        parent_node
+            .children_vec_option_mut(child_type)
+            .get_or_insert_with(Vec::new)
+            .push(child_node);
     }
 }
 
@@ -299,7 +299,10 @@ impl MapDataNode {
         }
     }
 
-    fn children_vec_option_mut(&mut self, child_type: NodeChildType) -> &mut Option<Vec<MapDataNode>> {
+    fn children_vec_option_mut(
+        &mut self,
+        child_type: NodeChildType,
+    ) -> &mut Option<Vec<MapDataNode>> {
         match child_type {
             NodeChildType::MapPolySet => &mut self.children_mappolyset,
             NodeChildType::MapObjSet => &mut self.children_mapobjset,
