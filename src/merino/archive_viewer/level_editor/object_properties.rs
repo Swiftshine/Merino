@@ -1,6 +1,7 @@
 use strum::IntoEnumIterator;
 
 use crate::merino::archive_viewer::level_editor::contexts::canvas_context::CanvasContext;
+use crate::merino::archive_viewer::level_editor::contexts::canvas_context::CanvasTarget;
 use crate::merino::archive_viewer::level_editor::contexts::message_context::MessageContext;
 use crate::merino::archive_viewer::level_editor::editable::EditInfo;
 use crate::merino::archive_viewer::level_editor::editable::Editable;
@@ -417,7 +418,7 @@ impl MapDataNode {
                         if ui.button(EmojiMessage::add_msg("New Child"))
                         .on_hover_text("Create a new node of this type.")
                         .clicked() {
-                            todo!("make \"add new node\" command")
+                            canvas_context.set_target(Some(CanvasTarget::new_to_node(child_type, node_path.clone())));
                         }
 
                         if ui.button(EmojiMessage::target_msg("Set Child"))

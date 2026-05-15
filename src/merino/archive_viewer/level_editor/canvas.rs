@@ -18,8 +18,13 @@ impl LevelEditor {
         // interact with objects
         self.interact_with_all_nodes(ui, rect);
 
+        // process inputs
         if response.hovered() {
-            // process inputs
+            // deal with any targets
+            if self.canvas_context.is_target_new() {
+                self.add_object(ui, rect, &response);
+            }
+
             self.handle_mouse_inputs(ui);
             self.handle_keyboard_inputs(ui);
         }

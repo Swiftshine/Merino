@@ -1,3 +1,4 @@
+mod add_object;
 mod canvas;
 mod contexts;
 pub(crate) mod docking;

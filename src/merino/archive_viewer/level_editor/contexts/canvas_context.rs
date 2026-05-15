@@ -2,7 +2,7 @@ use enum_map::EnumMap;
 
 use crate::merino::{
     archive_viewer::level_editor::settings::NodeEditSettings,
-    game::mapbin::{MapNodeType, NodePath},
+    game::mapbin::{MapNodeType, NodeChildType, NodePath},
     util::camera::CanvasCamera,
 };
 
@@ -11,10 +11,32 @@ struct CanvasSettings {
     node_edit_settings: EnumMap<MapNodeType, NodeEditSettings>,
 }
 
+pub enum CanvasTarget {
+    /// Create a new child of this type and attach it this parent node.
+    NewNode(NodeChildType, NodePath),
+}
+
+impl CanvasTarget {
+    pub fn new_to_root(child_type: NodeChildType) -> Self {
+        Self::NewNode(child_type, NodePath::root())
+    }
+
+    pub fn new_to_node(child_type: NodeChildType, parent: NodePath) -> Self {
+        Self::NewNode(child_type, parent)
+    }
+
+    pub fn to_string(&self) -> String {
+        match self {
+            Self::NewNode(child_type, _) => child_type.to_string(),
+        }
+    }
+}
+
 pub struct CanvasContext {
     camera: CanvasCamera,
     selected_node_paths: Vec<NodePath>,
     settings: CanvasSettings,
+    target: Option<CanvasTarget>,
 }
 
 impl CanvasContext {
@@ -23,6 +45,7 @@ impl CanvasContext {
             camera: CanvasCamera::default(),
             selected_node_paths: Vec::new(),
             settings: CanvasSettings::default(),
+            target: None,
         }
     }
 
@@ -38,13 +61,13 @@ impl CanvasContext {
         self.settings.node_edit_settings[node_type].editable
     }
 
-    pub fn convert_to_camera(&mut self, pos: egui::Vec2) -> egui::Vec2 {
+    pub fn convert_to_camera(&self, pos: egui::Vec2) -> egui::Vec2 {
         self.camera.convert_to_camera(pos)
     }
 
-    // pub fn convert_from_camera(&mut self, pos: egui::Vec2) -> egui::Vec2 {
-    //     self.camera.convert_from_camera(pos)
-    // }
+    pub fn convert_from_camera(&self, pos: egui::Vec2) -> egui::Vec2 {
+        self.camera.convert_from_camera(pos)
+    }
 
     pub fn camera_pan(&mut self, delta: egui::Vec2) {
         self.camera.pan(delta / self.camera.zoom);
@@ -83,5 +106,22 @@ impl CanvasContext {
 
     pub fn selected_node_paths(&self) -> &Vec<NodePath> {
         &self.selected_node_paths
+    }
+
+    pub fn set_target(&mut self, target: Option<CanvasTarget>) {
+        self.target = target;
+    }
+
+    pub fn is_target_new(&self) -> bool {
+        self.target.as_ref().is_some_and(|t| {
+            match t {
+                CanvasTarget::NewNode(_, _) => true,
+                // _ => false
+            }
+        })
+    }
+
+    pub fn take_target(&mut self) -> Option<CanvasTarget> {
+        self.target.take()
     }
 }

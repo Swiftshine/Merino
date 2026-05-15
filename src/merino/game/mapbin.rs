@@ -111,7 +111,7 @@ impl NodePath {
         self.0.iter()
     }
 
-    pub fn root() -> Self {
+    pub const fn root() -> Self {
         Self(Vec::new())
     }
 
@@ -299,7 +299,7 @@ impl MapDataNode {
         }
     }
 
-    fn children_vec_option_mut(
+    pub fn children_vec_option_mut(
         &mut self,
         child_type: NodeChildType,
     ) -> &mut Option<Vec<MapDataNode>> {
