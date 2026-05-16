@@ -37,6 +37,12 @@ impl LevelEditor {
                         let _ = self.parse_params(string);
                     }
                 }
+
+                if ui.button("Load Images").clicked() {
+                    if let Ok(string) = Self::load_image_data() {
+                        let _ = self.parse_image_data(string);
+                    }
+                }
             });
         });
     }

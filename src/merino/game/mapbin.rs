@@ -85,9 +85,9 @@ impl NodeStep {
         self.node_type
     }
 
-    pub fn node_index(&self) -> usize {
-        self.index
-    }
+    // pub fn node_index(&self) -> usize {
+    //     self.index
+    // }
 }
 
 /// A path to any given node in the tree.

@@ -150,7 +150,7 @@ impl MapDataNode {
         can_edit: bool,
         canvas_response: &egui::Response,
     ) {
-        let (name, position, _params, color) = match &mut self.node_data {
+        let (name, position, params, color) = match &mut self.node_data {
             NodeData::MapObjSet {
                 name,
                 position,
@@ -232,17 +232,33 @@ impl MapDataNode {
             &current_path,
             canvas_response
         );
-
+        
         // draw name
         let painter = ui.painter_at(canvas_rect);
-
+        
         let rect = rects[0];
         let response = &responses[0];
-
+        
         let selected = canvas_context.is_node_selected(current_path);
-
+        
         if response.hovered() || selected {
             draw_text_above_point(ui, canvas_rect, rect, name, color);
+        }
+        
+        // draw image if present
+        let mut has_image = false;
+        if let Some((tex, rotation)) = canvas_context.image_bank_mut().resolve_image_for_node(ui.ctx(), self.node_type, name, &params) {
+            draw_rotated_image(&painter, tex.id(), rect, rotation, egui::Color32::WHITE);
+            has_image = true;
+        }
+
+        if !(has_image && !canvas_context.settings().display_squares_for_images()) {
+            painter.rect_stroke(
+                rect,
+                0.0,
+                egui::Stroke::new(1.0, color),
+                egui::StrokeKind::Middle,
+            );
         }
 
         if selected {
@@ -780,4 +796,65 @@ fn draw_text_above_point(
     );
 
     painter.galley(text_rect.min, galley, color);
+}
+
+fn draw_rotated_image(
+    painter: &egui::Painter,
+    texture_id: egui::TextureId,
+    rect: egui::Rect,
+    rotation_degrees: f32,
+    tint: egui::Color32,
+) {
+    use egui::{
+        Pos2,
+        epaint::{Mesh, Vertex},
+    };
+
+    let mut mesh = Mesh::with_texture(texture_id);
+
+    let center = rect.center();
+
+    let rotation = egui::emath::Rot2::from_angle(-rotation_degrees.to_radians());
+
+    let rotate = |p: Pos2| center + rotation * (p - center);
+
+    let p0 = rotate(rect.left_top());
+    let p1 = rotate(rect.right_top());
+    let p2 = rotate(rect.right_bottom());
+    let p3 = rotate(rect.left_bottom());
+
+    let uv0 = Pos2::new(0.0, 0.0);
+    let uv1 = Pos2::new(1.0, 0.0);
+    let uv2 = Pos2::new(1.0, 1.0);
+    let uv3 = Pos2::new(0.0, 1.0);
+
+    let base = mesh.vertices.len() as u32;
+
+    mesh.vertices.extend_from_slice(&[
+        Vertex {
+            pos: p0,
+            uv: uv0,
+            color: tint,
+        },
+        Vertex {
+            pos: p1,
+            uv: uv1,
+            color: tint,
+        },
+        Vertex {
+            pos: p2,
+            uv: uv2,
+            color: tint,
+        },
+        Vertex {
+            pos: p3,
+            uv: uv3,
+            color: tint,
+        },
+    ]);
+
+    mesh.indices
+        .extend_from_slice(&[base, base + 1, base + 2, base, base + 2, base + 3]);
+
+    painter.add(egui::Shape::mesh(mesh));
 }

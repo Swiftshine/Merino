@@ -11,6 +11,7 @@ egui = "0.33.3"
 egui_dock = { version = "0.18.0", features = ["serde"] }
 enum-map = "2.7.3"
 gfarch = "0.3.0"
+image = "0.25.10"
 paste = "1.0.15"
 rfd = "0.17.2"
 serde_json = "1.0.149"

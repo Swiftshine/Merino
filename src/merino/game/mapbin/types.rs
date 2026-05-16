@@ -20,38 +20,38 @@ pub struct Vec3f {
 }
 
 pub trait Vec2Like {
-    fn x(&self) -> f32;
-    fn y(&self) -> f32;
+    // fn x(&self) -> f32;
+    // fn y(&self) -> f32;
     fn x_mut(&mut self) -> &mut f32;
     fn y_mut(&mut self) -> &mut f32;
 }
 
 impl Vec2Like for Vec2f {
-    fn x(&self) -> f32 {
-        self.x
-    }
+    // fn x(&self) -> f32 {
+    //     self.x
+    // }
 
-    fn y(&self) -> f32 {
-        self.y
-    }
+    // fn y(&self) -> f32 {
+    //     self.y
+    // }
 
     fn x_mut(&mut self) -> &mut f32 {
         &mut self.x
     }
-    
+
     fn y_mut(&mut self) -> &mut f32 {
         &mut self.y
     }
 }
 
 impl Vec2Like for Vec3f {
-    fn x(&self) -> f32 {
-        self.x
-    }
+    // fn x(&self) -> f32 {
+    //     self.x
+    // }
 
-    fn y(&self) -> f32 {
-        self.y
-    }
+    // fn y(&self) -> f32 {
+    //     self.y
+    // }
 
     fn x_mut(&mut self) -> &mut f32 {
         &mut self.x
@@ -95,35 +95,35 @@ impl<'a> From<&'a Params<5>> for AnyParams<'a> {
     }
 }
 
-// impl AnyParams {
-//     pub fn len(&self) -> usize {
-//         match self {
-//             Self::Params3(_) => 3,
-//             Self::Params5(_) => 5
-//         }
-//     }
+impl<'a> AnyParams<'a> {
+    // pub fn len(&self) -> usize {
+    //     match self {
+    //         Self::Params3(_) => 3,
+    //         Self::Params5(_) => 5
+    //     }
+    // }
 
-//     pub fn int_params(&self) -> &[i32] {
-//         match self {
-//             Self::Params3(p) => &p.int_values,
-//             Self::Params5(p) => &p.int_values,
-//         }
-//     }
+    pub fn int_params(&self) -> &[i32] {
+        match self {
+            Self::Params3(p) => &p.int_values,
+            Self::Params5(p) => &p.int_values,
+        }
+    }
 
-//     pub fn float_params(&self) -> &[f32] {
-//         match self {
-//             Self::Params3(p) => &p.float_values,
-//             Self::Params5(p) => &p.float_values,
-//         }
-//     }
+    pub fn float_params(&self) -> &[f32] {
+        match self {
+            Self::Params3(p) => &p.float_values,
+            Self::Params5(p) => &p.float_values,
+        }
+    }
 
-//     pub fn string_params(&self) -> &[String64] {
-//         match self {
-//             Self::Params3(p) => &p.string_values,
-//             Self::Params5(p) => &p.string_values,
-//         }
-//     }
-// }
+    pub fn string_params(&self) -> &[String64] {
+        match self {
+            Self::Params3(p) => &p.string_values,
+            Self::Params5(p) => &p.string_values,
+        }
+    }
+}
 
 /// A string with a char limit
 #[derive(Debug, Clone, Default, PartialEq)]

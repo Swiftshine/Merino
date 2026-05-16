@@ -42,6 +42,7 @@ impl LevelEditor {
             ui.label(egui::RichText::new("Other Settings").strong());
             ui.checkbox(settings.display_grid_mut(), "Display Grid");
             ui.checkbox(settings.snap_to_grid_mut(), "Snap to Grid");
+            ui.checkbox(settings.display_squares_for_images_mut(), "Display Squares for Images");
         }
 
         if prune {

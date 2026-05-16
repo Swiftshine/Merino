@@ -1,7 +1,7 @@
 use enum_map::EnumMap;
 
 use crate::merino::{
-    archive_viewer::level_editor::settings::NodeEditSettings,
+    archive_viewer::level_editor::{object_image::ImageBank, settings::NodeEditSettings},
     game::mapbin::{MapNodeType, NodeChildType, NodePath},
     util::camera::CanvasCamera,
 };
@@ -11,6 +11,7 @@ pub struct CanvasSettings {
     node_edit_settings: EnumMap<MapNodeType, NodeEditSettings>,
     display_grid: bool,
     snap_to_grid: bool,
+    display_squares_for_images: bool,
 }
 
 impl CanvasSettings {
@@ -41,6 +42,14 @@ impl CanvasSettings {
 
     pub fn snap_to_grid_mut(&mut self) -> &mut bool {
         &mut self.snap_to_grid
+    }
+    
+    pub fn display_squares_for_images(&self) -> bool {
+        self.display_squares_for_images
+    }
+
+    pub fn display_squares_for_images_mut(&mut self) -> &mut bool {
+        &mut self.display_squares_for_images
     }
 }
 pub enum CanvasTarget {
@@ -76,6 +85,7 @@ pub struct CanvasContext {
     selected_node_paths: Vec<NodePath>,
     settings: CanvasSettings,
     target: Option<CanvasTarget>,
+    image_bank: ImageBank,
 }
 
 impl CanvasContext {
@@ -85,6 +95,7 @@ impl CanvasContext {
             selected_node_paths: Vec::new(),
             settings: CanvasSettings::new(),
             target: None,
+            image_bank: ImageBank::default()
         }
     }
 
@@ -208,5 +219,9 @@ impl CanvasContext {
     
     pub fn settings(&self) -> &CanvasSettings {
         &self.settings
+    }
+    
+    pub fn image_bank_mut(&mut self) -> &mut ImageBank {
+        &mut self.image_bank
     }
 }

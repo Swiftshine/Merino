@@ -11,6 +11,7 @@ mod params;
 mod settings;
 mod ui;
 mod canvas_settings;
+mod object_image;
 
 use crate::merino::{
     archive_viewer::level_editor::{
