@@ -372,7 +372,7 @@ impl MapDataNode {
 
                         Some(children) => {
                             ui.indent(ui.id().with(child_type), |ui|{
-                                for (index, child) in children.iter_mut().enumerate() {
+                                for (index, _) in children.iter_mut().enumerate() {
                                     ui.horizontal(|ui|{
                                         ui.label(format!("Index {}", index));
         

@@ -33,6 +33,6 @@ impl EmojiMessage {
     emoji_msg!(folder, "📁", message);
     emoji_msg!(memo, "📝", message);
     emoji_msg!(palette, "🎨", message);
-    emoji_msg!(target, "🎯", both);
+    emoji_msg!(target, "🎯", icon);
     // emoji_msg!(warning, "⚠", message);
 }
