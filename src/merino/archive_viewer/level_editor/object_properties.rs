@@ -155,7 +155,6 @@ impl MapDataNode {
                     unk11 => "Unk 11",
                     unk12 => "Unk 12",
                     unk13 => "Unk 13",
-                    // params => "Params",
                     unk14 => "Unk 14"
                 );
 
@@ -192,8 +191,9 @@ impl MapDataNode {
                     unk11 => "Unk 11",
                     unk12 => "Unk 12",
                     unk13 => "Unk 13",
-                    params => "Params"
                 );
+
+                params.edit_properties(ui, EditInfo::search_param(param_list, self.node_type, name.as_str()));
             }
 
             NodeData::MapEnemySet {
@@ -244,8 +244,9 @@ impl MapDataNode {
                     unk22 => "Unk 22",
                     unk23 => "Unk 23",
                     unk24 => "Unk 24",
-                    params => "Params"
                 );
+
+                params.edit_properties(ui, EditInfo::search_param(param_list, self.node_type, name.as_str()));
             }
 
             NodeData::MapLocator {
@@ -256,8 +257,9 @@ impl MapDataNode {
                 edit_fields!(ui,
                     name => "Name",
                     position => "Position",
-                    params => "Params"
                 );
+
+                params.edit_properties(ui, EditInfo::search_param(param_list, self.node_type, name.as_str()));
             }
 
             NodeData::MapPath {
@@ -268,8 +270,9 @@ impl MapDataNode {
                 edit_fields!(ui,
                     name => "Name",
                     points => "Points",
-                    params => "Params"
                 );
+
+                params.edit_properties(ui, EditInfo::search_param(param_list, self.node_type, name.as_str()));
             }
 
             NodeData::MapRect {
@@ -282,8 +285,9 @@ impl MapDataNode {
                     name => "Name",
                     bounds_start => "Bounds Start",
                     bounds_end => "Bounds End",
-                    params => "Params"
                 );
+
+                params.edit_properties(ui, EditInfo::search_param(param_list, self.node_type, name.as_str()));
             }
 
             NodeData::MapCircle {
@@ -296,8 +300,9 @@ impl MapDataNode {
                     name => "Name",
                     position => "Position",
                     radius => "Radius",
-                    params => "Params"
                 );
+
+                params.edit_properties(ui, EditInfo::search_param(param_list, self.node_type, name.as_str()));
             }
 
             NodeData::MapTerrain {
@@ -331,9 +336,10 @@ impl MapDataNode {
                     unk11 => "Unk 11",
                     unk12 => "Unk 12",
                     lines => "Lines",
-                    params => "Params",
                     unk15 => "Unk 15"
                 );
+
+                params.edit_properties(ui, EditInfo::search_param(param_list, self.node_type, collision_type.as_str()));
             }
 
             _ => unreachable!(),
