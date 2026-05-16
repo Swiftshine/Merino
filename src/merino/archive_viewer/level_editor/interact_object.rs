@@ -485,7 +485,7 @@ impl MapDataNode {
 
         let radius_resp = ui.interact(
             radius_rect,
-            egui::Id::new(&current_path).with("radius"),
+            ui.id().with(&current_path).with("radius"),
             egui::Sense::click_and_drag(),
         );
 
@@ -721,8 +721,8 @@ fn make_handle_response(
     id_source: impl std::hash::Hash, // for hashing
 ) -> egui::Response {
     ui.interact(
-        target_rect,
-        egui::Id::new(current_path).with(id_source),
+        canvas_rect.intersect(target_rect),
+        ui.id().with(current_path).with(id_source),
         egui::Sense::click_and_drag(),
     )
 }
