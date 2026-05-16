@@ -19,7 +19,13 @@ impl LevelEditor {
                 }
 
                 Command::RemoveNode(path) => {
-                    if self.mapdata.as_mut().unwrap().remove_node_at_path(path).is_some() {
+                    if self
+                        .mapdata
+                        .as_mut()
+                        .unwrap()
+                        .remove_node_at_path(path)
+                        .is_some()
+                    {
                         // deselect node
                         self.canvas_context.clear_selections();
                     }

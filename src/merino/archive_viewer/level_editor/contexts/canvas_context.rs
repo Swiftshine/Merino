@@ -9,8 +9,20 @@ use crate::merino::{
 #[derive(Default)]
 struct CanvasSettings {
     node_edit_settings: EnumMap<MapNodeType, NodeEditSettings>,
+    display_grid: bool,
+    snap_to_grid: bool,
 }
 
+impl CanvasSettings {
+    // todo! load from file
+    fn new() -> Self {
+        Self {
+            snap_to_grid: true,
+            display_grid: true,
+            ..Default::default()
+        }
+    }
+}
 pub enum CanvasTarget {
     /// Create a new child of this type and attach it this parent node.
     NewNode(NodeChildType, NodePath),
@@ -44,7 +56,7 @@ impl CanvasContext {
         Self {
             camera: CanvasCamera::default(),
             selected_node_paths: Vec::new(),
-            settings: CanvasSettings::default(),
+            settings: CanvasSettings::new(),
             target: None,
         }
     }
@@ -123,5 +135,19 @@ impl CanvasContext {
 
     pub fn take_target(&mut self) -> Option<CanvasTarget> {
         self.target.take()
+    }
+
+    pub fn draw_grid(
+        &self,
+        painter: &egui::Painter,
+        rect: egui::Rect,
+        size: f32,
+        color: egui::Color32,
+    ) {
+        self.camera.draw_grid(painter, rect, size, color);
+    }
+
+    pub fn snap_to_grid(&self) -> bool {
+        self.settings.snap_to_grid
     }
 }

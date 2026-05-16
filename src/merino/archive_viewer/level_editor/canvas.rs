@@ -15,8 +15,13 @@ impl LevelEditor {
         let painter = ui.painter_at(rect);
         painter.rect_filled(rect, 0.0, egui::Color32::BLACK);
 
+        // draw grid
+        // todo! make this toggleable
+        self.canvas_context
+            .draw_grid(&painter, rect, 1.0, egui::Color32::from_gray(30));
+
         // interact with objects
-        self.interact_with_all_nodes(ui, rect);
+        self.interact_with_all_nodes(ui, rect, &response);
 
         // process inputs
         if response.hovered() {

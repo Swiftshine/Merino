@@ -16,7 +16,7 @@ pub const SELECTION_HIGHLIGHT: egui::Color32 =
     egui::Color32::from_rgba_unmultiplied_const(0xFF, 0xFF, 0xFF, 0x10);
 
 impl LevelEditor {
-    pub fn interact_with_all_nodes(&mut self, ui: &mut egui::Ui, canvas_rect: egui::Rect) {
+    pub fn interact_with_all_nodes(&mut self, ui: &mut egui::Ui, canvas_rect: egui::Rect, canvas_response: &egui::Response) {
         let Self {
             mapdata,
             canvas_context,
@@ -33,6 +33,7 @@ impl LevelEditor {
             &mut node_path,
             canvas_context,
             message_context,
+            canvas_response
         );
     }
 }
@@ -45,6 +46,7 @@ impl MapDataNode {
         current_path: &mut NodePath,
         canvas_context: &mut CanvasContext,
         messages: &mut MessageContext,
+        canvas_response: &egui::Response,
     ) {
         // process self if we're allowed to do that
         if canvas_context.can_view(self.node_type) {
@@ -59,6 +61,7 @@ impl MapDataNode {
                         canvas_context,
                         messages,
                         can_edit,
+                        canvas_response
                     );
                 }
                 MapNodeType::MapPolySet => {
@@ -70,6 +73,7 @@ impl MapDataNode {
                         messages,
                         can_edit,
                         egui::Color32::WHITE,
+                        canvas_response
                     );
                 }
                 MapNodeType::MapObjSet
@@ -83,6 +87,7 @@ impl MapDataNode {
                         canvas_context,
                         messages,
                         can_edit,
+                        canvas_response
                     );
                 }
                 MapNodeType::MapPath => {
@@ -94,6 +99,7 @@ impl MapDataNode {
                         messages,
                         can_edit,
                         egui::Color32::from_rgb(0x31, 0x5C, 0x2B),
+                        canvas_response
                     );
                 }
                 MapNodeType::MapCircle => {
@@ -105,6 +111,7 @@ impl MapDataNode {
                         messages,
                         can_edit,
                         egui::Color32::PURPLE,
+                        canvas_response
                     );
                 }
                 MapNodeType::MapTerrain => {
@@ -116,6 +123,7 @@ impl MapDataNode {
                         messages,
                         can_edit,
                         egui::Color32::LIGHT_GREEN,
+                        canvas_response
                     );
                 }
             }
@@ -124,7 +132,7 @@ impl MapDataNode {
         // process children
         for (step, child) in self.iter_mut() {
             current_path.push(step);
-            child.interact(ui, canvas_rect, current_path, canvas_context, messages);
+            child.interact(ui, canvas_rect, current_path, canvas_context, messages, canvas_response);
             current_path.pop();
         }
     }
@@ -140,6 +148,7 @@ impl MapDataNode {
         canvas_context: &mut CanvasContext,
         messages: &mut MessageContext,
         can_edit: bool,
+        canvas_response: &egui::Response,
     ) {
         let (name, position, _params, color) = match &mut self.node_data {
             NodeData::MapObjSet {
@@ -204,7 +213,7 @@ impl MapDataNode {
             _ => return,
         };
 
-        let square_size = 0.7;
+        let square_size = 1.0;
 
         let draw_pos =
             canvas_rect.min + canvas_context.convert_to_camera(Vec2f::from(*position).into());
@@ -221,6 +230,7 @@ impl MapDataNode {
             color,
             can_edit,
             &current_path,
+            canvas_response
         );
 
         // draw name
@@ -248,6 +258,7 @@ impl MapDataNode {
         canvas_context: &mut CanvasContext,
         messages: &mut MessageContext,
         do_edit: bool,
+        canvas_response: &egui::Response,
     ) {
         let (start, end, color) = {
             match &mut self.node_data {
@@ -297,6 +308,7 @@ impl MapDataNode {
             color,
             do_edit,
             &current_path,
+            canvas_response
         );
     }
 
@@ -311,6 +323,7 @@ impl MapDataNode {
         messages: &mut MessageContext,
         can_edit: bool,
         color: egui::Color32,
+        canvas_response: &egui::Response,
     ) {
         let NodeData::MapPolySet { line, .. } = &mut self.node_data else {
             return;
@@ -338,6 +351,7 @@ impl MapDataNode {
             color,
             can_edit,
             &current_path,
+            canvas_response
         );
 
         if changed {
@@ -355,6 +369,7 @@ impl MapDataNode {
         messages: &mut MessageContext,
         can_edit: bool,
         color: egui::Color32,
+        canvas_response: &egui::Response,
     ) {
         let NodeData::MapPath { name, points, .. } = &mut self.node_data else {
             return;
@@ -390,6 +405,7 @@ impl MapDataNode {
             color,
             can_edit,
             &current_path,
+            canvas_response
         );
 
         assert_eq!(rects.len(), responses.len());
@@ -420,6 +436,7 @@ impl MapDataNode {
         messages: &mut MessageContext,
         do_edit: bool,
         color: egui::Color32,
+        canvas_response: &egui::Response,
     ) {
         let NodeData::MapCircle {
             name,
@@ -453,6 +470,7 @@ impl MapDataNode {
             color,
             do_edit,
             &current_path,
+            canvas_response
         );
 
         // radius handle
@@ -519,6 +537,7 @@ impl MapDataNode {
         messages: &mut MessageContext,
         can_edit: bool,
         color: egui::Color32,
+        canvas_response: &egui::Response,
     ) {
         let NodeData::MapTerrain {
             collision_type,
@@ -541,11 +560,12 @@ impl MapDataNode {
             current_path,
             canvas_context,
             messages,
-            0.7,
+            1.0,
             false,
             color,
             can_edit,
             &current_path,
+            canvas_response
         );
 
         let position_rect = rects[0];
@@ -587,6 +607,7 @@ impl MapDataNode {
                 color,
                 can_edit,
                 &(current_path, line_index),
+                canvas_response
             );
 
             if changed {
@@ -613,6 +634,7 @@ fn handle_drag_and_selections<T: Vec2Like>(
     mut color: egui::Color32,
     can_drag: bool,
     id_source: &impl std::hash::Hash,
+    canvas_response: &egui::Response,
 ) -> (bool, Vec<egui::Rect>, Vec<egui::Response>) {
     assert_eq!(draw_points.len(), positions.len());
 
@@ -665,7 +687,7 @@ fn handle_drag_and_selections<T: Vec2Like>(
         }
 
         if resp.dragged_by(egui::PointerButton::Primary) && can_drag {
-            drag_position(positions[index], resp, canvas_context);
+            drag_position(positions[index], resp, canvas_context, canvas_response);
             true
         } else {
             false
@@ -696,19 +718,33 @@ fn make_handle_response(
     )
 }
 
-fn drag_world_delta(response: &egui::Response, canvas_context: &CanvasContext) -> egui::Vec2 {
-    response.drag_delta() / canvas_context.camera_zoom()
-}
-
 fn drag_position<T: Vec2Like>(
     value: &mut T,
     response: &egui::Response,
     canvas_context: &CanvasContext,
+    canvas_response: &egui::Response,
 ) {
-    let world_delta = drag_world_delta(response, canvas_context);
+    let grid_size = 0.5;
 
-    *value.x_mut() += world_delta.x;
-    *value.y_mut() -= world_delta.y;
+    let pointer = response.interact_pointer_pos().unwrap();
+    let local_pos = pointer - canvas_response.rect.min;
+
+    let world = canvas_context
+        .convert_from_camera(local_pos)
+        .to_pos2();
+
+    let snapped = if canvas_context.snap_to_grid() {
+        egui::pos2(snap(world.x, grid_size), snap(world.y, grid_size))
+    } else {
+        world
+    };
+
+    *value.x_mut() = snapped.x;
+    *value.y_mut() = snapped.y;
+}
+
+fn snap(value: f32, grid: f32) -> f32 {
+    (value / grid).round() * grid
 }
 
 fn draw_text_above_point(

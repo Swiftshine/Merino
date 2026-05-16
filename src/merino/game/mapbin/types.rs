@@ -20,11 +20,21 @@ pub struct Vec3f {
 }
 
 pub trait Vec2Like {
+    fn x(&self) -> f32;
+    fn y(&self) -> f32;
     fn x_mut(&mut self) -> &mut f32;
     fn y_mut(&mut self) -> &mut f32;
 }
 
 impl Vec2Like for Vec2f {
+    fn x(&self) -> f32 {
+        self.x
+    }
+
+    fn y(&self) -> f32 {
+        self.y
+    }
+
     fn x_mut(&mut self) -> &mut f32 {
         &mut self.x
     }
@@ -34,6 +44,14 @@ impl Vec2Like for Vec2f {
 }
 
 impl Vec2Like for Vec3f {
+    fn x(&self) -> f32 {
+        self.x
+    }
+
+    fn y(&self) -> f32 {
+        self.y
+    }
+
     fn x_mut(&mut self) -> &mut f32 {
         &mut self.x
     }

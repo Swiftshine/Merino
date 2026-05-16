@@ -193,10 +193,9 @@ impl MapDataNode {
                 let mut node_data = NodeData::default_mapterrain(version);
 
                 if let NodeData::MapTerrain {
-                    position,
-                    lines,
-                    ..
-                } = &mut node_data {
+                    position, lines, ..
+                } = &mut node_data
+                {
                     *position = pos.into();
 
                     // make the default line below the position of the central node

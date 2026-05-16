@@ -83,6 +83,72 @@ impl CanvasCamera {
         self.position = Default::default();
         self.zoom = 1.0;
     }
+
+    pub fn draw_grid(
+        &self,
+        painter: &egui::Painter,
+        rect: egui::Rect,
+        grid_size: f32,
+        color: egui::Color32,
+    ) {
+        let pixels_per_grid = grid_size * self.zoom;
+
+        if pixels_per_grid < 16.0 {
+            return;
+        }
+
+        // visible world bounds
+        let top_left = self.convert_from_camera(rect.left_top().to_vec2());
+        let bottom_right = self.convert_from_camera(rect.right_bottom().to_vec2());
+
+        let min_x = top_left.x.min(bottom_right.x);
+        let max_x = top_left.x.max(bottom_right.x);
+
+        let min_y = top_left.y.min(bottom_right.y);
+        let max_y = top_left.y.max(bottom_right.y);
+
+        let offset = grid_size * 0.5;
+
+        let start_x = ((min_x - offset) / grid_size).floor() * grid_size + offset;
+        let end_x = ((max_x - offset) / grid_size).ceil() * grid_size + offset;
+
+        let start_y = ((min_y - offset) / grid_size).floor() * grid_size + offset;
+        let end_y = ((max_y - offset) / grid_size).ceil() * grid_size + offset;
+
+        let stroke = egui::Stroke::new(1.0, color);
+
+        // vertical lines
+        let mut x = start_x;
+        while x <= end_x {
+            let screen_x = self.convert_to_camera(egui::vec2(x, 0.0)).x;
+
+            painter.line_segment(
+                [
+                    egui::pos2(rect.left() + screen_x, rect.top()),
+                    egui::pos2(rect.left() + screen_x, rect.bottom()),
+                ],
+                stroke,
+            );
+
+            x += grid_size;
+        }
+
+        // horizontal lines
+        let mut y = start_y;
+        while y <= end_y {
+            let screen_y = self.convert_to_camera(egui::vec2(0.0, y)).y;
+
+            painter.line_segment(
+                [
+                    egui::pos2(rect.left(), rect.top() + screen_y),
+                    egui::pos2(rect.right(), rect.top() + screen_y),
+                ],
+                stroke,
+            );
+
+            y += grid_size;
+        }
+    }
 }
 
 impl From<Vec3f> for Vec2f {
