@@ -13,6 +13,8 @@ mod params;
 mod settings;
 mod ui;
 
+use std::path::PathBuf;
+
 use crate::merino::{
     archive_viewer::level_editor::{
         contexts::{
@@ -21,7 +23,7 @@ use crate::merino::{
         },
         docking::LevelEditorTab,
     },
-    game::mapbin::Mapdata,
+    game::mapbin::Mapdata, util::res_folder::get_subfolder,
 };
 use anyhow::Result;
 
@@ -35,14 +37,19 @@ pub struct LevelEditor {
     parameter_context: ParameterContext,
 
     // docking
-    dock_state: Option<egui_dock::DockState<LevelEditorTab>>,
+    pub(crate) dock_state: Option<egui_dock::DockState<LevelEditorTab>>,
     tab_to_open: Option<LevelEditorTab>,
 }
 
 impl LevelEditor {
     pub fn new() -> Self {
-        // todo! load from file
-        let dock_state = Some(Self::default_dock());
+        let dock_state = if let Ok(state) = Self::read_dock_state() {
+            state
+        } else {
+            Self::default_dock()
+        };
+
+        let dock_state = Some(dock_state);
 
         Self {
             mapdata: None,
@@ -74,5 +81,16 @@ impl LevelEditor {
 
     pub fn has_mapdata(&self) -> bool {
         self.mapdata.is_some()
+    }
+
+    pub fn on_exit(&mut self) {
+        // save settings
+        let _ = self.canvas_context.settings().write();
+        // save dock data
+        let _ = self.write_dock_state();
+    }
+
+    pub fn get_level_editor_folder() -> Result<PathBuf> {
+        get_subfolder("level_editor")
     }
 }

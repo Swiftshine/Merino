@@ -29,4 +29,8 @@ impl ArchiveViewer {
     pub fn show_ui(&mut self, ui: &mut egui::Ui) {
         self.update_dock(ui);
     }
+
+    pub fn on_exit(&mut self) {
+        self.level_editor.on_exit();
+    }
 }

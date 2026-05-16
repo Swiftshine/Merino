@@ -1,4 +1,8 @@
-use crate::merino::{archive_viewer::viewer::ArchiveViewer, util::emoji::EmojiMessage};
+use crate::merino::{archive_viewer::{level_editor::{LevelEditor, docking::LevelEditorTab}, viewer::ArchiveViewer}, util::emoji::EmojiMessage};
+use anyhow::Result;
+use std::fs;
+
+const DOCKING_SETTINGS_FILE: &str = "dock_settings.json";
 
 #[derive(PartialEq, Eq, Clone, Debug)]
 pub enum ArchiveViewerTab {
@@ -103,5 +107,25 @@ impl ArchiveViewer {
     /// Note: needs to be delayed due to ownership of the dock state.
     pub fn schedule_open_tab(&mut self, tab: ArchiveViewerTab) {
         self.tab_to_open = Some(tab);
+    }
+}
+
+
+impl LevelEditor {
+    pub fn read_dock_state() -> Result<egui_dock::DockState<LevelEditorTab>> {
+        let path = Self::get_level_editor_folder()?.join(DOCKING_SETTINGS_FILE);
+        let json = fs::read_to_string(path)?;
+
+        let state = 
+        serde_json::from_str::<egui_dock::DockState<LevelEditorTab>>(&json)?;
+
+        Ok(state)
+    }
+
+    pub fn write_dock_state(&self) -> Result<()> {
+        let path = Self::get_level_editor_folder()?.join(DOCKING_SETTINGS_FILE);
+        let json = serde_json::to_string_pretty(&self.dock_state)?;
+        fs::write(path, json)?;
+        Ok(())
     }
 }

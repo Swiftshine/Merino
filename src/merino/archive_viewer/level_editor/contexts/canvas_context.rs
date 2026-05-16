@@ -1,12 +1,17 @@
-use enum_map::EnumMap;
+use std::{fs, path::PathBuf};
 
+use enum_map::EnumMap;
+use anyhow::Result;
 use crate::merino::{
-    archive_viewer::level_editor::{object_image::ImageBank, settings::NodeEditSettings},
+    archive_viewer::level_editor::{LevelEditor, object_image::ImageBank, settings::NodeEditSettings},
     game::mapbin::{MapNodeType, NodeChildType, NodePath},
     util::camera::CanvasCamera,
 };
+use serde::{Serialize, Deserialize};
 
-#[derive(Default)]
+const CANVAS_SETTINGS_FILE: &str = "canvas_settings.json";
+
+#[derive(Default, Serialize, Deserialize)]
 pub struct CanvasSettings {
     node_edit_settings: EnumMap<MapNodeType, NodeEditSettings>,
     display_grid: bool,
@@ -15,12 +20,15 @@ pub struct CanvasSettings {
 }
 
 impl CanvasSettings {
-    // todo! load from file
     fn new() -> Self {
-        Self {
-            snap_to_grid: true,
-            display_grid: true,
-            ..Default::default()
+        if let Some(loaded) = Self::read() {
+            loaded
+        } else {
+            Self {
+                snap_to_grid: true,
+                display_grid: true,
+                ..Default::default()
+            }
         }
     }
 
@@ -50,6 +58,25 @@ impl CanvasSettings {
 
     pub fn display_squares_for_images_mut(&mut self) -> &mut bool {
         &mut self.display_squares_for_images
+    }
+
+    fn get_file_path() -> Result<PathBuf> {
+        Ok(LevelEditor::get_level_editor_folder()?.join(CANVAS_SETTINGS_FILE))
+    }
+
+    pub fn read() -> Option<Self> {
+        let path = Self::get_file_path().ok()?;
+        let json = fs::read_to_string(path).ok()?;
+        
+        serde_json::from_str::<Self>(&json).ok()
+    }
+
+    pub fn write(&self) -> Result<()> {
+        let path = Self::get_file_path()?;
+        let json = serde_json::to_string_pretty(&self)?;
+
+        fs::write(path, json)?;
+        Ok(())
     }
 }
 pub enum CanvasTarget {

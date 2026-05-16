@@ -5,12 +5,12 @@ mod write;
 
 use strum::EnumIter;
 use types::*;
-
+use serde::{Serialize, Deserialize};
 use enum_map::Enum;
 use strum::{AsRefStr, Display, EnumString, FromRepr};
 
 #[derive(
-    FromRepr, Debug, Default, Display, AsRefStr, Copy, Clone, EnumString, PartialEq, Enum, Hash, Eq,
+    FromRepr, Debug, Default, Display, AsRefStr, Copy, Clone, EnumString, PartialEq, Enum, Hash, Eq, Serialize, Deserialize
 )]
 #[repr(u32)]
 pub enum MapNodeType {

@@ -28,6 +28,20 @@ fn make_merino_folder() -> Result<()> {
     Ok(())
 }
 
+
+fn make_subfolder(folder_name: &str) -> Result<()> {
+    fs::create_dir(get_merino_folder()?.join(folder_name))?;
+    Ok(())
+}
+
+pub fn get_subfolder(folder_name: &str) -> Result<PathBuf> {
+    if !get_merino_folder()?.join(folder_name).exists() {
+        make_subfolder(folder_name)?;
+    }
+
+    Ok(get_merino_folder()?.join(folder_name))
+}
+
 // Creates `merino_res` if it doesn't exist, and returns a path to it.
 pub fn get_merino_folder() -> Result<PathBuf> {
     if !merino_folder_exists()? {

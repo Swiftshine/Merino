@@ -1,3 +1,7 @@
+use serde::{Serialize, Deserialize};
+
+
+#[derive(Serialize, Deserialize)]
 pub struct NodeEditSettings {
     pub visible: bool,
     pub editable: bool,

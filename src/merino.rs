@@ -35,4 +35,8 @@ impl eframe::App for MerinoApp {
             self.archive_viewer.show_ui(ui);
         });
     }
+
+    fn on_exit(&mut self, _gl: Option<&eframe::glow::Context>) {
+        self.archive_viewer.on_exit();
+    }
 }

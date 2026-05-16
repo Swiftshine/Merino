@@ -1,8 +1,9 @@
 use strum::EnumIter;
 
 use crate::merino::{archive_viewer::level_editor::LevelEditor, util::emoji::EmojiMessage};
+use serde::{Serialize, Deserialize};
 
-#[derive(PartialEq, Eq, Clone, Debug, EnumIter)]
+#[derive(PartialEq, Eq, Clone, Debug, EnumIter, Serialize, Deserialize)]
 pub enum LevelEditorTab {
     AddObject,
     Canvas,
