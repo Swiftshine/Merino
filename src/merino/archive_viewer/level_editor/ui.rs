@@ -40,14 +40,16 @@ impl LevelEditor {
 
                     // todo! make this also happen on startup
                     if ui.button("Load Parameters").clicked()
-                        && let Ok(string) = Self::load_params() {
-                            let _ = self.parse_params(string);
-                        }
+                        && let Ok(string) = Self::load_params()
+                    {
+                        let _ = self.parse_params(string);
+                    }
 
                     if ui.button("Load Images").clicked()
-                        && let Ok(string) = Self::load_image_data() {
-                            let _ = self.parse_image_data(string);
-                        }
+                        && let Ok(string) = Self::load_image_data()
+                    {
+                        let _ = self.parse_image_data(string);
+                    }
                 });
             });
     }
