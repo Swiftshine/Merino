@@ -24,8 +24,10 @@ impl CanvasSettings {
     }
 }
 pub enum CanvasTarget {
-    /// Create a new child of this type and attach it this parent node.
+    /// Create a new child of this type and attach it to this parent node.
     NewNode(NodeChildType, NodePath),
+    /// Search for an existing node to attach it to this parent node.
+    Search(NodePath)
 }
 
 impl CanvasTarget {
@@ -37,9 +39,14 @@ impl CanvasTarget {
         Self::NewNode(child_type, parent)
     }
 
+    pub fn search(parent: NodePath) -> Self {
+        Self::Search(parent)
+    }
+
     pub fn to_string(&self) -> String {
         match self {
             Self::NewNode(child_type, _) => child_type.to_string(),
+            Self::Search(_) => format!("Searching")
         }
     }
 }
@@ -128,7 +135,16 @@ impl CanvasContext {
         self.target.as_ref().is_some_and(|t| {
             match t {
                 CanvasTarget::NewNode(_, _) => true,
-                // _ => false
+                _ => false
+            }
+        })
+    }
+
+    pub fn is_target_search(&self) -> bool {
+        self.target.as_ref().is_some_and(|t| {
+            match t {
+                CanvasTarget::Search(_) => true,
+                _ => false
             }
         })
     }

@@ -4,7 +4,7 @@ mod contexts;
 pub(crate) mod docking;
 mod editable;
 mod input;
-mod interact;
+mod interact_object;
 mod message;
 mod object_properties;
 mod params;

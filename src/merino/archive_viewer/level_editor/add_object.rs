@@ -83,6 +83,8 @@ impl LevelEditor {
                     parent.add_new_child(version, *child_type, &mut self.canvas_context, local_pos);
                     placed = true;
                 }
+
+                _ => unreachable!()
             }
         }
 
@@ -367,7 +369,7 @@ impl NodeData {
 
 // helpers
 
-fn draw_crosshair(painter: egui::Painter, response: &egui::Response) {
+pub fn draw_crosshair(painter: egui::Painter, response: &egui::Response) {
     if let Some(pointer_pos) = response.hover_pos() {
         // circle
         painter.circle_filled(pointer_pos, 1.0, egui::Color32::GRAY);

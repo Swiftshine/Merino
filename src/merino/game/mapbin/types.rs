@@ -38,6 +38,7 @@ impl Vec2Like for Vec2f {
     fn x_mut(&mut self) -> &mut f32 {
         &mut self.x
     }
+    
     fn y_mut(&mut self) -> &mut f32 {
         &mut self.y
     }

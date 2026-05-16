@@ -2,7 +2,7 @@ use crate::merino::{
     archive_viewer::level_editor::{
         LevelEditor,
         contexts::{
-            canvas_context::CanvasContext,
+            canvas_context::{CanvasContext, CanvasTarget},
             message_context::{Command, MessageContext},
         },
     },
@@ -677,7 +677,16 @@ fn handle_drag_and_selections<T: Vec2Like>(
 
     let changed = responses.iter().enumerate().any(|(index, resp)| {
         if resp.clicked_by(egui::PointerButton::Primary) {
-            let command = if shift_held {
+            let command = if canvas_context.is_target_search() {
+                let target = canvas_context.take_target().unwrap();
+
+                let parent_path = match target {
+                    CanvasTarget::Search(parent) => parent,
+                    _ => unreachable!()
+                };
+
+                Command::make_child_of(current_path.clone(), parent_path)               
+            } else if shift_held {
                 Command::add_to_selection(current_path.clone())
             } else {
                 Command::select_node(current_path.clone())

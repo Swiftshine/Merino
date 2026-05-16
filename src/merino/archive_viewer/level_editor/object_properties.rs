@@ -344,8 +344,18 @@ impl MapDataNode {
         messages: &mut MessageContext,
         node_path: &NodePath,
     ) {
-        ui.label(egui::RichText::new("Children").strong().underline())
+        ui.horizontal(|ui|{
+            ui.label(egui::RichText::new("Children").strong().underline())
             .on_hover_text("The parentheses indicate how many children of that type are present.");
+            
+            ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui|{
+                if ui.button(EmojiMessage::target())
+                .on_hover_text("Make an existing node a child of this node")
+                .clicked() {
+                    canvas_context.set_target(Some(CanvasTarget::search(node_path.clone())));
+                }
+            });
+        });
 
         for child_type in NodeChildType::iter() {
             let children = self.children_vec_mut(child_type);
@@ -358,18 +368,13 @@ impl MapDataNode {
             .show(ui, |ui|{
                 ui.vertical(|ui|{
                     match children {
-                        None => {
-                            ui.label("No children.");
-                        }
+                        None => {}
 
                         Some(children) => {
                             ui.indent(ui.id().with(child_type), |ui|{
                                 for (index, child) in children.iter_mut().enumerate() {
                                     ui.horizontal(|ui|{
-                                        if ui.label(egui::RichText::new(format!("Index {}", index)).strong().underline()).on_hover_text("Go to child").clicked() {
-                                            let child_path = node_path.with_step(NodeStep::new(child_type, index));
-                                            messages.push_command(Command::select_node(child_path));
-                                        }
+                                        ui.label(format!("Index {}", index));
         
                                         ui.with_layout(
                                             egui::Layout::right_to_left(egui::Align::Center),
@@ -408,12 +413,6 @@ impl MapDataNode {
                         .on_hover_text("Create a new node of this type.")
                         .clicked() {
                             canvas_context.set_target(Some(CanvasTarget::new_to_node(child_type, node_path.clone())));
-                        }
-
-                        if ui.button(EmojiMessage::target_msg("Set Child"))
-                        .on_hover_text("Select an existing node of this type.")
-                        .clicked() {
-                            todo!("make a better search target and actually filter types on the canvas that do not match this type")
                         }
                     });
                 });

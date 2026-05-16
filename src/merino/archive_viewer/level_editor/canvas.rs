@@ -1,4 +1,4 @@
-use crate::merino::archive_viewer::level_editor::LevelEditor;
+use crate::merino::archive_viewer::level_editor::{LevelEditor, add_object::draw_crosshair};
 
 impl LevelEditor {
     pub fn show_canvas(&mut self, ui: &mut egui::Ui) {
@@ -26,8 +26,11 @@ impl LevelEditor {
         // process inputs
         if response.hovered() {
             // deal with any targets
+
             if self.canvas_context.is_target_new() {
                 self.add_object(ui, rect, &response);
+            } else if self.canvas_context.is_target_search() {
+                draw_crosshair(painter, &response);
             }
 
             self.handle_mouse_inputs(ui);

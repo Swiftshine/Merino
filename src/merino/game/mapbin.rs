@@ -142,7 +142,7 @@ impl NodePath {
     }
 
     pub fn is_descendant_of(&self, ancestor: &Self) -> bool {
-        self != ancestor && self.0.starts_with(&ancestor.0)
+        self.0.starts_with(&ancestor.0)
     }
 }
 
