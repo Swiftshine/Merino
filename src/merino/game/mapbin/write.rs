@@ -139,7 +139,7 @@ impl MapdataWriter {
         }
 
         // nodes
-        mapdata.root.write(&mut self, &mapdata, mapdata.version)?;
+        mapdata.root.write(&mut self, mapdata, mapdata.version)?;
 
         // pad to 0x20 bytes
         let len = self.buffer.len();

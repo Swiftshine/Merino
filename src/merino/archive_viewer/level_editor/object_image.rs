@@ -88,7 +88,7 @@ impl ImageBank {
 
         let resolved = def.resolve(params)?;
 
-        let asset_id = format!("{}/{}/{}", node_type.to_string(), name, resolved.image_path);
+        let asset_id = format!("{}/{}/{}", node_type, name, resolved.image_path);
         let base_path = get_merino_folder().ok()?;
         let file_path = base_path
             .join("image")

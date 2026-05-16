@@ -518,7 +518,7 @@ impl MapDataNode {
 
         let radius_resp = ui.interact(
             radius_rect,
-            ui.id().with(&current_path).with("radius"),
+            ui.id().with(current_path).with("radius"),
             egui::Sense::click_and_drag(),
         );
 

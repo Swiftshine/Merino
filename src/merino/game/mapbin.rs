@@ -140,11 +140,7 @@ impl NodePath {
     }
 
     pub fn get_step(&self) -> Option<NodeStep> {
-        if let Some(last) = self.0.last() {
-            Some(*last)
-        } else {
-            None
-        }
+        self.0.last().map(|last| *last)
     }
 
     pub fn with_step(&self, step: NodeStep) -> Self {

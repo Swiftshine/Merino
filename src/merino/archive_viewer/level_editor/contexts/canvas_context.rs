@@ -104,7 +104,7 @@ impl CanvasTarget {
     pub fn to_string(&self) -> String {
         match self {
             Self::NewNode(child_type, _) => child_type.to_string(),
-            Self::Search(_) => format!("Searching"),
+            Self::Search(_) => "Searching".to_string(),
         }
     }
 }
