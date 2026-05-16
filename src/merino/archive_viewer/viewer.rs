@@ -28,7 +28,7 @@ impl ArchiveViewer {
 
     pub fn show_ui(&mut self, ui: &mut egui::Ui) {
         // check if writing is requested
-        
+
         if self.level_editor.has_writable_data() {
             let data = self.level_editor.take_writable_data().unwrap();
             self.file_context.replace_current_file_contents(data);

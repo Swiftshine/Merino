@@ -1,7 +1,7 @@
 use strum::EnumIter;
 
 use crate::merino::{archive_viewer::level_editor::LevelEditor, util::emoji::EmojiMessage};
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 #[derive(PartialEq, Eq, Clone, Debug, EnumIter, Serialize, Deserialize)]
 pub enum LevelEditorTab {

@@ -3,14 +3,27 @@ mod read;
 pub(crate) mod types;
 mod write;
 
-use strum::EnumIter;
-use types::*;
-use serde::{Serialize, Deserialize};
 use enum_map::Enum;
+use serde::{Deserialize, Serialize};
+use strum::EnumIter;
 use strum::{AsRefStr, Display, EnumString, FromRepr};
+use types::*;
 
 #[derive(
-    FromRepr, Debug, Default, Display, AsRefStr, Copy, Clone, EnumString, PartialEq, Enum, Hash, Eq, Serialize, Deserialize
+    FromRepr,
+    Debug,
+    Default,
+    Display,
+    AsRefStr,
+    Copy,
+    Clone,
+    EnumString,
+    PartialEq,
+    Enum,
+    Hash,
+    Eq,
+    Serialize,
+    Deserialize,
 )]
 #[repr(u32)]
 pub enum MapNodeType {

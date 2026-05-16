@@ -1,13 +1,15 @@
 use std::{fs, path::PathBuf};
 
-use enum_map::EnumMap;
-use anyhow::Result;
 use crate::merino::{
-    archive_viewer::level_editor::{LevelEditor, object_image::ImageBank, settings::NodeEditSettings},
+    archive_viewer::level_editor::{
+        LevelEditor, object_image::ImageBank, settings::NodeEditSettings,
+    },
     game::mapbin::{MapNodeType, NodeChildType, NodePath},
     util::camera::CanvasCamera,
 };
-use serde::{Serialize, Deserialize};
+use anyhow::Result;
+use enum_map::EnumMap;
+use serde::{Deserialize, Serialize};
 
 const CANVAS_SETTINGS_FILE: &str = "canvas_settings.json";
 
@@ -67,7 +69,7 @@ impl CanvasSettings {
     pub fn read() -> Option<Self> {
         let path = Self::get_file_path().ok()?;
         let json = fs::read_to_string(path).ok()?;
-        
+
         serde_json::from_str::<Self>(&json).ok()
     }
 

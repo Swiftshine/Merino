@@ -28,7 +28,6 @@ fn make_merino_folder() -> Result<()> {
     Ok(())
 }
 
-
 fn make_subfolder(folder_name: &str) -> Result<()> {
     fs::create_dir(get_merino_folder()?.join(folder_name))?;
     Ok(())

@@ -31,7 +31,10 @@ impl LevelEditor {
                         }
                     });
 
-                    if ui.add_enabled(self.has_mapdata(), egui::Button::new("Save to Archive")).clicked() {
+                    if ui
+                        .add_enabled(self.has_mapdata(), egui::Button::new("Save to Archive"))
+                        .clicked()
+                    {
                         self.write_mapdata();
                     }
 

@@ -23,7 +23,8 @@ use crate::merino::{
         },
         docking::LevelEditorTab,
     },
-    game::mapbin::Mapdata, util::res_folder::get_subfolder,
+    game::mapbin::Mapdata,
+    util::res_folder::get_subfolder,
 };
 use anyhow::Result;
 

@@ -18,7 +18,13 @@ impl ArchiveViewer {
                             ui.close();
                         }
 
-                        if ui.add_enabled(self.file_context.has_files(), egui::Button::new("Save Archive")).clicked() {
+                        if ui
+                            .add_enabled(
+                                self.file_context.has_files(),
+                                egui::Button::new("Save Archive"),
+                            )
+                            .clicked()
+                        {
                             let _ = self.file_context.save_archive();
                             ui.close();
                         }

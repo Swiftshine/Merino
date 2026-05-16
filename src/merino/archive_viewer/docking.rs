@@ -1,4 +1,10 @@
-use crate::merino::{archive_viewer::{level_editor::{LevelEditor, docking::LevelEditorTab}, viewer::ArchiveViewer}, util::emoji::EmojiMessage};
+use crate::merino::{
+    archive_viewer::{
+        level_editor::{LevelEditor, docking::LevelEditorTab},
+        viewer::ArchiveViewer,
+    },
+    util::emoji::EmojiMessage,
+};
 use anyhow::Result;
 use std::fs;
 
@@ -110,14 +116,12 @@ impl ArchiveViewer {
     }
 }
 
-
 impl LevelEditor {
     pub fn read_dock_state() -> Result<egui_dock::DockState<LevelEditorTab>> {
         let path = Self::get_level_editor_folder()?.join(DOCKING_SETTINGS_FILE);
         let json = fs::read_to_string(path)?;
 
-        let state = 
-        serde_json::from_str::<egui_dock::DockState<LevelEditorTab>>(&json)?;
+        let state = serde_json::from_str::<egui_dock::DockState<LevelEditorTab>>(&json)?;
 
         Ok(state)
     }
