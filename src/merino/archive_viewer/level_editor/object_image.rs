@@ -1,7 +1,11 @@
 use anyhow::{Result, anyhow};
 use std::{collections::HashMap, fs, str::FromStr};
 
-use crate::merino::{archive_viewer::level_editor::{LevelEditor, params::ParameterDataType}, game::mapbin::{MapNodeType, types::AnyParams}, util::res_folder::get_merino_folder};
+use crate::merino::{
+    archive_viewer::level_editor::{LevelEditor, params::ParameterDataType},
+    game::mapbin::{MapNodeType, types::AnyParams},
+    util::res_folder::get_merino_folder,
+};
 
 const IMAGEDATA_FILE: &str = "imagedata.json";
 
@@ -97,11 +101,11 @@ impl ImageBank {
 
         Some((texture.clone(), resolved.rotation_degrees))
     }
-    
+
     fn clear_image_objects(&mut self) {
         self.image_objects.clear()
     }
-    
+
     fn clear_textures(&mut self) {
         self.textures.clear()
     }
@@ -110,8 +114,12 @@ impl ImageBank {
         self.clear_image_objects();
         self.clear_textures();
     }
-    
-    pub fn insert_image_object(&mut self, k: (MapNodeType, String), v: ImageDefinition) -> Option<ImageDefinition> {
+
+    pub fn insert_image_object(
+        &mut self,
+        k: (MapNodeType, String),
+        v: ImageDefinition,
+    ) -> Option<ImageDefinition> {
         self.image_objects.insert(k, v)
     }
 }
@@ -148,29 +156,29 @@ impl ParameterDataType {
         slot: usize,
     ) -> bool {
         match self {
-            Self::Int | Self::DropdownInt => {
-                params.int_params().get(slot)
-                    .map(|&val| expected.as_i64() == Some(val as i64))
-                    .unwrap_or(false)
-            }
+            Self::Int | Self::DropdownInt => params
+                .int_params()
+                .get(slot)
+                .map(|&val| expected.as_i64() == Some(val as i64))
+                .unwrap_or(false),
 
-            Self::Float => {
-                params.float_params().get(slot)
-                    .map(|&val| expected.as_f64() == Some(val as f64))
-                    .unwrap_or(false)
-            }
+            Self::Float => params
+                .float_params()
+                .get(slot)
+                .map(|&val| expected.as_f64() == Some(val as f64))
+                .unwrap_or(false),
 
-            Self::String => {
-                params.string_params().get(slot)
-                    .map(|val| expected.as_str() == Some(val.as_str()))
-                    .unwrap_or(false)
-            }
+            Self::String => params
+                .string_params()
+                .get(slot)
+                .map(|val| expected.as_str() == Some(val.as_str()))
+                .unwrap_or(false),
 
-            Self::Bool => {
-                params.int_params().get(slot)
-                    .map(|&val| expected.as_bool() == Some(val != 0))
-                    .unwrap_or(false)
-            }
+            Self::Bool => params
+                .int_params()
+                .get(slot)
+                .map(|&val| expected.as_bool() == Some(val != 0))
+                .unwrap_or(false),
 
             Self::None => false,
         }
@@ -178,13 +186,9 @@ impl ParameterDataType {
 
     pub fn extract_as_f32(&self, params: &AnyParams<'_>, slot: usize) -> Option<f32> {
         match self {
-            Self::Int | Self::DropdownInt => {
-                params.int_params().get(slot).map(|&val| val as f32)
-            }
+            Self::Int | Self::DropdownInt => params.int_params().get(slot).map(|&val| val as f32),
 
-            Self::Float => {
-                params.float_params().get(slot).copied()
-            }
+            Self::Float => params.float_params().get(slot).copied(),
 
             _ => None,
         }
@@ -221,7 +225,7 @@ impl LevelEditor {
         let string = fs::read_to_string(path)?;
         Ok(string)
     }
-    
+
     pub fn parse_image_data(&mut self, json: String) -> Result<()> {
         let json: serde_json::Value = serde_json::from_str(&json)?;
 
@@ -316,7 +320,9 @@ impl LevelEditor {
                     }
                 }
 
-                self.canvas_context.image_bank_mut().insert_image_object((set_type, obj_name.clone()), image_def);
+                self.canvas_context
+                    .image_bank_mut()
+                    .insert_image_object((set_type, obj_name.clone()), image_def);
             }
         }
 

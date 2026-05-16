@@ -1,21 +1,24 @@
 mod add_object;
 mod canvas;
+mod canvas_settings;
 mod contexts;
 pub(crate) mod docking;
 mod editable;
 mod input;
 mod interact_object;
 mod message;
+mod object_image;
 mod object_properties;
 mod params;
 mod settings;
 mod ui;
-mod canvas_settings;
-mod object_image;
 
 use crate::merino::{
     archive_viewer::level_editor::{
-        contexts::{canvas_context::CanvasContext, message_context::MessageContext, parameter_context::ParameterContext},
+        contexts::{
+            canvas_context::CanvasContext, message_context::MessageContext,
+            parameter_context::ParameterContext,
+        },
         docking::LevelEditorTab,
     },
     game::mapbin::Mapdata,

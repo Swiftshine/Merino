@@ -27,7 +27,7 @@ impl CanvasSettings {
     pub fn node_edit_settings_mut(&mut self) -> &mut EnumMap<MapNodeType, NodeEditSettings> {
         &mut self.node_edit_settings
     }
-    
+
     pub fn display_grid(&self) -> bool {
         self.display_grid
     }
@@ -35,7 +35,7 @@ impl CanvasSettings {
     pub fn display_grid_mut(&mut self) -> &mut bool {
         &mut self.display_grid
     }
-    
+
     pub fn snap_to_grid(&self) -> bool {
         self.snap_to_grid
     }
@@ -43,7 +43,7 @@ impl CanvasSettings {
     pub fn snap_to_grid_mut(&mut self) -> &mut bool {
         &mut self.snap_to_grid
     }
-    
+
     pub fn display_squares_for_images(&self) -> bool {
         self.display_squares_for_images
     }
@@ -56,7 +56,7 @@ pub enum CanvasTarget {
     /// Create a new child of this type and attach it to this parent node.
     NewNode(NodeChildType, NodePath),
     /// Search for an existing node to attach it to this parent node.
-    Search(NodePath)
+    Search(NodePath),
 }
 
 impl CanvasTarget {
@@ -75,7 +75,7 @@ impl CanvasTarget {
     pub fn to_string(&self) -> String {
         match self {
             Self::NewNode(child_type, _) => child_type.to_string(),
-            Self::Search(_) => format!("Searching")
+            Self::Search(_) => format!("Searching"),
         }
     }
 }
@@ -95,7 +95,7 @@ impl CanvasContext {
             selected_node_paths: Vec::new(),
             settings: CanvasSettings::new(),
             target: None,
-            image_bank: ImageBank::default()
+            image_bank: ImageBank::default(),
         }
     }
 
@@ -163,20 +163,16 @@ impl CanvasContext {
     }
 
     pub fn is_target_new(&self) -> bool {
-        self.target.as_ref().is_some_and(|t| {
-            match t {
-                CanvasTarget::NewNode(_, _) => true,
-                _ => false
-            }
+        self.target.as_ref().is_some_and(|t| match t {
+            CanvasTarget::NewNode(_, _) => true,
+            _ => false,
         })
     }
 
     pub fn is_target_search(&self) -> bool {
-        self.target.as_ref().is_some_and(|t| {
-            match t {
-                CanvasTarget::Search(_) => true,
-                _ => false
-            }
+        self.target.as_ref().is_some_and(|t| match t {
+            CanvasTarget::Search(_) => true,
+            _ => false,
         })
     }
 
@@ -193,7 +189,7 @@ impl CanvasContext {
     ) {
         self.camera.draw_grid(painter, rect, size, color);
     }
-    
+
     pub fn prune_invalid_selections(&mut self) {
         self.selected_node_paths.retain(|path| {
             let root_settings = &self.settings.node_edit_settings[MapNodeType::MapSet];
@@ -216,11 +212,11 @@ impl CanvasContext {
     pub fn settings_mut(&mut self) -> &mut CanvasSettings {
         &mut self.settings
     }
-    
+
     pub fn settings(&self) -> &CanvasSettings {
         &self.settings
     }
-    
+
     pub fn image_bank_mut(&mut self) -> &mut ImageBank {
         &mut self.image_bank
     }

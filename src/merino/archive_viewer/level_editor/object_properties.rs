@@ -158,7 +158,10 @@ impl MapDataNode {
                     unk14 => "Unk 14"
                 );
 
-                params.edit_properties(ui, EditInfo::search_param(param_list, self.node_type, name.as_str()));
+                params.edit_properties(
+                    ui,
+                    EditInfo::search_param(param_list, self.node_type, name.as_str()),
+                );
             }
 
             NodeData::MapItemSet {
@@ -193,7 +196,10 @@ impl MapDataNode {
                     unk13 => "Unk 13",
                 );
 
-                params.edit_properties(ui, EditInfo::search_param(param_list, self.node_type, name.as_str()));
+                params.edit_properties(
+                    ui,
+                    EditInfo::search_param(param_list, self.node_type, name.as_str()),
+                );
             }
 
             NodeData::MapEnemySet {
@@ -246,7 +252,10 @@ impl MapDataNode {
                     unk24 => "Unk 24",
                 );
 
-                params.edit_properties(ui, EditInfo::search_param(param_list, self.node_type, name.as_str()));
+                params.edit_properties(
+                    ui,
+                    EditInfo::search_param(param_list, self.node_type, name.as_str()),
+                );
             }
 
             NodeData::MapLocator {
@@ -259,7 +268,10 @@ impl MapDataNode {
                     position => "Position",
                 );
 
-                params.edit_properties(ui, EditInfo::search_param(param_list, self.node_type, name.as_str()));
+                params.edit_properties(
+                    ui,
+                    EditInfo::search_param(param_list, self.node_type, name.as_str()),
+                );
             }
 
             NodeData::MapPath {
@@ -272,7 +284,10 @@ impl MapDataNode {
                     points => "Points",
                 );
 
-                params.edit_properties(ui, EditInfo::search_param(param_list, self.node_type, name.as_str()));
+                params.edit_properties(
+                    ui,
+                    EditInfo::search_param(param_list, self.node_type, name.as_str()),
+                );
             }
 
             NodeData::MapRect {
@@ -287,7 +302,10 @@ impl MapDataNode {
                     bounds_end => "Bounds End",
                 );
 
-                params.edit_properties(ui, EditInfo::search_param(param_list, self.node_type, name.as_str()));
+                params.edit_properties(
+                    ui,
+                    EditInfo::search_param(param_list, self.node_type, name.as_str()),
+                );
             }
 
             NodeData::MapCircle {
@@ -302,7 +320,10 @@ impl MapDataNode {
                     radius => "Radius",
                 );
 
-                params.edit_properties(ui, EditInfo::search_param(param_list, self.node_type, name.as_str()));
+                params.edit_properties(
+                    ui,
+                    EditInfo::search_param(param_list, self.node_type, name.as_str()),
+                );
             }
 
             NodeData::MapTerrain {
@@ -339,7 +360,10 @@ impl MapDataNode {
                     unk15 => "Unk 15"
                 );
 
-                params.edit_properties(ui, EditInfo::search_param(param_list, self.node_type, collision_type.as_str()));
+                params.edit_properties(
+                    ui,
+                    EditInfo::search_param(param_list, self.node_type, collision_type.as_str()),
+                );
             }
 
             _ => unreachable!(),
@@ -353,14 +377,18 @@ impl MapDataNode {
         messages: &mut MessageContext,
         node_path: &NodePath,
     ) {
-        ui.horizontal(|ui|{
+        ui.horizontal(|ui| {
             ui.label(egui::RichText::new("Children").strong().underline())
-            .on_hover_text("The parentheses indicate how many children of that type are present.");
-            
-            ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui|{
-                if ui.button(EmojiMessage::target())
-                .on_hover_text("Make an existing node a child of this node")
-                .clicked() {
+                .on_hover_text(
+                    "The parentheses indicate how many children of that type are present.",
+                );
+
+            ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                if ui
+                    .button(EmojiMessage::target())
+                    .on_hover_text("Make an existing node a child of this node")
+                    .clicked()
+                {
                     canvas_context.set_target(Some(CanvasTarget::search(node_path.clone())));
                 }
             });
@@ -373,59 +401,81 @@ impl MapDataNode {
             let header = format!("({}) {}", child_count, child_type);
 
             egui::CollapsingHeader::new(header)
-            .default_open(false)
-            .show(ui, |ui|{
-                ui.vertical(|ui|{
-                    match children {
-                        None => {}
+                .default_open(false)
+                .show(ui, |ui| {
+                    ui.vertical(|ui| {
+                        match children {
+                            None => {}
 
-                        Some(children) => {
-                            ui.indent(ui.id().with(child_type), |ui|{
-                                for (index, _) in children.iter_mut().enumerate() {
-                                    ui.horizontal(|ui|{
-                                        ui.label(format!("Index {}", index));
-        
-                                        ui.with_layout(
-                                            egui::Layout::right_to_left(egui::Align::Center),
-                                            |ui|{
-                                                if ui
-                                                    .button(EmojiMessage::discard())
-                                                    .on_hover_text("Delete child")
-                                                    .clicked()
-                                                {
-                                                    let child_path = node_path.with_step(NodeStep::new(child_type, index));
-                                                    messages.push_command(Command::remove_node(child_path));
-                                                }
-                                                
-                                                if ui.button(EmojiMessage::cross()).on_hover_text("Detach child").clicked() {
-                                                    let child_path = node_path.with_step(NodeStep::new(child_type, index));
-                                                    messages.push_command(Command::make_child_of_root(child_path));
-                                                }
-        
-                                                if ui.button(EmojiMessage::target())
-                                                .on_hover_text("Go to child")
-                                                .clicked() {
-                                                    let child_path = node_path.with_step(NodeStep::new(child_type, index));
-                                                    messages.push_command(Command::select_node(child_path));
-                                                }
-                                            }
-                                        );
-                                    });
-                                }
-                            });
-                        }
-                    }
-      
+                            Some(children) => {
+                                ui.indent(ui.id().with(child_type), |ui| {
+                                    for (index, _) in children.iter_mut().enumerate() {
+                                        ui.horizontal(|ui| {
+                                            ui.label(format!("Index {}", index));
 
-                    ui.horizontal(|ui|{
-                        if ui.button(EmojiMessage::add_msg("New Child"))
-                        .on_hover_text("Create a new node of this type.")
-                        .clicked() {
-                            canvas_context.set_target(Some(CanvasTarget::new_to_node(child_type, node_path.clone())));
+                                            ui.with_layout(
+                                                egui::Layout::right_to_left(egui::Align::Center),
+                                                |ui| {
+                                                    if ui
+                                                        .button(EmojiMessage::discard())
+                                                        .on_hover_text("Delete child")
+                                                        .clicked()
+                                                    {
+                                                        let child_path = node_path.with_step(
+                                                            NodeStep::new(child_type, index),
+                                                        );
+                                                        messages.push_command(
+                                                            Command::remove_node(child_path),
+                                                        );
+                                                    }
+
+                                                    if ui
+                                                        .button(EmojiMessage::cross())
+                                                        .on_hover_text("Detach child")
+                                                        .clicked()
+                                                    {
+                                                        let child_path = node_path.with_step(
+                                                            NodeStep::new(child_type, index),
+                                                        );
+                                                        messages.push_command(
+                                                            Command::make_child_of_root(child_path),
+                                                        );
+                                                    }
+
+                                                    if ui
+                                                        .button(EmojiMessage::target())
+                                                        .on_hover_text("Go to child")
+                                                        .clicked()
+                                                    {
+                                                        let child_path = node_path.with_step(
+                                                            NodeStep::new(child_type, index),
+                                                        );
+                                                        messages.push_command(
+                                                            Command::select_node(child_path),
+                                                        );
+                                                    }
+                                                },
+                                            );
+                                        });
+                                    }
+                                });
+                            }
                         }
+
+                        ui.horizontal(|ui| {
+                            if ui
+                                .button(EmojiMessage::add_msg("New Child"))
+                                .on_hover_text("Create a new node of this type.")
+                                .clicked()
+                            {
+                                canvas_context.set_target(Some(CanvasTarget::new_to_node(
+                                    child_type,
+                                    node_path.clone(),
+                                )));
+                            }
+                        });
                     });
                 });
-            });
         }
     }
 }

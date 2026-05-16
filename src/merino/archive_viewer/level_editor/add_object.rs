@@ -84,7 +84,7 @@ impl LevelEditor {
                     placed = true;
                 }
 
-                _ => unreachable!()
+                _ => unreachable!(),
             }
         }
 

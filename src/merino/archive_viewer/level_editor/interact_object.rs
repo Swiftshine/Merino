@@ -16,7 +16,12 @@ pub const SELECTION_HIGHLIGHT: egui::Color32 =
     egui::Color32::from_rgba_unmultiplied_const(0xFF, 0xFF, 0xFF, 0x10);
 
 impl LevelEditor {
-    pub fn interact_with_all_nodes(&mut self, ui: &mut egui::Ui, canvas_rect: egui::Rect, canvas_response: &egui::Response) {
+    pub fn interact_with_all_nodes(
+        &mut self,
+        ui: &mut egui::Ui,
+        canvas_rect: egui::Rect,
+        canvas_response: &egui::Response,
+    ) {
         let Self {
             mapdata,
             canvas_context,
@@ -33,7 +38,7 @@ impl LevelEditor {
             &mut node_path,
             canvas_context,
             message_context,
-            canvas_response
+            canvas_response,
         );
     }
 }
@@ -61,7 +66,7 @@ impl MapDataNode {
                         canvas_context,
                         messages,
                         can_edit,
-                        canvas_response
+                        canvas_response,
                     );
                 }
                 MapNodeType::MapPolySet => {
@@ -73,7 +78,7 @@ impl MapDataNode {
                         messages,
                         can_edit,
                         egui::Color32::WHITE,
-                        canvas_response
+                        canvas_response,
                     );
                 }
                 MapNodeType::MapObjSet
@@ -87,7 +92,7 @@ impl MapDataNode {
                         canvas_context,
                         messages,
                         can_edit,
-                        canvas_response
+                        canvas_response,
                     );
                 }
                 MapNodeType::MapPath => {
@@ -99,7 +104,7 @@ impl MapDataNode {
                         messages,
                         can_edit,
                         egui::Color32::from_rgb(0x31, 0x5C, 0x2B),
-                        canvas_response
+                        canvas_response,
                     );
                 }
                 MapNodeType::MapCircle => {
@@ -111,7 +116,7 @@ impl MapDataNode {
                         messages,
                         can_edit,
                         egui::Color32::PURPLE,
-                        canvas_response
+                        canvas_response,
                     );
                 }
                 MapNodeType::MapTerrain => {
@@ -123,7 +128,7 @@ impl MapDataNode {
                         messages,
                         can_edit,
                         egui::Color32::LIGHT_GREEN,
-                        canvas_response
+                        canvas_response,
                     );
                 }
             }
@@ -132,7 +137,14 @@ impl MapDataNode {
         // process children
         for (step, child) in self.iter_mut() {
             current_path.push(step);
-            child.interact(ui, canvas_rect, current_path, canvas_context, messages, canvas_response);
+            child.interact(
+                ui,
+                canvas_rect,
+                current_path,
+                canvas_context,
+                messages,
+                canvas_response,
+            );
             current_path.pop();
         }
     }
@@ -230,24 +242,29 @@ impl MapDataNode {
             color,
             can_edit,
             &current_path,
-            canvas_response
+            canvas_response,
         );
-        
+
         // draw name
         let painter = ui.painter_at(canvas_rect);
-        
+
         let rect = rects[0];
         let response = &responses[0];
-        
+
         let selected = canvas_context.is_node_selected(current_path);
-        
+
         if response.hovered() || selected {
             draw_text_above_point(ui, canvas_rect, rect, name, color);
         }
-        
+
         // draw image if present
         let mut has_image = false;
-        if let Some((tex, rotation)) = canvas_context.image_bank_mut().resolve_image_for_node(ui.ctx(), self.node_type, name, &params) {
+        if let Some((tex, rotation)) = canvas_context.image_bank_mut().resolve_image_for_node(
+            ui.ctx(),
+            self.node_type,
+            name,
+            &params,
+        ) {
             draw_rotated_image(&painter, tex.id(), rect, rotation, egui::Color32::WHITE);
             has_image = true;
         }
@@ -324,7 +341,7 @@ impl MapDataNode {
             color,
             do_edit,
             &current_path,
-            canvas_response
+            canvas_response,
         );
     }
 
@@ -367,7 +384,7 @@ impl MapDataNode {
             color,
             can_edit,
             &current_path,
-            canvas_response
+            canvas_response,
         );
 
         if changed {
@@ -421,7 +438,7 @@ impl MapDataNode {
             color,
             can_edit,
             &current_path,
-            canvas_response
+            canvas_response,
         );
 
         assert_eq!(rects.len(), responses.len());
@@ -486,7 +503,7 @@ impl MapDataNode {
             color,
             do_edit,
             &current_path,
-            canvas_response
+            canvas_response,
         );
 
         // radius handle
@@ -581,7 +598,7 @@ impl MapDataNode {
             color,
             can_edit,
             &current_path,
-            canvas_response
+            canvas_response,
         );
 
         let position_rect = rects[0];
@@ -623,7 +640,7 @@ impl MapDataNode {
                 color,
                 can_edit,
                 &(current_path, line_index),
-                canvas_response
+                canvas_response,
             );
 
             if changed {
@@ -698,10 +715,10 @@ fn handle_drag_and_selections<T: Vec2Like>(
 
                 let parent_path = match target {
                     CanvasTarget::Search(parent) => parent,
-                    _ => unreachable!()
+                    _ => unreachable!(),
                 };
 
-                Command::make_child_of(current_path.clone(), parent_path)               
+                Command::make_child_of(current_path.clone(), parent_path)
             } else if shift_held {
                 Command::add_to_selection(current_path.clone())
             } else {
@@ -754,9 +771,7 @@ fn drag_position<T: Vec2Like>(
     let pointer = response.interact_pointer_pos().unwrap();
     let local_pos = pointer - canvas_response.rect.min;
 
-    let world = canvas_context
-        .convert_from_camera(local_pos)
-        .to_pos2();
+    let world = canvas_context.convert_from_camera(local_pos).to_pos2();
 
     let snapped = if canvas_context.settings().snap_to_grid() {
         egui::pos2(snap(world.x, grid_size), snap(world.y, grid_size))

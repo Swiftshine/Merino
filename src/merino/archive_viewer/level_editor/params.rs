@@ -2,7 +2,10 @@ use std::{fs, str::FromStr};
 
 use anyhow::{Result, anyhow};
 
-use crate::merino::{archive_viewer::level_editor::LevelEditor, game::mapbin::MapNodeType, util::res_folder::get_merino_folder};
+use crate::merino::{
+    archive_viewer::level_editor::LevelEditor, game::mapbin::MapNodeType,
+    util::res_folder::get_merino_folder,
+};
 
 const OBJECTDATA_FILE: &str = "objectdata.json";
 
@@ -164,7 +167,8 @@ impl LevelEditor {
             parameter_objects.extend(objects);
         }
 
-        self.parameter_context.set_parameter_objects(parameter_objects);
+        self.parameter_context
+            .set_parameter_objects(parameter_objects);
 
         Ok(())
     }

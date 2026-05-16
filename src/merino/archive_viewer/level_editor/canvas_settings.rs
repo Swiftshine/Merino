@@ -17,9 +17,9 @@ impl LevelEditor {
             .on_hover_text(
                 "Disabling any of these values will deselect every node of the corresponding type.",
             );
-    
+
             let node_edit_settings = settings.node_edit_settings_mut();
-    
+
             for (node_type, settings) in node_edit_settings.iter_mut() {
                 ui.horizontal(|ui| {
                     ui.label(node_type.to_string());
@@ -36,13 +36,15 @@ impl LevelEditor {
                     });
                 });
             }
-    
-            
+
             // canvas settings
             ui.label(egui::RichText::new("Other Settings").strong());
             ui.checkbox(settings.display_grid_mut(), "Display Grid");
             ui.checkbox(settings.snap_to_grid_mut(), "Snap to Grid");
-            ui.checkbox(settings.display_squares_for_images_mut(), "Display Squares for Images");
+            ui.checkbox(
+                settings.display_squares_for_images_mut(),
+                "Display Squares for Images",
+            );
         }
 
         if prune {

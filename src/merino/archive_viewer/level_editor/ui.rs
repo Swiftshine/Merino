@@ -19,31 +19,31 @@ impl LevelEditor {
 
     pub fn show_top_menu(&mut self, ui: &mut egui::Ui) {
         egui::TopBottomPanel::top(ui.next_auto_id())
-        .resizable(false)
-        .show_inside(ui, |ui|{
-            egui::MenuBar::new().ui(ui, |ui|{
-                // tab submenu
-                ui.menu_button("Open Tab", |ui|{
-                    for tab in LevelEditorTab::iter() {
-                        if ui.button(tab.get_name()).clicked() {
-                            self.open_tab(tab);
+            .resizable(false)
+            .show_inside(ui, |ui| {
+                egui::MenuBar::new().ui(ui, |ui| {
+                    // tab submenu
+                    ui.menu_button("Open Tab", |ui| {
+                        for tab in LevelEditorTab::iter() {
+                            if ui.button(tab.get_name()).clicked() {
+                                self.open_tab(tab);
+                            }
+                        }
+                    });
+
+                    // todo! make this also happen on startup
+                    if ui.button("Load Parameters").clicked() {
+                        if let Ok(string) = Self::load_params() {
+                            let _ = self.parse_params(string);
+                        }
+                    }
+
+                    if ui.button("Load Images").clicked() {
+                        if let Ok(string) = Self::load_image_data() {
+                            let _ = self.parse_image_data(string);
                         }
                     }
                 });
-
-                // todo! make this also happen on startup
-                if ui.button("Load Parameters").clicked() {
-                    if let Ok(string) = Self::load_params() {
-                        let _ = self.parse_params(string);
-                    }
-                }
-
-                if ui.button("Load Images").clicked() {
-                    if let Ok(string) = Self::load_image_data() {
-                        let _ = self.parse_image_data(string);
-                    }
-                }
             });
-        });
     }
 }
