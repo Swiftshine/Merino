@@ -5,6 +5,7 @@ use crate::merino::archive_viewer::level_editor::contexts::canvas_context::Canva
 use crate::merino::archive_viewer::level_editor::contexts::message_context::MessageContext;
 use crate::merino::archive_viewer::level_editor::editable::EditInfo;
 use crate::merino::archive_viewer::level_editor::editable::Editable;
+use crate::merino::archive_viewer::level_editor::params::ParameterObject;
 use crate::merino::game::mapbin::MapDataNode;
 use crate::merino::game::mapbin::NodeChildType;
 use crate::merino::game::mapbin::NodePath;
@@ -86,7 +87,7 @@ impl LevelEditor {
         egui::ScrollArea::vertical()
             .max_height(500.0)
             .show(ui, |ui| {
-                node.edit_properties(ui);
+                node.edit_properties(ui, self.parameter_context.parameter_objects());
             });
 
         ui.add_space(4.0);
@@ -95,7 +96,7 @@ impl LevelEditor {
 }
 
 impl MapDataNode {
-    pub fn edit_properties(&mut self, ui: &mut egui::Ui) {
+    pub fn edit_properties(&mut self, ui: &mut egui::Ui, param_list: &[ParameterObject]) {
         match &mut self.node_data {
             NodeData::MapSet {
                 unk1,
@@ -154,9 +155,11 @@ impl MapDataNode {
                     unk11 => "Unk 11",
                     unk12 => "Unk 12",
                     unk13 => "Unk 13",
-                    params => "Params",
+                    // params => "Params",
                     unk14 => "Unk 14"
                 );
+
+                params.edit_properties(ui, EditInfo::search_param(param_list, self.node_type, name.as_str()));
             }
 
             NodeData::MapItemSet {

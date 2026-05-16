@@ -1,6 +1,10 @@
+use std::{fs, str::FromStr};
+
 use anyhow::{Result, anyhow};
 
-use crate::merino::{archive_viewer::level_editor::LevelEditor, game::mapbin::MapNodeType};
+use crate::merino::{archive_viewer::level_editor::LevelEditor, game::mapbin::MapNodeType, util::res_folder::get_merino_folder};
+
+const OBJECTDATA_FILE: &str = "objectdata.json";
 
 #[derive(Default, Debug, Clone)]
 pub enum ParameterDataType {
@@ -59,102 +63,109 @@ pub struct ParameterObject {
 }
 
 impl LevelEditor {
-    // pub fn parse_params(&mut self, json: String) -> Result<()> {
-    //     let json: serde_json::Value = serde_json::from_str(&json).expect("failed to parse json");
+    pub fn load_params() -> Result<String> {
+        let path = get_merino_folder()?.join(OBJECTDATA_FILE);
+        let string = fs::read_to_string(path)?;
+        Ok(string)
+    }
 
-    //     let mut parameter_objects = Vec::new();
+    pub fn parse_params(&mut self, json: String) -> Result<()> {
+        let json: serde_json::Value = serde_json::from_str(&json).expect("failed to parse json");
 
-    //     let set_names = [
-    //         "MapObjSet",
-    //         "MapItemSet",
-    //         "MapEnemySet",
-    //         "MapLocator",
-    //         "MapPath",
-    //         "MapRect",
-    //         "MapCircle",
-    //         "MapTerrain",
-    //     ];
+        let mut parameter_objects = Vec::new();
 
-    //     for set_name in set_names {
-    //         let set_object = match json.get(set_name).and_then(|v| v.as_object()) {
-    //             Some(obj) => obj,
-    //             None => continue,
-    //         };
+        let set_names = [
+            "MapObjSet",
+            "MapItemSet",
+            "MapEnemySet",
+            "MapLocator",
+            "MapPath",
+            "MapRect",
+            "MapCircle",
+            "MapTerrain",
+        ];
 
-    //         let set_type = MapNodeType::from_str(set_name)?;
+        for set_name in set_names {
+            let set_object = match json.get(set_name).and_then(|v| v.as_object()) {
+                Some(obj) => obj,
+                None => continue,
+            };
 
-    //         let objects = set_object.iter().map(|(obj_name, props)| {
-    //             let mut param_object = ParameterObject::default();
-    //             param_object.set_type = set_type;
-    //             param_object.name = obj_name.to_owned();
-    //             param_object.description = props["description"].as_str().map(String::from);
-    //             param_object.display_name = props["display_name"].as_str().map(String::from);
-    //             param_object.note = props["note"].as_str().map(String::from);
+            let set_type = MapNodeType::from_str(set_name)?;
 
-    //             if let Some(params) = props.get("parameters").and_then(|v| v.as_object()) {
-    //                 param_object.parameters = params
-    //                     .iter()
-    //                     .filter_map(|(p_name, p_val)| {
-    //                         let data_type_str = p_val.get("data_type")?.as_str()?;
-    //                         let data_type = ParameterDataType::from_string(data_type_str).ok()?;
+            let objects = set_object.iter().map(|(obj_name, props)| {
+                let mut param_object = ParameterObject::default();
+                param_object.set_type = set_type;
+                param_object.name = obj_name.to_owned();
+                param_object.description = props["description"].as_str().map(String::from);
+                param_object.display_name = props["display_name"].as_str().map(String::from);
+                param_object.note = props["note"].as_str().map(String::from);
 
-    //                         let slot = p_val.get("slot")?.as_u64()? as usize;
+                if let Some(params) = props.get("parameters").and_then(|v| v.as_object()) {
+                    param_object.parameters = params
+                        .iter()
+                        .filter_map(|(p_name, p_val)| {
+                            let data_type_str = p_val.get("data_type")?.as_str()?;
+                            let data_type = ParameterDataType::from_string(data_type_str).ok()?;
 
-    //                         let description = p_val
-    //                             .get("description")
-    //                             .and_then(|v| v.as_str())
-    //                             .map(String::from);
+                            let slot = p_val.get("slot")?.as_u64()? as usize;
 
-    //                         let notes = if let Some(arr) =
-    //                             p_val.get("notes").and_then(|v| v.as_array())
-    //                         {
-    //                             Some(
-    //                                 arr.iter()
-    //                                     .filter_map(|v| v.as_str().map(String::from))
-    //                                     .collect::<Vec<String>>(),
-    //                             )
-    //                         } else if let Some(note) = p_val.get("note").and_then(|v| v.as_str()) {
-    //                             Some(vec![note.to_string()])
-    //                         } else {
-    //                             None
-    //                         };
+                            let description = p_val
+                                .get("description")
+                                .and_then(|v| v.as_str())
+                                .map(String::from);
 
-    //                         // dropdown logic
-    //                         let dropdown_options = match &data_type {
-    //                             ParameterDataType::DropdownInt => p_val
-    //                                 .get("values")
-    //                                 .and_then(|v| v.as_object())
-    //                                 .and_then(|obj| {
-    //                                     obj.iter()
-    //                                         .map(|(k, v)| {
-    //                                             Some(DropdownOption::new(
-    //                                                 k.clone(),
-    //                                                 v.as_i64()? as i32,
-    //                                             ))
-    //                                         })
-    //                                         .collect::<Option<Vec<_>>>()
-    //                                 }),
-    //                             _ => None,
-    //                         };
+                            let notes = if let Some(arr) =
+                                p_val.get("notes").and_then(|v| v.as_array())
+                            {
+                                Some(
+                                    arr.iter()
+                                        .filter_map(|v| v.as_str().map(String::from))
+                                        .collect::<Vec<String>>(),
+                                )
+                            } else if let Some(note) = p_val.get("note").and_then(|v| v.as_str()) {
+                                Some(vec![note.to_string()])
+                            } else {
+                                None
+                            };
 
-    //                         Some(Parameter {
-    //                             name: p_name.to_owned(),
-    //                             data_type,
-    //                             slot,
-    //                             description,
-    //                             notes,
-    //                             dropdown_options,
-    //                         })
-    //                     })
-    //                     .collect();
-    //             }
-    //             param_object
-    //         });
+                            // dropdown logic
+                            let dropdown_options = match &data_type {
+                                ParameterDataType::DropdownInt => p_val
+                                    .get("values")
+                                    .and_then(|v| v.as_object())
+                                    .and_then(|obj| {
+                                        obj.iter()
+                                            .map(|(k, v)| {
+                                                Some(DropdownOption::new(
+                                                    k.clone(),
+                                                    v.as_i64()? as i32,
+                                                ))
+                                            })
+                                            .collect::<Option<Vec<_>>>()
+                                    }),
+                                _ => None,
+                            };
 
-    //         parameter_objects.extend(objects);
-    //     }
+                            Some(Parameter {
+                                name: p_name.to_owned(),
+                                data_type,
+                                slot,
+                                description,
+                                notes,
+                                dropdown_options,
+                            })
+                        })
+                        .collect();
+                }
+                param_object
+            });
 
-    //     self.object_property_editor_context.parameter_objects = parameter_objects;
-    //     Ok(())
-    // }
+            parameter_objects.extend(objects);
+        }
+
+        self.parameter_context.set_parameter_objects(parameter_objects);
+
+        Ok(())
+    }
 }

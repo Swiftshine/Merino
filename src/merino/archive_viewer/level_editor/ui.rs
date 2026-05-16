@@ -30,6 +30,13 @@ impl LevelEditor {
                         }
                     }
                 });
+
+                // todo! make this also happen on startup
+                if ui.button("Load Parameters").clicked() {
+                    if let Ok(string) = Self::load_params() {
+                        let _ = self.parse_params(string);
+                    }
+                }
             });
         });
     }

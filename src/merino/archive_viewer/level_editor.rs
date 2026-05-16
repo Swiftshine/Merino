@@ -14,7 +14,7 @@ mod canvas_settings;
 
 use crate::merino::{
     archive_viewer::level_editor::{
-        contexts::{canvas_context::CanvasContext, message_context::MessageContext},
+        contexts::{canvas_context::CanvasContext, message_context::MessageContext, parameter_context::ParameterContext},
         docking::LevelEditorTab,
     },
     game::mapbin::Mapdata,
@@ -28,6 +28,7 @@ pub struct LevelEditor {
     // contexts
     canvas_context: CanvasContext,
     message_context: MessageContext,
+    parameter_context: ParameterContext,
 
     // docking
     dock_state: Option<egui_dock::DockState<LevelEditorTab>>,
@@ -43,6 +44,7 @@ impl LevelEditor {
             mapdata: None,
             canvas_context: CanvasContext::new(),
             message_context: MessageContext::new(),
+            parameter_context: ParameterContext::new(),
             dock_state,
             tab_to_open: None,
         }
