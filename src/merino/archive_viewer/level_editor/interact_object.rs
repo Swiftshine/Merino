@@ -742,7 +742,7 @@ fn drag_position<T: Vec2Like>(
         .convert_from_camera(local_pos)
         .to_pos2();
 
-    let snapped = if canvas_context.snap_to_grid() {
+    let snapped = if canvas_context.settings().snap_to_grid() {
         egui::pos2(snap(world.x, grid_size), snap(world.y, grid_size))
     } else {
         world

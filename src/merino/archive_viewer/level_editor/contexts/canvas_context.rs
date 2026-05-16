@@ -7,7 +7,7 @@ use crate::merino::{
 };
 
 #[derive(Default)]
-struct CanvasSettings {
+pub struct CanvasSettings {
     node_edit_settings: EnumMap<MapNodeType, NodeEditSettings>,
     display_grid: bool,
     snap_to_grid: bool,
@@ -21,6 +21,26 @@ impl CanvasSettings {
             display_grid: true,
             ..Default::default()
         }
+    }
+
+    pub fn node_edit_settings_mut(&mut self) -> &mut EnumMap<MapNodeType, NodeEditSettings> {
+        &mut self.node_edit_settings
+    }
+    
+    pub fn display_grid(&self) -> bool {
+        self.display_grid
+    }
+
+    pub fn display_grid_mut(&mut self) -> &mut bool {
+        &mut self.display_grid
+    }
+    
+    pub fn snap_to_grid(&self) -> bool {
+        self.snap_to_grid
+    }
+
+    pub fn snap_to_grid_mut(&mut self) -> &mut bool {
+        &mut self.snap_to_grid
     }
 }
 pub enum CanvasTarget {
@@ -162,8 +182,31 @@ impl CanvasContext {
     ) {
         self.camera.draw_grid(painter, rect, size, color);
     }
+    
+    pub fn prune_invalid_selections(&mut self) {
+        self.selected_node_paths.retain(|path| {
+            let root_settings = &self.settings.node_edit_settings[MapNodeType::MapSet];
 
-    pub fn snap_to_grid(&self) -> bool {
-        self.settings.snap_to_grid
+            if !root_settings.visible || !root_settings.editable {
+                return false;
+            }
+
+            // every node in the path must be visible + editable
+
+            path.iter().all(|step| {
+                let node_type = MapNodeType::from(step.node_type());
+                let settings = &self.settings.node_edit_settings[node_type];
+
+                settings.visible && settings.editable
+            })
+        });
+    }
+
+    pub fn settings_mut(&mut self) -> &mut CanvasSettings {
+        &mut self.settings
+    }
+    
+    pub fn settings(&self) -> &CanvasSettings {
+        &self.settings
     }
 }

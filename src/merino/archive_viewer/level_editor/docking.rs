@@ -4,17 +4,19 @@ use crate::merino::{archive_viewer::level_editor::LevelEditor, util::emoji::Emoj
 
 #[derive(PartialEq, Eq, Clone, Debug, EnumIter)]
 pub enum LevelEditorTab {
-    Canvas,
-    ObjectProperties,
     AddObject,
+    Canvas,
+    CanvasSettings,
+    ObjectProperties,
 }
 
 impl LevelEditorTab {
     pub fn get_name(&self) -> String {
         match self {
+            Self::AddObject => EmojiMessage::add_msg("Add Object"),
             Self::Canvas => EmojiMessage::palette_msg("Canvas"),
+            Self::CanvasSettings => EmojiMessage::burger_msg("Canvas Settings"),
             Self::ObjectProperties => EmojiMessage::memo_msg("Object Properties"),
-            Self::AddObject => EmojiMessage::add_msg("Add Object")
         }
     }
 }
@@ -38,16 +40,20 @@ impl<'a> egui_dock::TabViewer for LevelEditorTabViewer<'a> {
 
     fn ui(&mut self, ui: &mut egui::Ui, tab: &mut Self::Tab) {
         match tab {
+            LevelEditorTab::AddObject => {
+                self.level_editor.show_add_object_ui(ui);
+            }
+
             LevelEditorTab::Canvas => {
                 self.level_editor.show_canvas(ui);
             }
 
-            LevelEditorTab::ObjectProperties => {
-                self.level_editor.show_object_properties(ui);
+            LevelEditorTab::CanvasSettings => {
+                self.level_editor.show_canvas_settings_ui(ui);
             }
 
-            LevelEditorTab::AddObject => {
-                self.level_editor.show_add_object_ui(ui);
+            LevelEditorTab::ObjectProperties => {
+                self.level_editor.show_object_properties(ui);
             }
         }
     }

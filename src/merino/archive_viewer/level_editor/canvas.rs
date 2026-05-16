@@ -17,8 +17,10 @@ impl LevelEditor {
 
         // draw grid
         // todo! make this toggleable
-        self.canvas_context
+        if self.canvas_context.settings().display_grid() {
+            self.canvas_context
             .draw_grid(&painter, rect, 1.0, egui::Color32::from_gray(30));
+        }
 
         // interact with objects
         self.interact_with_all_nodes(ui, rect, &response);
