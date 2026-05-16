@@ -19,7 +19,6 @@ impl Default for CanvasCamera {
 
 impl CanvasCamera {
     pub fn update(&mut self, ctx: &egui::Context, canvas_response: &egui::Response) {
-        let zoom_sensitivity = 0.1;
         let zoom_min = 0.5;
         let zoom_max = 150.0;
 
@@ -32,20 +31,20 @@ impl CanvasCamera {
         };
 
         // zoom handling
+        let zoom_delta = ctx.input(|i| i.zoom_delta());
 
-        if is_mouse_over_canvas {
-            let scroll_delta = ctx.input(|i| i.smooth_scroll_delta.y);
-            if scroll_delta != 0.0 {
-                let mouse_pos =
-                    ctx.input(|i| i.pointer.hover_pos().unwrap_or(egui::Pos2::ZERO).to_vec2());
-                let world_pos_before = self.convert_from_camera(mouse_pos);
+        if zoom_delta != 1.0 && is_mouse_over_canvas {
+            let mouse_pos =
+                ctx.input(|i| i.pointer.hover_pos().unwrap_or(egui::Pos2::ZERO).to_vec2());
 
-                let zoom_change = zoom_sensitivity * scroll_delta.signum();
-                self.zoom = (self.zoom + zoom_change).clamp(zoom_min, zoom_max);
+            let world_before = self.convert_from_camera(mouse_pos);
 
-                let world_pos_after = self.convert_from_camera(mouse_pos);
-                self.position += world_pos_before - world_pos_after;
-            }
+            self.zoom = (self.zoom * zoom_delta).clamp(zoom_min, zoom_max);
+
+            let world_after = self.convert_from_camera(mouse_pos);
+
+            // keep mouse anchored
+            self.position += world_before - world_after;
         }
 
         if self.center_attempted {
