@@ -206,27 +206,18 @@ impl Mapdata {
         assert!(!path.is_root());
 
         let parent_path = path.parent();
-        let step = parent_path.get_step()?;
+        let current_step = path.get_step()?;
 
-        // get the parent of the node we want to remove
-        let parent = self.get_node_at_path(&parent_path)?;
-
-        let vec = match step.node_type {
-            NodeChildType::MapPolySet => &mut parent.children_mappolyset,
-            NodeChildType::MapObjSet => &mut parent.children_mapobjset,
-            NodeChildType::MapItemSet => &mut parent.children_mapitemset,
-            NodeChildType::MapEnemySet => &mut parent.children_mapenemyset,
-            NodeChildType::MapLocator => &mut parent.children_maplocator,
-            NodeChildType::MapPath => &mut parent.children_mappath,
-            NodeChildType::MapRect => &mut parent.children_maprect,
-            NodeChildType::MapCircle => &mut parent.children_mapcircle,
-            NodeChildType::MapTerrain => &mut parent.children_mapterrain,
+        let parent_node = if parent_path.is_root() {
+            &mut self.root
+        } else {
+            self.get_node_at_path(&parent_path)?
         };
 
-        if let Some(v) = vec
-            && step.index < v.len()
-        {
-            Some(v.remove(step.index))
+        let vec = parent_node.children_vec_mut(current_step.node_type)?;
+
+        if current_step.index < vec.len() {
+            Some(vec.remove(current_step.index))
         } else {
             None
         }
