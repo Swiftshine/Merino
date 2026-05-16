@@ -1,4 +1,6 @@
-use crate::merino::archive_viewer::level_editor::LevelEditor;
+use strum::IntoEnumIterator;
+
+use crate::merino::archive_viewer::level_editor::{LevelEditor, docking::LevelEditorTab};
 
 impl LevelEditor {
     pub fn show_ui(&mut self, ui: &mut egui::Ui) {
@@ -10,7 +12,25 @@ impl LevelEditor {
             return;
         }
 
+        self.show_top_menu(ui);
         self.process_messages();
         self.update_dock(ui);
+    }
+
+    pub fn show_top_menu(&mut self, ui: &mut egui::Ui) {
+        egui::TopBottomPanel::top(ui.next_auto_id())
+        .resizable(false)
+        .show_inside(ui, |ui|{
+            egui::MenuBar::new().ui(ui, |ui|{
+                // tab submenu
+                ui.menu_button("Open Tab", |ui|{
+                    for tab in LevelEditorTab::iter() {
+                        if ui.button(tab.get_name()).clicked() {
+                            self.open_tab(tab);
+                        }
+                    }
+                });
+            });
+        });
     }
 }

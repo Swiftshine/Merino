@@ -1,16 +1,20 @@
+use strum::EnumIter;
+
 use crate::merino::{archive_viewer::level_editor::LevelEditor, util::emoji::EmojiMessage};
 
-#[derive(PartialEq, Eq, Clone, Debug)]
+#[derive(PartialEq, Eq, Clone, Debug, EnumIter)]
 pub enum LevelEditorTab {
     Canvas,
     ObjectProperties,
+    AddObject,
 }
 
 impl LevelEditorTab {
-    fn get_name(&self) -> String {
+    pub fn get_name(&self) -> String {
         match self {
             Self::Canvas => EmojiMessage::palette_msg("Canvas"),
             Self::ObjectProperties => EmojiMessage::memo_msg("Object Properties"),
+            Self::AddObject => EmojiMessage::add_msg("Add Object")
         }
     }
 }
@@ -41,6 +45,10 @@ impl<'a> egui_dock::TabViewer for LevelEditorTabViewer<'a> {
             LevelEditorTab::ObjectProperties => {
                 self.level_editor.show_object_properties(ui);
             }
+
+            LevelEditorTab::AddObject => {
+                self.level_editor.show_add_object_ui(ui);
+            }
         }
     }
 }
@@ -64,11 +72,10 @@ impl LevelEditor {
 
         // check if it's not already open first
         if !found {
-            self.dock_state
-                .as_mut()
-                .unwrap()
-                .main_surface_mut()
-                .push_to_first_leaf(tab);
+            let dock_state = self.dock_state.as_mut().unwrap();
+
+            // create a new floating window
+            let _surface = dock_state.add_window(vec![tab]);
         }
     }
 
