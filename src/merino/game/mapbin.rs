@@ -140,7 +140,7 @@ impl NodePath {
     }
 
     pub fn get_step(&self) -> Option<NodeStep> {
-        self.0.last().map(|last| *last)
+        self.0.last().copied()
     }
 
     pub fn with_step(&self, step: NodeStep) -> Self {
