@@ -30,6 +30,7 @@ use anyhow::Result;
 pub struct LevelEditor {
     // data
     mapdata: Option<Mapdata>,
+    writable_data: Option<Vec<u8>>,
 
     // contexts
     canvas_context: CanvasContext,
@@ -53,6 +54,7 @@ impl LevelEditor {
 
         Self {
             mapdata: None,
+            writable_data: None,
             canvas_context: CanvasContext::new(),
             message_context: MessageContext::new(),
             parameter_context: ParameterContext::new(),
@@ -75,9 +77,11 @@ impl LevelEditor {
         Ok(())
     }
 
-    // pub fn save_mapdata() -> Result<Vec<u8>> {
-    //     todo!()
-    // }
+    pub fn write_mapdata(&mut self) {
+        if let Ok(data) = self.mapdata.as_ref().unwrap().write() {
+            self.writable_data = Some(data);
+        }
+    }
 
     pub fn has_mapdata(&self) -> bool {
         self.mapdata.is_some()
@@ -92,5 +96,13 @@ impl LevelEditor {
 
     pub fn get_level_editor_folder() -> Result<PathBuf> {
         get_subfolder("level_editor")
+    }
+
+    pub fn has_writable_data(&self) -> bool {
+        self.writable_data.is_some()
+    }
+
+    pub fn take_writable_data(&mut self) -> Option<Vec<u8>> {
+        self.writable_data.take()
     }
 }

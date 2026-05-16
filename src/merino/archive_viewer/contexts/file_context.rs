@@ -47,15 +47,31 @@ impl FileContext {
 
         self.archive_contents = gfarch::extract(&data)?.into_iter().collect();
 
-        // if we have archive contents then clear everything
-        self.clear_all();
+        self.selected_file = None;
 
         Ok(true)
     }
 
-    /// Clears selections, etc.
-    fn clear_all(&mut self) {
-        self.selected_file = None;
-        // archive contents were rewritten anyway
+    pub fn save_archive(&self) -> Result<()> {
+        let Some(path) = FileDialog::new()
+        .add_filter("Good-Feel ARchive", &["gfa"])
+        .save_file() else {
+            return Ok(());
+        };
+
+        let mut archive: Vec<(String, Vec<u8>)> = self.archive_contents.clone().into_iter().collect();
+        archive.sort_by_key(|(name, _)| name.to_lowercase());
+        
+        let file = gfarch::pack_from_files(&archive, gfarch::Version::V3_1, gfarch::CompressionType::BPE, gfarch::GFCPOffset::Default);
+
+        fs::write(path, file)?;
+
+        Ok(())
+    }
+
+    pub fn replace_current_file_contents(&mut self, new_contents: Vec<u8>) {
+        let selected = self.selected_file().unwrap().clone();
+    
+        *self.archive_contents.get_mut(&selected).unwrap() = new_contents;
     }
 }

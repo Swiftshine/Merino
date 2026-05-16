@@ -31,6 +31,10 @@ impl LevelEditor {
                         }
                     });
 
+                    if ui.add_enabled(self.has_mapdata(), egui::Button::new("Save to Archive")).clicked() {
+                        self.write_mapdata();
+                    }
+
                     // todo! make this also happen on startup
                     if ui.button("Load Parameters").clicked() {
                         if let Ok(string) = Self::load_params() {

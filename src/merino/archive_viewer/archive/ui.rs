@@ -17,6 +17,11 @@ impl ArchiveViewer {
                             let _ = self.file_context.open_archive();
                             ui.close();
                         }
+
+                        if ui.add_enabled(self.file_context.has_files(), egui::Button::new("Save Archive")).clicked() {
+                            let _ = self.file_context.save_archive();
+                            ui.close();
+                        }
                     });
                 });
             });
@@ -36,7 +41,12 @@ impl ArchiveViewer {
         let mut selected_file = None;
         let mut tab_to_open = None;
 
-        for (name, bytes) in self.file_context.archive_contents() {
+        // sort alphabetically
+        // BTree doesn't do that the way a human would so we'll do it ourselves
+        let mut files: Vec<_> = self.file_context.archive_contents().iter().collect();
+        files.sort_by_key(|(name, _)| name.to_lowercase());
+
+        for (name, bytes) in files {
             // make sure the file is something we're looking for
             let can_select = valid_extensions.iter().any(|ext| name.ends_with(ext));
 
