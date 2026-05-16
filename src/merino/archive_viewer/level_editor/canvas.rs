@@ -16,7 +16,6 @@ impl LevelEditor {
         painter.rect_filled(rect, 0.0, egui::Color32::BLACK);
 
         // draw grid
-        // todo! make this toggleable
         if self.canvas_context.settings().display_grid() {
             self.canvas_context
             .draw_grid(&painter, rect, 1.0, egui::Color32::from_gray(30));
