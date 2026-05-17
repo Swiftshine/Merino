@@ -31,5 +31,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Merino-${{ matrix.os }}
-          path: target/release/merino*
+          path: |
+            target/release/merino
+            target/release/merino.exe 
           if-no-files-found: error
