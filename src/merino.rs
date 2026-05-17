@@ -10,24 +10,33 @@ use rand::RngExt;
 
 use archive_viewer::viewer::ArchiveViewer;
 
-static ICONS: [&[u8]; 13] = [
-    include_bytes!("../assets/icon_0.png"),
-    include_bytes!("../assets/icon_1.png"),
-    include_bytes!("../assets/icon_2.png"),
-    include_bytes!("../assets/icon_3.png"),
-    include_bytes!("../assets/icon_4.png"),
-    include_bytes!("../assets/icon_5.png"),
-    include_bytes!("../assets/icon_6.png"),
-    include_bytes!("../assets/icon_7.png"),
-    include_bytes!("../assets/icon_8.png"),
-    include_bytes!("../assets/icon_9.png"),
-    include_bytes!("../assets/icon_10.png"),
-    include_bytes!("../assets/icon_11.png"),
-    include_bytes!("../assets/icon_12.png"),
+static BONUS_ICONS: [&[u8]; 13] = [
+    include_bytes!("../assets/bonus_icon_0.png"),
+    include_bytes!("../assets/bonus_icon_1.png"),
+    include_bytes!("../assets/bonus_icon_2.png"),
+    include_bytes!("../assets/bonus_icon_3.png"),
+    include_bytes!("../assets/bonus_icon_4.png"),
+    include_bytes!("../assets/bonus_icon_5.png"),
+    include_bytes!("../assets/bonus_icon_6.png"),
+    include_bytes!("../assets/bonus_icon_7.png"),
+    include_bytes!("../assets/bonus_icon_8.png"),
+    include_bytes!("../assets/bonus_icon_9.png"),
+    include_bytes!("../assets/bonus_icon_10.png"),
+    include_bytes!("../assets/bonus_icon_11.png"),
+    include_bytes!("../assets/bonus_icon_12.png"),
 ];
 
-fn random_icon_index() -> usize {
-    rand::rng().random_range(0..ICONS.len())
+static ICON: &[u8] = include_bytes!("../assets/icon.png");
+
+fn random_icon() -> &'static [u8] {
+    // 1 in 10 chance
+    let result = rand::rng().random_range(1..=10);
+
+    if result == 10 {
+        BONUS_ICONS[rand::rng().random_range(0..BONUS_ICONS.len())]
+    } else {
+        ICON
+    }
 }
 
 /// Contains app data.
@@ -48,16 +57,17 @@ impl MerinoApp {
         // load icon
         options.viewport.icon = Some(Arc::new(IconData {
             rgba: {
-                let icon = ICONS[random_icon_index()];
-                let image = image::load_from_memory(icon).expect("Failed to open icon").into_rgba8();
+                let icon = random_icon();
+                let image = image::load_from_memory(icon)
+                    .expect("Failed to open icon")
+                    .into_rgba8();
 
                 image.into_raw()
             },
 
             width: 64,
-            height: 64
+            height: 64,
         }));
-
 
         eframe::run_native(
             "Merino",
