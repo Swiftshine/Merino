@@ -187,7 +187,7 @@ pub struct Mapdata {
 }
 
 impl Mapdata {
-    pub fn get_node_at_path(&mut self, path: &NodePath) -> Option<&mut MapDataNode> {
+    pub fn get_node_at_path_mut(&mut self, path: &NodePath) -> Option<&mut MapDataNode> {
         let mut current = &mut self.root;
 
         for step in path.iter() {
@@ -209,6 +209,28 @@ impl Mapdata {
         Some(current)
     }
 
+    pub fn get_node_at_path(&self, path: &NodePath) -> Option<&MapDataNode> {
+        let mut current = &self.root;
+
+        for step in path.iter() {
+            let vec = match step.node_type {
+                NodeChildType::MapPolySet => &current.children_mappolyset,
+                NodeChildType::MapObjSet => &current.children_mapobjset,
+                NodeChildType::MapItemSet => &current.children_mapitemset,
+                NodeChildType::MapEnemySet => &current.children_mapenemyset,
+                NodeChildType::MapLocator => &current.children_maplocator,
+                NodeChildType::MapPath => &current.children_mappath,
+                NodeChildType::MapRect => &current.children_maprect,
+                NodeChildType::MapCircle => &current.children_mapcircle,
+                NodeChildType::MapTerrain => &current.children_mapterrain,
+            };
+
+            current = vec.as_ref()?.get(step.index)?;
+        }
+
+        Some(current)
+    }
+
     /// The path given should not point to root.
     pub fn remove_node_at_path(&mut self, path: NodePath) -> Option<MapDataNode> {
         assert!(!path.is_root());
@@ -219,7 +241,7 @@ impl Mapdata {
         let parent_node = if parent_path.is_root() {
             &mut self.root
         } else {
-            self.get_node_at_path(&parent_path)?
+            self.get_node_at_path_mut(&parent_path)?
         };
 
         let vec = parent_node.children_vec_mut(current_step.node_type)?;
@@ -249,7 +271,7 @@ impl Mapdata {
         let child_node = self.remove_node_at_path(child).unwrap();
 
         // get parent node
-        let parent_node = self.get_node_at_path(&parent).unwrap();
+        let parent_node = self.get_node_at_path_mut(&parent).unwrap();
 
         // push node
         parent_node
@@ -456,4 +478,47 @@ pub enum NodeData {
         params: Params<3>,
         unk15: Option<[[String32; 2]; 3]>, // version >= 4.6
     },
+}
+
+impl NodeData {
+    pub fn position(&self) -> Vec2f {
+        match self {
+            NodeData::MapSet {
+                bounds_start,
+                bounds_end,
+                ..
+            }
+            | NodeData::MapRect {
+                bounds_start,
+                bounds_end,
+                ..
+            } => {
+                // center of rect
+                Vec2f {
+                    x: (bounds_start.x + bounds_end.x) * 0.5,
+                    y: (bounds_start.y + bounds_end.y) * 0.5,
+                }
+            }
+
+            NodeData::MapPolySet { line, .. } => {
+                // midpoint of line
+                Vec2f {
+                    x: (line.start.x + line.end.x) * 0.5,
+                    y: (line.start.y + line.end.y) * 0.5,
+                }
+            }
+
+            NodeData::MapObjSet { position, .. }
+            | NodeData::MapItemSet { position, .. }
+            | NodeData::MapEnemySet { position, .. }
+            | NodeData::MapTerrain { position, .. }
+            | NodeData::MapLocator { position, .. } => (*position).into(),
+
+            NodeData::MapCircle { position, .. } => *position,
+
+            NodeData::MapPath { points, .. } => points.first().copied().unwrap(),
+
+            _ => unreachable!("Node data cannot be None")
+        }
+    }
 }

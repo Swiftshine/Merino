@@ -10,6 +10,9 @@ impl LevelEditor {
 
         // update camera
         self.canvas_context.camera_mut().update(ui.ctx(), &response);
+        
+        // update canvas rect
+        self.canvas_context.set_canvas_rect(rect);
 
         // draw black
         let painter = ui.painter_at(rect);

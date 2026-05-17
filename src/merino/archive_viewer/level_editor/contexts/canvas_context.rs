@@ -80,6 +80,7 @@ impl CanvasSettings {
         fs::write(path, json)?;
         Ok(())
     }
+
 }
 pub enum CanvasTarget {
     /// Create a new child of this type and attach it to this parent node.
@@ -115,6 +116,7 @@ pub struct CanvasContext {
     settings: CanvasSettings,
     target: Option<CanvasTarget>,
     image_bank: ImageBank,
+    canvas_rect: egui::Rect,
 }
 
 impl CanvasContext {
@@ -125,6 +127,7 @@ impl CanvasContext {
             settings: CanvasSettings::new(),
             target: None,
             image_bank: ImageBank::default(),
+            canvas_rect: egui::Rect::NOTHING
         }
     }
 
@@ -154,6 +157,18 @@ impl CanvasContext {
 
     pub fn camera_zoom(&self) -> f32 {
         self.camera.zoom
+    }
+
+    pub fn camera_focus(&mut self, world_pos: egui::Vec2) {
+        self.camera.center(world_pos, self.canvas_rect);
+    }
+        
+    // pub fn canvas_rect(&self) -> egui::Rect {
+    //     self.canvas_rect
+    // }
+    
+    pub fn set_canvas_rect(&mut self, canvas_rect: egui::Rect) {
+        self.canvas_rect = canvas_rect;
     }
 
     pub fn is_node_selected(&self, path: &NodePath) -> bool {

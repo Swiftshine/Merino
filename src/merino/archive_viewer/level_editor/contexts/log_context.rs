@@ -3,6 +3,7 @@ pub enum LogCategory {
     Load,
     Parse,
     Error,
+    Command,
 }
 
 impl LogCategory {
@@ -11,7 +12,8 @@ impl LogCategory {
             Self::Download => "Download",
             Self::Load => "Load",
             Self::Parse => "Parse",
-            Self::Error => "Error"
+            Self::Error => "Error",
+            Self::Command => "Command"
         }
     }
 }

@@ -15,8 +15,8 @@ impl LevelEditor {
         }
 
         self.show_top_menu(ui);
-        self.handle_download_messages();
         self.process_messages();
+        self.handle_download_messages();
         self.update_dock(ui);
     }
 

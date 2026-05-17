@@ -2,16 +2,18 @@ use crate::merino::game::mapbin::NodePath;
 
 /// Tell the editor to do something at the next opportunity.
 pub enum Command {
-    /// Clear selections and select this node
+    /// Clear selections and select this node.
     SelectNode(NodePath),
-    /// Add this node to the list of selections
+    /// Add this node to the list of selections.
     AddToSelection(NodePath),
-    /// Remove this node from the tree
+    /// Remove this node from the tree.
     RemoveNode(NodePath),
-    /// Select the parent of this path
-    SelectParentOf(NodePath),
+    /// Select and focus the camera on the parent of the node at this path.
+    FocusParentOf(NodePath),
     /// Make one node the child of another.
     MakeChildOf(NodePath, NodePath),
+    /// Select and focus the camera on the node at the given path.
+    Focus(NodePath)
 }
 
 impl Command {
@@ -27,8 +29,8 @@ impl Command {
         Self::RemoveNode(path)
     }
 
-    pub fn select_parent_of(path: NodePath) -> Self {
-        Self::SelectParentOf(path)
+    pub fn focus_parent_of(path: NodePath) -> Self {
+        Self::FocusParentOf(path)
     }
 
     pub fn make_child_of(child: NodePath, new_parent: NodePath) -> Self {
@@ -38,12 +40,14 @@ impl Command {
     pub fn make_child_of_root(child: NodePath) -> Self {
         Self::MakeChildOf(child, NodePath::root())
     }
+
+    pub fn focus(path: NodePath) -> Self {
+        Self::Focus(path)
+    }
 }
-// /// Tell the editor to retrieve data immediately.
-// enum Request { }
+
 pub struct MessageContext {
     commands: Vec<Command>,
-    // requests: Vec<Request>,
 }
 
 impl MessageContext {

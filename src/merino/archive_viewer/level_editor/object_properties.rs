@@ -1,15 +1,6 @@
 use strum::IntoEnumIterator;
 
-use crate::merino::archive_viewer::level_editor::contexts::canvas_context::CanvasContext;
-use crate::merino::archive_viewer::level_editor::contexts::canvas_context::CanvasTarget;
-use crate::merino::archive_viewer::level_editor::contexts::message_context::MessageContext;
-use crate::merino::archive_viewer::level_editor::editable::EditInfo;
-use crate::merino::archive_viewer::level_editor::editable::Editable;
-use crate::merino::archive_viewer::level_editor::params::ParameterObject;
-use crate::merino::game::mapbin::MapDataNode;
-use crate::merino::game::mapbin::NodeChildType;
-use crate::merino::game::mapbin::NodePath;
-use crate::merino::game::mapbin::NodeStep;
+use crate::merino::{archive_viewer::level_editor::{contexts::{canvas_context::{CanvasContext, CanvasTarget}, message_context::MessageContext}, editable::{EditInfo, Editable}, params::ParameterObject}, game::mapbin::{MapDataNode, NodeChildType, NodePath, NodeStep}};
 
 use crate::merino::{
     archive_viewer::level_editor::{LevelEditor, contexts::message_context::Command},
@@ -50,7 +41,7 @@ impl LevelEditor {
             return;
         };
 
-        let Some(node) = mapdata.get_node_at_path(&path) else {
+        let Some(node) = mapdata.get_node_at_path_mut(&path) else {
             return;
         };
 
@@ -78,7 +69,7 @@ impl LevelEditor {
                         .on_hover_text("Go to parent")
                         .clicked()
                     {
-                        messages.push_command(Command::select_parent_of(path.clone()));
+                        messages.push_command(Command::focus_parent_of(path.clone()));
                     }
                 });
             }
@@ -409,7 +400,7 @@ impl MapDataNode {
 
                             Some(children) => {
                                 ui.indent(ui.id().with(child_type), |ui| {
-                                    for (index, _) in children.iter_mut().enumerate() {
+                                    for (index, _child) in children.iter_mut().enumerate() {
                                         ui.horizontal(|ui| {
                                             ui.label(format!("Index {}", index));
 
@@ -450,9 +441,8 @@ impl MapDataNode {
                                                         let child_path = node_path.with_step(
                                                             NodeStep::new(child_type, index),
                                                         );
-                                                        messages.push_command(
-                                                            Command::select_node(child_path),
-                                                        );
+         
+                                                        messages.push_command(Command::focus(child_path));
                                                     }
                                                 },
                                             );

@@ -1,5 +1,5 @@
 use crate::merino::archive_viewer::level_editor::{
-    LevelEditor, contexts::message_context::Command, docking::LevelEditorTab,
+    LevelEditor, contexts::{log_context::LogCategory, message_context::Command}, docking::LevelEditorTab,
 };
 
 impl LevelEditor {
@@ -31,16 +31,24 @@ impl LevelEditor {
                     }
                 }
 
-                Command::SelectParentOf(path) => {
+                Command::FocusParentOf(path) => {
                     let parent_path = path.parent();
 
                     if !parent_path.is_root() {
-                        additional_commands.push(Command::SelectNode(parent_path));
+                        additional_commands.push(Command::Focus(parent_path));
+                    } else {
+                        self.log_context.log(LogCategory::Command, "The parent node is the root.".to_string());
                     }
                 }
 
                 Command::MakeChildOf(child, new_parent) => {
                     self.mapdata.as_mut().unwrap().move_node(child, new_parent);
+                }
+
+                Command::Focus(path) => {
+                    let world_pos = self.mapdata.as_ref().unwrap().get_node_at_path(&path).unwrap().node_data.position();
+                    self.canvas_context.camera_focus(world_pos.into());
+                    additional_commands.push(Command::SelectNode(path));
                 }
             }
         }

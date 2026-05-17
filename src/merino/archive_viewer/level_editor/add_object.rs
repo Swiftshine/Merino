@@ -78,7 +78,7 @@ impl LevelEditor {
                         .mapdata
                         .as_mut()
                         .unwrap()
-                        .get_node_at_path(new_parent)
+                        .get_node_at_path_mut(new_parent)
                         .unwrap();
                     parent.add_new_child(version, *child_type, &mut self.canvas_context, local_pos);
                     placed = true;

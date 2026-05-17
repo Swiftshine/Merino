@@ -73,11 +73,11 @@ impl CanvasCamera {
         }
     }
 
-    /// Schedules a centering.
-    // pub fn center(&mut self, pos: egui::Vec2) {
-    //     self.center_attempted = true;
-    //     self.position = pos;
-    // }
+    pub fn center(&mut self, world_pos: egui::Vec2, canvas_rect: egui::Rect) {
+        let screen_center = canvas_rect.center().to_vec2();
+        self.position.x = world_pos.x - (screen_center.x / self.zoom);
+        self.position.y = -world_pos.y - (screen_center.y / self.zoom);
+    }
 
     pub fn reset(&mut self) {
         self.position = Default::default();
