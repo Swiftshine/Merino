@@ -2,9 +2,33 @@ mod archive_viewer;
 mod game;
 mod util;
 
+use std::sync::Arc;
+
 use eframe::NativeOptions;
+use egui::IconData;
+use rand::RngExt;
 
 use archive_viewer::viewer::ArchiveViewer;
+
+static ICONS: [&[u8]; 13] = [
+    include_bytes!("../assets/icon_0.png"),
+    include_bytes!("../assets/icon_1.png"),
+    include_bytes!("../assets/icon_2.png"),
+    include_bytes!("../assets/icon_3.png"),
+    include_bytes!("../assets/icon_4.png"),
+    include_bytes!("../assets/icon_5.png"),
+    include_bytes!("../assets/icon_6.png"),
+    include_bytes!("../assets/icon_7.png"),
+    include_bytes!("../assets/icon_8.png"),
+    include_bytes!("../assets/icon_9.png"),
+    include_bytes!("../assets/icon_10.png"),
+    include_bytes!("../assets/icon_11.png"),
+    include_bytes!("../assets/icon_12.png"),
+];
+
+fn random_icon_index() -> usize {
+    rand::rng().random_range(0..ICONS.len())
+}
 
 /// Contains app data.
 pub struct MerinoApp {
@@ -19,7 +43,21 @@ impl MerinoApp {
     }
 
     pub fn run() -> Result<(), eframe::Error> {
-        let options = NativeOptions::default();
+        let mut options = NativeOptions::default();
+
+        // load icon
+        options.viewport.icon = Some(Arc::new(IconData {
+            rgba: {
+                let icon = ICONS[random_icon_index()];
+                let image = image::load_from_memory(icon).expect("Failed to open icon").into_rgba8();
+
+                image.into_raw()
+            },
+
+            width: 64,
+            height: 64
+        }));
+
 
         eframe::run_native(
             "Merino",
