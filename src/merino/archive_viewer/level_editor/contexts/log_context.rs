@@ -1,11 +1,17 @@
 pub enum LogCategory {
-    Download
+    Download,
+    Load,
+    Parse,
+    Error,
 }
 
 impl LogCategory {
     fn as_str(&self) -> &'static str {
         match self {
-            Self::Download => "Download"
+            Self::Download => "Download",
+            Self::Load => "Load",
+            Self::Parse => "Parse",
+            Self::Error => "Error"
         }
     }
 }
@@ -58,6 +64,14 @@ impl LogContext {
         self.log_messages.push(log);
     }
 
+    pub fn log(&mut self, category: LogCategory, message: String) {
+        self.push_log(LogMessage::new(category, message));
+    }
+
+    pub fn log_error(&mut self, message: String) {
+        self.log(LogCategory::Error, message);
+    }
+
     // /// Remove a completed message.
     // pub fn remove_log(&mut self, index: usize) {
     //     self.log_messages.remove(index);
@@ -98,5 +112,9 @@ impl LogContext {
 
     pub fn log_started(&self) -> bool {
         self.current_written_log.is_some()
+    }
+    
+    pub fn current_written_log(&self) -> Option<&LogMessage> {
+        self.current_written_log.as_ref()
     }
 }

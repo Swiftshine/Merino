@@ -1,9 +1,7 @@
 use strum::IntoEnumIterator;
 
 use crate::merino::archive_viewer::level_editor::{
-    LevelEditor,
-    docking::LevelEditorTab,
-    download::{IMAGEDB_URL, OBJECTDB_URL},
+    LevelEditor, contexts::log_context::LogCategory, docking::LevelEditorTab, download::{IMAGEDB_URL, OBJECTDB_URL}
 };
 
 impl LevelEditor {
@@ -55,16 +53,56 @@ impl LevelEditor {
 
                     ui.menu_button("Load", |ui| {
                         // todo! make this also happen on startup
-                        if ui.button("Object Parameters").clicked()
-                            && let Ok(string) = Self::load_params()
-                        {
-                            let _ = self.parse_params(string);
+                        if ui.button("Object Parameters").clicked() {
+                            match Self::load_params() {
+                                Ok(string) => {
+                                    self.log_context.log(
+                                        LogCategory::Load,
+                                        "Loaded object parameters.".to_string(),
+                                    );
+                        
+                                    match self.parse_params(string) {
+                                        Ok(_) => self.log_context.log(
+                                            LogCategory::Parse,
+                                            "Parsed object parameters.".to_string(),
+                                        ),
+                                        Err(e) => self
+                                            .log_context
+                                            .log_error(format!("Could not parse object parameters. Error: {e}")),
+                                    }
+                                }
+                        
+                                Err(e) => {
+                                    self.log_context
+                                        .log_error(format!("Could not load object parameters. Error: {e}"));
+                                }
+                            }
                         }
-
-                        if ui.button("Object Images").clicked()
-                            && let Ok(string) = Self::load_image_data()
-                        {
-                            let _ = self.parse_image_data(string);
+                        
+                        if ui.button("Object Images").clicked() {
+                            match Self::load_image_data() {
+                                Ok(string) => {
+                                    self.log_context.log(
+                                        LogCategory::Load,
+                                        "Loaded object images.".to_string(),
+                                    );
+                        
+                                    match self.parse_image_data(string) {
+                                        Ok(_) => self.log_context.log(
+                                            LogCategory::Parse,
+                                            "Parsed object images.".to_string(),
+                                        ),
+                                        Err(e) => self
+                                            .log_context
+                                            .log_error(format!("Could not parse object images. Error: {e}")),
+                                    }
+                                }
+                        
+                                Err(e) => {
+                                    self.log_context
+                                        .log_error(format!("Could not load object images. Error: {e}"));
+                                }
+                            }
                         }
                     });
                 });

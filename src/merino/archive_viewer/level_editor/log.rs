@@ -13,5 +13,11 @@ impl LevelEditor {
                 });
             });
         }
+
+        if let Some(log) = self.log_context.current_written_log() {
+            ui.collapsing(log.category(), |ui|{
+                ui.label(log.content());
+            });
+        }
     }
 }
