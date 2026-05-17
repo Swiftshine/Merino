@@ -162,7 +162,7 @@ impl MapDataNode {
         can_edit: bool,
         canvas_response: &egui::Response,
     ) {
-        let (name, position, params, color) = match &mut self.node_data {
+        let (name, position, params, mut color) = match &mut self.node_data {
             NodeData::MapObjSet {
                 name,
                 position,
@@ -229,6 +229,19 @@ impl MapDataNode {
 
         let draw_pos =
             canvas_rect.min + canvas_context.convert_to_camera(Vec2f::from(*position).into());
+
+        let resolved = canvas_context.image_bank_mut().resolve_image_for_node(
+            ui.ctx(),
+            self.node_type,
+            name,
+            &params,
+        );
+
+        // make color transparent if settings specify
+        if resolved.is_some() && !canvas_context.settings().display_squares_for_images() {
+            color = egui::Color32::TRANSPARENT;
+        }
+
         let (_, rects, responses) = handle_drag_and_selections(
             ui,
             &[draw_pos],
@@ -258,24 +271,8 @@ impl MapDataNode {
         }
 
         // draw image if present
-        let mut has_image = false;
-        if let Some((tex, rotation)) = canvas_context.image_bank_mut().resolve_image_for_node(
-            ui.ctx(),
-            self.node_type,
-            name,
-            &params,
-        ) {
+        if let Some((tex, rotation)) = resolved {
             draw_rotated_image(&painter, tex.id(), rect, rotation, egui::Color32::WHITE);
-            has_image = true;
-        }
-
-        if !(has_image && !canvas_context.settings().display_squares_for_images()) {
-            painter.rect_stroke(
-                rect,
-                0.0,
-                egui::Stroke::new(1.0, color),
-                egui::StrokeKind::Middle,
-            );
         }
 
         if selected {
