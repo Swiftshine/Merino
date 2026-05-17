@@ -1,6 +1,10 @@
 use strum::IntoEnumIterator;
 
-use crate::merino::archive_viewer::level_editor::{LevelEditor, docking::LevelEditorTab};
+use crate::merino::archive_viewer::level_editor::{
+    LevelEditor,
+    docking::LevelEditorTab,
+    download::{IMAGEDB_URL, OBJECTDB_URL},
+};
 
 impl LevelEditor {
     pub fn show_ui(&mut self, ui: &mut egui::Ui) {
@@ -13,6 +17,7 @@ impl LevelEditor {
         }
 
         self.show_top_menu(ui);
+        self.handle_download_messages();
         self.process_messages();
         self.update_dock(ui);
     }
@@ -38,18 +43,30 @@ impl LevelEditor {
                         self.write_mapdata();
                     }
 
-                    // todo! make this also happen on startup
-                    if ui.button("Load Parameters").clicked()
-                        && let Ok(string) = Self::load_params()
-                    {
-                        let _ = self.parse_params(string);
-                    }
+                    ui.menu_button("Download", |ui| {
+                        if ui.button("Object Parameters").clicked() {
+                            let _ = self.start_download(OBJECTDB_URL);
+                        }
 
-                    if ui.button("Load Images").clicked()
-                        && let Ok(string) = Self::load_image_data()
-                    {
-                        let _ = self.parse_image_data(string);
-                    }
+                        if ui.button("Object Images").clicked() {
+                            let _ = self.start_download(IMAGEDB_URL);
+                        }
+                    });
+
+                    ui.menu_button("Load", |ui| {
+                        // todo! make this also happen on startup
+                        if ui.button("Object Parameters").clicked()
+                            && let Ok(string) = Self::load_params()
+                        {
+                            let _ = self.parse_params(string);
+                        }
+
+                        if ui.button("Object Images").clicked()
+                            && let Ok(string) = Self::load_image_data()
+                        {
+                            let _ = self.parse_image_data(string);
+                        }
+                    });
                 });
             });
     }

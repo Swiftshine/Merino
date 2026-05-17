@@ -3,6 +3,7 @@ mod canvas;
 mod canvas_settings;
 mod contexts;
 pub(crate) mod docking;
+mod download;
 mod editable;
 mod input;
 mod interact_object;
@@ -12,14 +13,14 @@ mod object_properties;
 mod params;
 mod settings;
 mod ui;
+mod log;
 
 use std::path::PathBuf;
 
 use crate::merino::{
     archive_viewer::level_editor::{
         contexts::{
-            canvas_context::CanvasContext, message_context::MessageContext,
-            parameter_context::ParameterContext,
+            canvas_context::CanvasContext, download_context::DownloadContext, log_context::LogContext, message_context::MessageContext, parameter_context::ParameterContext
         },
         docking::LevelEditorTab,
     },
@@ -27,6 +28,7 @@ use crate::merino::{
     util::res_folder::get_subfolder,
 };
 use anyhow::Result;
+use tokio::runtime::Runtime;
 
 pub struct LevelEditor {
     // data
@@ -37,10 +39,15 @@ pub struct LevelEditor {
     canvas_context: CanvasContext,
     message_context: MessageContext,
     parameter_context: ParameterContext,
+    download_context: Option<DownloadContext>,
+    log_context: LogContext,
 
     // docking
     pub(crate) dock_state: Option<egui_dock::DockState<LevelEditorTab>>,
     tab_to_open: Option<LevelEditorTab>,
+
+    // other
+    runtime: tokio::runtime::Runtime,
 }
 
 impl LevelEditor {
@@ -59,7 +66,10 @@ impl LevelEditor {
             canvas_context: CanvasContext::new(),
             message_context: MessageContext::new(),
             parameter_context: ParameterContext::new(),
+            download_context: None,
+            log_context: LogContext::new(),
             dock_state,
+            runtime: Runtime::new().unwrap(),
             tab_to_open: None,
         }
     }

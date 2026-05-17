@@ -8,6 +8,7 @@ pub enum LevelEditorTab {
     AddObject,
     Canvas,
     CanvasSettings,
+    Log,
     ObjectProperties,
 }
 
@@ -17,6 +18,7 @@ impl LevelEditorTab {
             Self::AddObject => EmojiMessage::add_msg("Add Object"),
             Self::Canvas => EmojiMessage::palette_msg("Canvas"),
             Self::CanvasSettings => EmojiMessage::burger_msg("Canvas Settings"),
+            Self::Log => EmojiMessage::book_msg("Log"),
             Self::ObjectProperties => EmojiMessage::memo_msg("Object Properties"),
         }
     }
@@ -53,9 +55,14 @@ impl<'a> egui_dock::TabViewer for LevelEditorTabViewer<'a> {
                 self.level_editor.show_canvas_settings_ui(ui);
             }
 
+            LevelEditorTab::Log => {
+                self.level_editor.show_log_ui(ui);
+            }
+
             LevelEditorTab::ObjectProperties => {
                 self.level_editor.show_object_properties(ui);
             }
+
         }
     }
 }

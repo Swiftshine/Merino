@@ -26,10 +26,11 @@ macro_rules! emoji_msg {
 
 impl EmojiMessage {
     emoji_msg!(add, "➕", both);
+    emoji_msg!(book, "📘", message);
     emoji_msg!(burger, "☰", message);
     // emoji_msg!(check, "✔", message);
     emoji_msg!(cross, "❌", icon);
-    emoji_msg!(discard, "🗑", icon);
+    emoji_msg!(discard, "🗑", both);
     emoji_msg!(folder, "📁", message);
     emoji_msg!(memo, "📝", message);
     emoji_msg!(palette, "🎨", message);
