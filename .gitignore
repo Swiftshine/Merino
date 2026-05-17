@@ -5,3 +5,4 @@ scratch/
 *.gfa
 *.mapbin
 merino_res/
+.obsidian
