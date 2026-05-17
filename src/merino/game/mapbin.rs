@@ -1,4 +1,3 @@
-#[allow(unused_variables)] // todo! get rid of this when it's no longer needed.
 mod read;
 pub(crate) mod types;
 mod write;
