@@ -140,12 +140,12 @@ impl CanvasContext {
         self.settings.node_edit_settings[node_type].editable
     }
 
-    pub fn convert_to_camera(&self, pos: egui::Vec2) -> egui::Vec2 {
-        self.camera.convert_to_camera(pos)
+    pub fn world_to_camera(&self, pos: egui::Vec2) -> egui::Vec2 {
+        self.camera.world_to_camera(pos)
     }
 
-    pub fn convert_from_camera(&self, pos: egui::Vec2) -> egui::Vec2 {
-        self.camera.convert_from_camera(pos)
+    pub fn camera_to_world(&self, pos: egui::Vec2) -> egui::Vec2 {
+        self.camera.camera_to_world(pos)
     }
 
     pub fn camera_pan(&mut self, delta: egui::Vec2) {

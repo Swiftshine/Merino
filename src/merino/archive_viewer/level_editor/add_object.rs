@@ -103,7 +103,7 @@ impl MapDataNode {
         canvas_context: &mut CanvasContext,
         pointer_pos: egui::Pos2,
     ) {
-        let pos = canvas_context.convert_from_camera(pointer_pos.to_vec2());
+        let pos = canvas_context.camera_to_world(pointer_pos.to_vec2());
 
         let node_data = match child_type {
             NodeChildType::MapPolySet => {

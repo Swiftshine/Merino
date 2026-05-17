@@ -37,11 +37,11 @@ impl CanvasCamera {
             let mouse_pos =
                 ctx.input(|i| i.pointer.hover_pos().unwrap_or(egui::Pos2::ZERO).to_vec2());
 
-            let world_before = self.convert_from_camera(mouse_pos);
+            let world_before = self.camera_to_world(mouse_pos);
 
             self.zoom = (self.zoom * zoom_delta).clamp(zoom_min, zoom_max);
 
-            let world_after = self.convert_from_camera(mouse_pos);
+            let world_after = self.camera_to_world(mouse_pos);
 
             // keep mouse anchored
             self.position += world_before - world_after;
@@ -59,14 +59,14 @@ impl CanvasCamera {
         self.position -= delta;
     }
 
-    pub fn convert_to_camera(&self, pos: egui::Vec2) -> egui::Vec2 {
+    pub fn world_to_camera(&self, pos: egui::Vec2) -> egui::Vec2 {
         egui::Vec2 {
             x: (pos.x - self.position.x) * self.zoom,
             y: (-pos.y - self.position.y) * self.zoom,
         }
     }
 
-    pub fn convert_from_camera(&self, pos: egui::Vec2) -> egui::Vec2 {
+    pub fn camera_to_world(&self, pos: egui::Vec2) -> egui::Vec2 {
         egui::Vec2 {
             x: (pos.x / self.zoom) + self.position.x,
             y: (-pos.y / self.zoom) - self.position.y,
@@ -98,8 +98,8 @@ impl CanvasCamera {
         }
 
         // visible world bounds
-        let top_left = self.convert_from_camera(rect.left_top().to_vec2());
-        let bottom_right = self.convert_from_camera(rect.right_bottom().to_vec2());
+        let top_left = self.camera_to_world(rect.left_top().to_vec2());
+        let bottom_right = self.camera_to_world(rect.right_bottom().to_vec2());
 
         let min_x = top_left.x.min(bottom_right.x);
         let max_x = top_left.x.max(bottom_right.x);
@@ -120,7 +120,7 @@ impl CanvasCamera {
         // vertical lines
         let mut x = start_x;
         while x <= end_x {
-            let screen_x = self.convert_to_camera(egui::vec2(x, 0.0)).x;
+            let screen_x = self.world_to_camera(egui::vec2(x, 0.0)).x;
 
             painter.line_segment(
                 [
@@ -136,7 +136,7 @@ impl CanvasCamera {
         // horizontal lines
         let mut y = start_y;
         while y <= end_y {
-            let screen_y = self.convert_to_camera(egui::vec2(0.0, y)).y;
+            let screen_y = self.world_to_camera(egui::vec2(0.0, y)).y;
 
             painter.line_segment(
                 [

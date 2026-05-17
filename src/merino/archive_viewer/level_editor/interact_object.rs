@@ -228,7 +228,7 @@ impl MapDataNode {
         let square_size = 1.0;
 
         let draw_pos =
-            canvas_rect.min + canvas_context.convert_to_camera(Vec2f::from(*position).into());
+            canvas_rect.min + canvas_context.world_to_camera(Vec2f::from(*position).into());
 
         let resolved = canvas_context.image_bank_mut().resolve_image_for_node(
             ui.ctx(),
@@ -313,8 +313,8 @@ impl MapDataNode {
         };
 
         let painter = ui.painter_at(canvas_rect);
-        let draw_bounds_start = canvas_rect.min + canvas_context.convert_to_camera(start.into());
-        let draw_bounds_end = canvas_rect.min + canvas_context.convert_to_camera(end.into());
+        let draw_bounds_start = canvas_rect.min + canvas_context.world_to_camera(start.into());
+        let draw_bounds_end = canvas_rect.min + canvas_context.world_to_camera(end.into());
 
         let rect = egui::Rect::from_two_pos(draw_bounds_start, draw_bounds_end);
 
@@ -361,8 +361,8 @@ impl MapDataNode {
 
         let painter = ui.painter_at(canvas_rect);
 
-        let draw_start = canvas_rect.min + canvas_context.convert_to_camera(line.start.into());
-        let draw_end = canvas_rect.min + canvas_context.convert_to_camera(line.end.into());
+        let draw_start = canvas_rect.min + canvas_context.world_to_camera(line.start.into());
+        let draw_end = canvas_rect.min + canvas_context.world_to_camera(line.end.into());
 
         painter.line_segment([draw_start, draw_end], egui::Stroke::new(0.5, color));
 
@@ -411,7 +411,7 @@ impl MapDataNode {
 
         let draw_points: Vec<egui::Pos2> = points
             .iter()
-            .map(|point| canvas_rect.min + canvas_context.convert_to_camera(point.into()))
+            .map(|point| canvas_rect.min + canvas_context.world_to_camera(point.into()))
             .collect();
 
         // draw lines in between points
@@ -479,7 +479,7 @@ impl MapDataNode {
         };
 
         let painter = ui.painter_at(canvas_rect);
-        let draw_center = canvas_rect.min + canvas_context.convert_to_camera(position.into());
+        let draw_center = canvas_rect.min + canvas_context.world_to_camera(position.into());
         let draw_radius = *radius * canvas_context.camera_zoom();
 
         painter.circle_stroke(draw_center, draw_radius, egui::Stroke::new(1.0, color));
@@ -580,7 +580,7 @@ impl MapDataNode {
         };
 
         let draw_pos =
-            canvas_rect.min + canvas_context.convert_to_camera(Vec2f::from(*position).into());
+            canvas_rect.min + canvas_context.world_to_camera(Vec2f::from(*position).into());
 
         let (_, rects, responses) = handle_drag_and_selections(
             ui,
@@ -616,9 +616,9 @@ impl MapDataNode {
         let painter = ui.painter_at(canvas_rect);
 
         for (line_index, line) in lines.iter_mut().enumerate() {
-            let draw_start = canvas_rect.min + canvas_context.convert_to_camera(line.start.into());
+            let draw_start = canvas_rect.min + canvas_context.world_to_camera(line.start.into());
 
-            let draw_end = canvas_rect.min + canvas_context.convert_to_camera(line.end.into());
+            let draw_end = canvas_rect.min + canvas_context.world_to_camera(line.end.into());
 
             painter.line_segment([draw_start, draw_end], egui::Stroke::new(1.0, color));
 
@@ -768,7 +768,7 @@ fn drag_position<T: Vec2Like>(
     let pointer = response.interact_pointer_pos().unwrap();
     let local_pos = pointer - canvas_response.rect.min;
 
-    let world = canvas_context.convert_from_camera(local_pos).to_pos2();
+    let world = canvas_context.camera_to_world(local_pos).to_pos2();
 
     let snapped = if canvas_context.settings().snap_to_grid() {
         egui::pos2(snap(world.x, grid_size), snap(world.y, grid_size))
