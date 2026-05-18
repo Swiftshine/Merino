@@ -1,4 +1,6 @@
-use crate::merino::game::mapbin::{CollisionLine, MapDataNode, MapNodeFlag, Mapdata, NodeData, types::*};
+use crate::merino::game::mapbin::{
+    CollisionLine, MapDataNode, MapNodeFlag, Mapdata, NodeData, types::*,
+};
 use anyhow::Result;
 use anyhow::anyhow;
 use byteorder::{BigEndian, WriteBytesExt};
@@ -56,7 +58,7 @@ impl MapdataWriter {
             index as u32
         } else {
             println!("Adding missing {} '{}' to string table", label, value);
-    
+
             list.push(value.clone());
             (list.len() - 1) as u32
         }
@@ -141,9 +143,7 @@ impl MapdataWriter {
         // temporarily take
         let mut root = std::mem::take(&mut mapdata.root);
 
-        let write_root = (|| {
-            root.write(&mut self, mapdata, mapdata.version)
-        })();
+        let write_root = (|| root.write(&mut self, mapdata, mapdata.version))();
 
         // always restore root, even on error
         mapdata.root = root;
@@ -221,7 +221,12 @@ impl Writable for CollisionLine {
 }
 
 impl MapDataNode {
-    fn write(&mut self, writer: &mut MapdataWriter, mapdata: &mut Mapdata, version: f32) -> Result<()> {
+    fn write(
+        &mut self,
+        writer: &mut MapdataWriter,
+        mapdata: &mut Mapdata,
+        version: f32,
+    ) -> Result<()> {
         // type
         writer.write_u32(self.node_type as u32)?;
 
@@ -243,8 +248,11 @@ impl MapDataNode {
                 unk3,
             } => {
                 line.write(writer, version)?;
-                let index =
-                    MapdataWriter::get_or_add_index_of(&mut mapdata.collision_types, collision_type, "Collision");
+                let index = MapdataWriter::get_or_add_index_of(
+                    &mut mapdata.collision_types,
+                    collision_type,
+                    "Collision",
+                );
                 writer.write_u32(index)?;
                 writer.write_u32(*unk3)?;
             }
@@ -266,7 +274,8 @@ impl MapDataNode {
                 params,
                 unk14,
             } => {
-                let index = MapdataWriter::get_or_add_index_of(&mut mapdata.object_types, name, "Object");
+                let index =
+                    MapdataWriter::get_or_add_index_of(&mut mapdata.object_types, name, "Object");
                 writer.write_u32(index)?;
                 position.write(writer, version)?;
                 writer.write_f32(*unk3)?;
@@ -306,7 +315,8 @@ impl MapDataNode {
                 unk13,
                 params,
             } => {
-                let index = MapdataWriter::get_or_add_index_of(&mut mapdata.item_types, name, "Item");
+                let index =
+                    MapdataWriter::get_or_add_index_of(&mut mapdata.item_types, name, "Item");
                 writer.write_u32(index)?;
                 position.write(writer, version)?;
                 writer.write_f32(*unk3)?;
@@ -437,8 +447,11 @@ impl MapDataNode {
                 params,
                 unk15,
             } => {
-                let index =
-                    MapdataWriter::get_or_add_index_of(&mut mapdata.collision_types, collision_type, "Collision");
+                let index = MapdataWriter::get_or_add_index_of(
+                    &mut mapdata.collision_types,
+                    collision_type,
+                    "Collision",
+                );
                 writer.write_u32(index)?;
                 position.write(writer, version)?;
                 writer.write_at_version(version, 4.43, unk3, |w, v| w.write_i32(*v))?;
@@ -477,7 +490,7 @@ impl MapDataNode {
                 }
             };
         }
-        
+
         check_flag!(self.children_mappolyset, MapNodeFlag::MapPolySet);
         check_flag!(self.children_mapobjset, MapNodeFlag::MapObjSet);
         check_flag!(self.children_mapitemset, MapNodeFlag::MapItemSet);
@@ -487,21 +500,21 @@ impl MapDataNode {
         check_flag!(self.children_maprect, MapNodeFlag::MapRect);
         check_flag!(self.children_mapcircle, MapNodeFlag::MapCircle);
         check_flag!(self.children_mapterrain, MapNodeFlag::MapTerrain);
-        
+
         writer.write_u32(flags)?;
-        
+
         macro_rules! write_children {
             ($field:expr) => {
                 if let Some(nodes) = &mut $field {
                     writer.write_u32(nodes.len() as u32)?;
-        
+
                     for n in nodes {
                         n.write(writer, mapdata, version)?;
                     }
                 }
             };
         }
-        
+
         write_children!(self.children_mappolyset);
         write_children!(self.children_mapobjset);
         write_children!(self.children_mapitemset);

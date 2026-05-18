@@ -28,7 +28,7 @@ impl ArchiveViewer {
             file_context: FileContext::new(),
             dock_state,
             tab_to_open: None,
-            special
+            special,
         };
 
         viewer.on_start();

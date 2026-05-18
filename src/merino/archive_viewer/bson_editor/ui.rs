@@ -36,20 +36,18 @@ impl BSONEditor {
                     if self.is_individual_file {
                         if ui.button("Save BSON As").clicked() {
                             match self.validate() {
-                                Ok(_) => {
-                                    match self.write_bson_to_file() {
-                                        Ok(_) => {
-                                            self.error_message = None;
-                                            self.show_error_popup = false;
-                                        }
-                    
-                                        Err(e) => {
-                                            self.error_message = Some(e.to_string());
-                                            self.show_error_popup = true;
-                                        }
+                                Ok(_) => match self.write_bson_to_file() {
+                                    Ok(_) => {
+                                        self.error_message = None;
+                                        self.show_error_popup = false;
                                     }
-                                }
-                    
+
+                                    Err(e) => {
+                                        self.error_message = Some(e.to_string());
+                                        self.show_error_popup = true;
+                                    }
+                                },
+
                                 Err(e) => {
                                     self.error_message = Some(format!("Validation failed:\n{e}"));
                                     self.show_error_popup = true;
@@ -58,21 +56,19 @@ impl BSONEditor {
                         }
                     } else if ui.button("Save BSON to Archive").clicked() {
                         match self.validate() {
-                            Ok(_) => {
-                                match self.write_bson() {
-                                    Ok(data) => {
-                                        self.writable_data = Some(data);
-                                        self.error_message = None;
-                                        self.show_error_popup = false;
-                                    }
-                    
-                                    Err(e) => {
-                                        self.error_message = Some(e.to_string());
-                                        self.show_error_popup = true;
-                                    }
+                            Ok(_) => match self.write_bson() {
+                                Ok(data) => {
+                                    self.writable_data = Some(data);
+                                    self.error_message = None;
+                                    self.show_error_popup = false;
                                 }
-                            }
-                    
+
+                                Err(e) => {
+                                    self.error_message = Some(e.to_string());
+                                    self.show_error_popup = true;
+                                }
+                            },
+
                             Err(e) => {
                                 self.error_message = Some(format!("Validation failed:\n{e}"));
                                 self.show_error_popup = true;
