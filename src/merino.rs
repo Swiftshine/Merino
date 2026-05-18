@@ -45,20 +45,21 @@ pub struct MerinoApp {
 }
 
 impl MerinoApp {
-    fn new() -> Self {
+    fn new(special: bool) -> Self {
         Self {
-            archive_viewer: ArchiveViewer::new(),
+            archive_viewer: ArchiveViewer::new(special),
         }
     }
 
     pub fn run() -> Result<(), eframe::Error> {
         let mut options = NativeOptions::default();
 
+        let icon_data = random_icon();
+        let special = icon_data != ICON;
+
         // load icon
         options.viewport.icon = Some(Arc::new({
-            let icon = random_icon();
-
-            let image = image::load_from_memory(icon)
+            let image = image::load_from_memory(icon_data)
                 .expect("Failed to open icon")
                 .into_rgba8();
 
@@ -77,7 +78,7 @@ impl MerinoApp {
             Box::new(|cc| {
                 setup_fonts(&cc.egui_ctx);
 
-                Ok(Box::<MerinoApp>::from(MerinoApp::new()))
+                Ok(Box::<MerinoApp>::from(MerinoApp::new(special)))
             }),
         )
     }

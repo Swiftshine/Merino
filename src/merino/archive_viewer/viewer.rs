@@ -13,10 +13,13 @@ pub struct ArchiveViewer {
     // dock state
     pub dock_state: Option<egui_dock::DockState<ArchiveViewerTab>>,
     pub tab_to_open: Option<ArchiveViewerTab>,
+    // other
+    // 1 in 10 chance
+    pub special: bool,
 }
 
 impl ArchiveViewer {
-    pub fn new() -> Self {
+    pub fn new(special: bool) -> Self {
         let dock_state = Some(Self::default_dock());
 
         let mut viewer = Self {
@@ -25,6 +28,7 @@ impl ArchiveViewer {
             file_context: FileContext::new(),
             dock_state,
             tab_to_open: None,
+            special
         };
 
         viewer.on_start();
