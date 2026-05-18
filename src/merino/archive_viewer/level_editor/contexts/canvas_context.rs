@@ -82,11 +82,11 @@ impl CanvasSettings {
         fs::write(path, json)?;
         Ok(())
     }
-    
+
     pub fn snap_to_start_mut(&mut self) -> &mut bool {
         &mut self.snap_to_start
     }
-    
+
     pub fn snap_to_start(&self) -> bool {
         self.snap_to_start
     }

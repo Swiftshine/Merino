@@ -55,24 +55,30 @@ impl MerinoApp {
         let mut options = NativeOptions::default();
 
         // load icon
-        options.viewport.icon = Some(Arc::new(IconData {
-            rgba: {
-                let icon = random_icon();
-                let image = image::load_from_memory(icon)
-                    .expect("Failed to open icon")
-                    .into_rgba8();
+        options.viewport.icon = Some(Arc::new({
+            let icon = random_icon();
 
-                image.into_raw()
-            },
+            let image = image::load_from_memory(icon)
+                .expect("Failed to open icon")
+                .into_rgba8();
 
-            width: 64,
-            height: 64,
+            let (width, height) = image.dimensions();
+
+            IconData {
+                rgba: image.into_raw(),
+                width,
+                height,
+            }
         }));
 
         eframe::run_native(
             "Merino",
             options,
-            Box::new(|_cc| Ok(Box::<MerinoApp>::from(MerinoApp::new()))),
+            Box::new(|cc| {
+                setup_fonts(&cc.egui_ctx);
+
+                Ok(Box::<MerinoApp>::from(MerinoApp::new()))
+            }),
         )
     }
 }
@@ -87,4 +93,28 @@ impl eframe::App for MerinoApp {
     fn on_exit(&mut self, _gl: Option<&eframe::glow::Context>) {
         self.archive_viewer.on_exit();
     }
+}
+
+fn setup_fonts(ctx: &egui::Context) {
+    let mut fonts = egui::FontDefinitions::default();
+
+    fonts.font_data.insert(
+        "FiraCode".to_string(),
+        egui::FontData::from_static(include_bytes!("../assets/font/FiraCode-Regular.ttf")).into(),
+    );
+
+    fonts.font_data.insert(
+        "NotoSansJP".to_string(),
+        egui::FontData::from_static(include_bytes!("../assets/font/NotoSansJP-Regular.ttf")).into(),
+    );
+
+    let monospace = fonts
+        .families
+        .entry(egui::FontFamily::Monospace)
+        .or_default();
+
+    monospace.insert(0, "FiraCode".to_string());
+    monospace.push("NotoSansJP".to_string());
+
+    ctx.set_fonts(fonts);
 }

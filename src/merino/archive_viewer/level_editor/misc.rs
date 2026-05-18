@@ -1,4 +1,7 @@
-use crate::merino::{archive_viewer::level_editor::LevelEditor, game::mapbin::{NodeChildType, NodeData}};
+use crate::merino::{
+    archive_viewer::level_editor::LevelEditor,
+    game::mapbin::{NodeChildType, NodeData},
+};
 
 /// Delay doing something
 pub enum WaitState {
@@ -7,7 +10,7 @@ pub enum WaitState {
     // Waiting for something
     Waiting,
     /// Done waiting for something
-    Done
+    Done,
 }
 
 impl LevelEditor {
@@ -17,14 +20,13 @@ impl LevelEditor {
         let root = &self.mapdata.as_ref()?.root;
         let locators = root.children_vec(NodeChildType::MapLocator)?;
 
-        let start_node = locators.iter().find(|node|{
+        let start_node = locators.iter().find(|node| {
             let NodeData::MapLocator { name, .. } = &node.node_data else {
                 return false;
             };
 
             name.as_str() == "START"
         })?;
-
 
         // snap to position
         let position = start_node.node_data.position();

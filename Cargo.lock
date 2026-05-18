@@ -1756,6 +1756,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "gfbson"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2fbece88f0535c29031803f66930a72123cb566f86daa03e6ded3004c761fbe2"
+dependencies = [
+ "byteorder",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.18",
+]
+
+[[package]]
 name = "gif"
 version = "0.14.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2595,6 +2607,7 @@ dependencies = [
  "egui_dock",
  "enum-map",
  "gfarch",
+ "gfbson",
  "image",
  "index-map",
  "paste",

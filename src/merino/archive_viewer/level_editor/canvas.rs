@@ -1,4 +1,6 @@
-use crate::merino::archive_viewer::level_editor::{LevelEditor, add_object::draw_crosshair, misc::WaitState};
+use crate::merino::archive_viewer::level_editor::{
+    LevelEditor, add_object::draw_crosshair, misc::WaitState,
+};
 
 impl LevelEditor {
     pub fn show_canvas(&mut self, ui: &mut egui::Ui) {
@@ -14,7 +16,9 @@ impl LevelEditor {
         // update canvas rect
         self.canvas_context.set_canvas_rect(rect);
 
-        if self.canvas_context.settings().snap_to_start() && matches!(self.wait_to_snap_to_start, WaitState::Waiting) {
+        if self.canvas_context.settings().snap_to_start()
+            && matches!(self.wait_to_snap_to_start, WaitState::Waiting)
+        {
             // we can now attempt to snap to the start position
             self.snap_to_start();
             // we're done now

@@ -9,12 +9,12 @@ mod input;
 mod interact_object;
 mod log;
 mod message;
+mod misc;
 mod object_image;
 mod object_properties;
 mod params;
 mod settings;
 mod ui;
-mod misc;
 
 use std::path::PathBuf;
 
@@ -27,7 +27,8 @@ use crate::merino::{
             message_context::MessageContext,
             parameter_context::ParameterContext,
         },
-        docking::LevelEditorTab, misc::WaitState,
+        docking::LevelEditorTab,
+        misc::WaitState,
     },
     game::mapbin::Mapdata,
     util::res_folder::get_subfolder,
@@ -53,9 +54,9 @@ pub struct LevelEditor {
 
     // other
     runtime: tokio::runtime::Runtime,
-    
+
     // waiting
-    wait_to_snap_to_start: WaitState
+    wait_to_snap_to_start: WaitState,
 }
 
 impl LevelEditor {

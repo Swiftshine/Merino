@@ -13,14 +13,15 @@ const DOCKING_SETTINGS_FILE: &str = "dock_settings.json";
 #[derive(PartialEq, Eq, Clone, Debug)]
 pub enum ArchiveViewerTab {
     Archive,
+    BSONEditor,
     LevelEditor,
-    // BSONEditor,
 }
 
 impl ArchiveViewerTab {
     fn get_name(&self) -> String {
         match self {
             Self::Archive => EmojiMessage::folder_msg("Archive"),
+            Self::BSONEditor => EmojiMessage::memo_msg("BSON Editor"),
             Self::LevelEditor => EmojiMessage::memo_msg("Level Editor"),
         }
     }
@@ -55,6 +56,10 @@ impl<'a> egui_dock::TabViewer for ArchiveViewerTabViewer<'a> {
         match tab {
             ArchiveViewerTab::Archive => {
                 self.archive_viewer.show_archive_ui(ui);
+            }
+
+            ArchiveViewerTab::BSONEditor => {
+                self.archive_viewer.bson_editor.show_ui(ui);
             }
 
             ArchiveViewerTab::LevelEditor => {

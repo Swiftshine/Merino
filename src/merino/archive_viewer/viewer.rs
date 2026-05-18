@@ -1,10 +1,12 @@
 use crate::merino::archive_viewer::{
-    contexts::file_context::FileContext, docking::ArchiveViewerTab, level_editor::LevelEditor,
+    bson_editor::BSONEditor, contexts::file_context::FileContext, docking::ArchiveViewerTab,
+    level_editor::LevelEditor,
 };
 
 /// View and edit mapbin or bson files.
 pub struct ArchiveViewer {
     // editors
+    pub bson_editor: BSONEditor,
     pub level_editor: LevelEditor,
     // contexts
     pub file_context: FileContext,
@@ -18,6 +20,7 @@ impl ArchiveViewer {
         let dock_state = Some(Self::default_dock());
 
         let mut viewer = Self {
+            bson_editor: BSONEditor::new(),
             level_editor: LevelEditor::new(),
             file_context: FileContext::new(),
             dock_state,
@@ -34,6 +37,11 @@ impl ArchiveViewer {
 
         if self.level_editor.has_writable_data() {
             let data = self.level_editor.take_writable_data().unwrap();
+            self.file_context.replace_current_file_contents(data);
+        }
+
+        if self.bson_editor.has_writable_data() {
+            let data = self.bson_editor.take_writable_data().unwrap();
             self.file_context.replace_current_file_contents(data);
         }
 

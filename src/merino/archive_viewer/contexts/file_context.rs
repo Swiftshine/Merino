@@ -32,6 +32,10 @@ impl FileContext {
     pub fn set_selected_file(&mut self, selected_file: Option<String>) {
         self.selected_file = selected_file;
     }
+
+    // pub fn is_file_selected(&self) -> bool {
+    //     self.selected_file.is_some()
+    // }
 }
 
 impl FileContext {
@@ -77,8 +81,8 @@ impl FileContext {
     }
 
     pub fn replace_current_file_contents(&mut self, new_contents: Vec<u8>) {
-        let selected = self.selected_file().unwrap().clone();
-
-        *self.archive_contents.get_mut(&selected).unwrap() = new_contents;
+        if let Some(selected) = self.selected_file() {
+            *self.archive_contents.get_mut(&selected.clone()).unwrap() = new_contents;
+        }
     }
 }

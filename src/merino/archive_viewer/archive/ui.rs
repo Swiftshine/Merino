@@ -39,10 +39,9 @@ impl ArchiveViewer {
             return;
         }
 
-        let valid_extensions = [
-            ".mapbin",
-            // ".bson" // later
-        ];
+        let bson_ext = [".bson", ".mappath", ".MapScene"];
+
+        let valid_extensions = [".mapbin", ".bson", ".mappath", ".MapScene"];
 
         let mut selected_file = None;
         let mut tab_to_open = None;
@@ -70,6 +69,13 @@ impl ArchiveViewer {
                     if name.ends_with(".mapbin") {
                         tab_to_open = Some(ArchiveViewerTab::LevelEditor);
                         let _ = self.level_editor.load_mapdata(bytes);
+                    } else {
+                        for ext in bson_ext.iter() {
+                            if name.ends_with(ext) {
+                                tab_to_open = Some(ArchiveViewerTab::BSONEditor);
+                                let _ = self.bson_editor.load_bson(bytes);
+                            }
+                        }
                     }
                 }
             } else {
