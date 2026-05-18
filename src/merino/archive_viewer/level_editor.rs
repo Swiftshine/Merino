@@ -14,6 +14,7 @@ mod object_properties;
 mod params;
 mod settings;
 mod ui;
+mod misc;
 
 use std::path::PathBuf;
 
@@ -26,7 +27,7 @@ use crate::merino::{
             message_context::MessageContext,
             parameter_context::ParameterContext,
         },
-        docking::LevelEditorTab,
+        docking::LevelEditorTab, misc::WaitState,
     },
     game::mapbin::Mapdata,
     util::res_folder::get_subfolder,
@@ -52,6 +53,9 @@ pub struct LevelEditor {
 
     // other
     runtime: tokio::runtime::Runtime,
+    
+    // waiting
+    wait_to_snap_to_start: WaitState
 }
 
 impl LevelEditor {
@@ -75,6 +79,7 @@ impl LevelEditor {
             dock_state,
             runtime: Runtime::new().unwrap(),
             tab_to_open: None,
+            wait_to_snap_to_start: WaitState::Idle,
         }
     }
 
@@ -84,6 +89,7 @@ impl LevelEditor {
                 self.mapdata = Some(mapdata);
                 self.log_context
                     .log(LogCategory::File, "Successfully read mapdata.".to_string());
+                self.wait_to_snap_to_start = WaitState::Waiting;
             }
 
             Err(e) => {

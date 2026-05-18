@@ -45,6 +45,7 @@ impl LevelEditor {
                 settings.display_squares_for_images_mut(),
                 "Display Squares for Images",
             );
+            ui.checkbox(settings.snap_to_start_mut(), "Snap to \"START\"");
         }
 
         if prune {

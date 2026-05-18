@@ -345,6 +345,20 @@ impl MapDataNode {
         items.into_iter()
     }
 
+    pub fn children_vec(&self, child_type: NodeChildType) -> Option<&Vec<MapDataNode>> {
+        match child_type {
+            NodeChildType::MapPolySet => self.children_mappolyset.as_ref(),
+            NodeChildType::MapObjSet => self.children_mapobjset.as_ref(),
+            NodeChildType::MapItemSet => self.children_mapitemset.as_ref(),
+            NodeChildType::MapEnemySet => self.children_mapenemyset.as_ref(),
+            NodeChildType::MapLocator => self.children_maplocator.as_ref(),
+            NodeChildType::MapPath => self.children_mappath.as_ref(),
+            NodeChildType::MapRect => self.children_maprect.as_ref(),
+            NodeChildType::MapCircle => self.children_mapcircle.as_ref(),
+            NodeChildType::MapTerrain => self.children_mapterrain.as_ref(),
+        }
+    }
+
     pub fn children_vec_mut(&mut self, child_type: NodeChildType) -> Option<&mut Vec<MapDataNode>> {
         match child_type {
             NodeChildType::MapPolySet => self.children_mappolyset.as_mut(),

@@ -19,6 +19,7 @@ pub struct CanvasSettings {
     display_grid: bool,
     snap_to_grid: bool,
     display_squares_for_images: bool,
+    snap_to_start: bool,
 }
 
 impl CanvasSettings {
@@ -29,6 +30,7 @@ impl CanvasSettings {
             Self {
                 snap_to_grid: true,
                 display_grid: true,
+                snap_to_start: true,
                 ..Default::default()
             }
         }
@@ -79,6 +81,14 @@ impl CanvasSettings {
 
         fs::write(path, json)?;
         Ok(())
+    }
+    
+    pub fn snap_to_start_mut(&mut self) -> &mut bool {
+        &mut self.snap_to_start
+    }
+    
+    pub fn snap_to_start(&self) -> bool {
+        self.snap_to_start
     }
 }
 pub enum CanvasTarget {
@@ -167,6 +177,10 @@ impl CanvasContext {
 
     pub fn camera_zoom(&self) -> f32 {
         self.camera.zoom
+    }
+
+    pub fn set_camera_zoom(&mut self, zoom: f32) {
+        self.camera.zoom = zoom;
     }
 
     pub fn camera_focus(&mut self, world_pos: egui::Vec2) {
