@@ -1,4 +1,4 @@
-use crate::merino::archive_viewer::bson_editor::BSONEditor;
+use crate::merino::{archive_viewer::bson_editor::BSONEditor, util::emoji::EmojiMessage};
 
 impl BSONEditor {
     pub fn show_ui(&mut self, ui: &mut egui::Ui) {
@@ -19,7 +19,7 @@ impl BSONEditor {
                     ui.colored_label(egui::Color32::LIGHT_RED, "JSON Error:");
                     ui.label(err);
 
-                    if ui.button("Clear").clicked() {
+                    if ui.button(EmojiMessage::cross_msg("Clear")).clicked() {
                         self.error_message = None;
                     }
                 });
