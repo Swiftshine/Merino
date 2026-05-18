@@ -72,8 +72,10 @@ impl MerinoApp {
             }
         }));
 
+        let title = format!("Merino {}", env!("CARGO_PKG_VERSION"));
+        
         eframe::run_native(
-            "Merino",
+            &title,
             options,
             Box::new(|cc| {
                 setup_fonts(&cc.egui_ctx);
