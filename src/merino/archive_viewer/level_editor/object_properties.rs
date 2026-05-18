@@ -87,7 +87,10 @@ impl LevelEditor {
 
         egui::ScrollArea::vertical()
             .max_height(500.0)
+            .auto_shrink([false, false])
             .show(ui, |ui| {
+                ui.set_min_width(ui.available_width());
+
                 node.edit_properties(ui, self.parameter_context.parameter_objects());
             });
 
