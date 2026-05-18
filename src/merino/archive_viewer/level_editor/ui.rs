@@ -1,7 +1,10 @@
 use strum::IntoEnumIterator;
 
 use crate::merino::archive_viewer::level_editor::{
-    LevelEditor, contexts::log_context::LogCategory, docking::LevelEditorTab, download::{IMAGEDB_URL, OBJECTDB_URL}
+    LevelEditor,
+    contexts::log_context::LogCategory,
+    docking::LevelEditorTab,
+    download::{IMAGEDB_URL, OBJECTDB_URL},
 };
 
 impl LevelEditor {
@@ -60,25 +63,26 @@ impl LevelEditor {
                                         LogCategory::Load,
                                         "Loaded object parameters.".to_string(),
                                     );
-                        
+
                                     match self.parse_params(string) {
                                         Ok(_) => self.log_context.log(
                                             LogCategory::Parse,
                                             "Parsed object parameters.".to_string(),
                                         ),
-                                        Err(e) => self
-                                            .log_context
-                                            .log_error(format!("Could not parse object parameters. Error: {e}")),
+                                        Err(e) => self.log_context.log_error(format!(
+                                            "Could not parse object parameters. Error: {e}"
+                                        )),
                                     }
                                 }
-                        
+
                                 Err(e) => {
-                                    self.log_context
-                                        .log_error(format!("Could not load object parameters. Error: {e}"));
+                                    self.log_context.log_error(format!(
+                                        "Could not load object parameters. Error: {e}"
+                                    ));
                                 }
                             }
                         }
-                        
+
                         if ui.button("Object Images").clicked() {
                             match Self::load_image_data() {
                                 Ok(string) => {
@@ -86,21 +90,22 @@ impl LevelEditor {
                                         LogCategory::Load,
                                         "Loaded object images.".to_string(),
                                     );
-                        
+
                                     match self.parse_image_data(string) {
                                         Ok(_) => self.log_context.log(
                                             LogCategory::Parse,
                                             "Parsed object images.".to_string(),
                                         ),
-                                        Err(e) => self
-                                            .log_context
-                                            .log_error(format!("Could not parse object images. Error: {e}")),
+                                        Err(e) => self.log_context.log_error(format!(
+                                            "Could not parse object images. Error: {e}"
+                                        )),
                                     }
                                 }
-                        
+
                                 Err(e) => {
-                                    self.log_context
-                                        .log_error(format!("Could not load object images. Error: {e}"));
+                                    self.log_context.log_error(format!(
+                                        "Could not load object images. Error: {e}"
+                                    ));
                                 }
                             }
                         }

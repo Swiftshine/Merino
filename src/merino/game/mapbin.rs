@@ -82,6 +82,25 @@ impl From<NodeChildType> for MapNodeType {
     }
 }
 
+impl TryFrom<MapNodeType> for NodeChildType {
+    type Error = &'static str;
+
+    fn try_from(value: MapNodeType) -> Result<Self, Self::Error> {
+        match value {
+            MapNodeType::MapPolySet => Ok(Self::MapPolySet),
+            MapNodeType::MapObjSet => Ok(Self::MapObjSet),
+            MapNodeType::MapItemSet => Ok(Self::MapItemSet),
+            MapNodeType::MapEnemySet => Ok(Self::MapEnemySet),
+            MapNodeType::MapLocator => Ok(Self::MapLocator),
+            MapNodeType::MapPath => Ok(Self::MapPath),
+            MapNodeType::MapRect => Ok(Self::MapRect),
+            MapNodeType::MapCircle => Ok(Self::MapCircle),
+            MapNodeType::MapTerrain => Ok(Self::MapTerrain),
+            MapNodeType::MapSet => Err("Cannot convert MapSet"),
+        }
+    }
+}
+
 #[derive(Debug, Hash, PartialEq, Clone, Copy)]
 pub struct NodeStep {
     node_type: NodeChildType,
@@ -518,7 +537,7 @@ impl NodeData {
 
             NodeData::MapPath { points, .. } => points.first().copied().unwrap(),
 
-            _ => unreachable!("Node data cannot be None")
+            _ => unreachable!("Node data cannot be None"),
         }
     }
 }

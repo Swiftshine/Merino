@@ -62,7 +62,6 @@ impl<'a> egui_dock::TabViewer for LevelEditorTabViewer<'a> {
             LevelEditorTab::ObjectProperties => {
                 self.level_editor.show_object_properties(ui);
             }
-
         }
     }
 }

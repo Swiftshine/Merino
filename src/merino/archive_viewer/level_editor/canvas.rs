@@ -10,7 +10,7 @@ impl LevelEditor {
 
         // update camera
         self.canvas_context.camera_mut().update(ui.ctx(), &response);
-        
+
         // update canvas rect
         self.canvas_context.set_canvas_rect(rect);
 

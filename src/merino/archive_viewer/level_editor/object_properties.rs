@@ -1,6 +1,16 @@
 use strum::IntoEnumIterator;
 
-use crate::merino::{archive_viewer::level_editor::{contexts::{canvas_context::{CanvasContext, CanvasTarget}, message_context::MessageContext}, editable::{EditInfo, Editable}, params::ParameterObject}, game::mapbin::{MapDataNode, NodeChildType, NodePath, NodeStep}};
+use crate::merino::{
+    archive_viewer::level_editor::{
+        contexts::{
+            canvas_context::{CanvasContext, CanvasTarget},
+            message_context::MessageContext,
+        },
+        editable::{EditInfo, Editable},
+        params::ParameterObject,
+    },
+    game::mapbin::{MapDataNode, NodeChildType, NodePath, NodeStep},
+};
 
 use crate::merino::{
     archive_viewer::level_editor::{LevelEditor, contexts::message_context::Command},
@@ -441,8 +451,10 @@ impl MapDataNode {
                                                         let child_path = node_path.with_step(
                                                             NodeStep::new(child_type, index),
                                                         );
-         
-                                                        messages.push_command(Command::focus(child_path));
+
+                                                        messages.push_command(Command::focus(
+                                                            child_path,
+                                                        ));
                                                     }
                                                 },
                                             );

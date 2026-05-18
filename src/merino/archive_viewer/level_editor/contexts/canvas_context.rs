@@ -80,11 +80,12 @@ impl CanvasSettings {
         fs::write(path, json)?;
         Ok(())
     }
-
 }
 pub enum CanvasTarget {
     /// Create a new child of this type and attach it to this parent node.
     NewNode(NodeChildType, NodePath),
+    /// Create a new child of this type with this name and attach it to this parent node.
+    NewNamedNode(NodeChildType, String, NodePath),
     /// Search for an existing node to attach it to this parent node.
     Search(NodePath),
 }
@@ -98,6 +99,14 @@ impl CanvasTarget {
         Self::NewNode(child_type, parent)
     }
 
+    // pub fn new_named_to_node(child_type: NodeChildType, name: String, parent: NodePath) -> Self {
+    //     Self::NewNamedNode(child_type, name, parent)
+    // }
+
+    pub fn new_named_to_root(child_type: NodeChildType, name: String) -> Self {
+        Self::NewNamedNode(child_type, name, NodePath::root())
+    }
+
     pub fn search(parent: NodePath) -> Self {
         Self::Search(parent)
     }
@@ -106,6 +115,7 @@ impl CanvasTarget {
         match self {
             Self::NewNode(child_type, _) => child_type.to_string(),
             Self::Search(_) => "Searching".to_string(),
+            Self::NewNamedNode(child_type, name, _) => format!("{name} ({child_type})"),
         }
     }
 }
@@ -127,7 +137,7 @@ impl CanvasContext {
             settings: CanvasSettings::new(),
             target: None,
             image_bank: ImageBank::default(),
-            canvas_rect: egui::Rect::NOTHING
+            canvas_rect: egui::Rect::NOTHING,
         }
     }
 
@@ -162,11 +172,11 @@ impl CanvasContext {
     pub fn camera_focus(&mut self, world_pos: egui::Vec2) {
         self.camera.center(world_pos, self.canvas_rect);
     }
-        
+
     // pub fn canvas_rect(&self) -> egui::Rect {
     //     self.canvas_rect
     // }
-    
+
     pub fn set_canvas_rect(&mut self, canvas_rect: egui::Rect) {
         self.canvas_rect = canvas_rect;
     }
@@ -191,6 +201,7 @@ impl CanvasContext {
     /// Removes all selections
     pub fn clear_selections(&mut self) {
         self.selected_node_paths.clear();
+        self.target = None;
     }
 
     /// Only one node can have its properties edited.
@@ -209,6 +220,7 @@ impl CanvasContext {
     pub fn is_target_new(&self) -> bool {
         self.target.as_ref().is_some_and(|t| match t {
             CanvasTarget::NewNode(_, _) => true,
+            CanvasTarget::NewNamedNode(_, _, _) => true,
             _ => false,
         })
     }

@@ -14,7 +14,7 @@ impl DownloadContext {
     pub fn new(receiver: Receiver<DownloadMessage>) -> Self {
         Self { receiver }
     }
-    
+
     pub fn receiver(&self) -> &Receiver<DownloadMessage> {
         &self.receiver
     }

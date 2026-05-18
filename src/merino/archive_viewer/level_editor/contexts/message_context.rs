@@ -13,7 +13,7 @@ pub enum Command {
     /// Make one node the child of another.
     MakeChildOf(NodePath, NodePath),
     /// Select and focus the camera on the node at the given path.
-    Focus(NodePath)
+    Focus(NodePath),
 }
 
 impl Command {

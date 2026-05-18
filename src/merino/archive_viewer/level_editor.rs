@@ -7,20 +7,24 @@ mod download;
 mod editable;
 mod input;
 mod interact_object;
+mod log;
 mod message;
 mod object_image;
 mod object_properties;
 mod params;
 mod settings;
 mod ui;
-mod log;
 
 use std::path::PathBuf;
 
 use crate::merino::{
     archive_viewer::level_editor::{
         contexts::{
-            canvas_context::CanvasContext, download_context::DownloadContext, log_context::{LogCategory, LogContext}, message_context::MessageContext, parameter_context::ParameterContext
+            canvas_context::CanvasContext,
+            download_context::DownloadContext,
+            log_context::{LogCategory, LogContext},
+            message_context::MessageContext,
+            parameter_context::ParameterContext,
         },
         docking::LevelEditorTab,
     },
@@ -78,11 +82,13 @@ impl LevelEditor {
         match Mapdata::read(bytes) {
             Ok(mapdata) => {
                 self.mapdata = Some(mapdata);
-                self.log_context.log(LogCategory::File, "Successfully read mapdata.".to_string());
+                self.log_context
+                    .log(LogCategory::File, "Successfully read mapdata.".to_string());
             }
 
             Err(e) => {
-                self.log_context.log_error(format!("Could not read mapdata: {e}"));
+                self.log_context
+                    .log_error(format!("Could not read mapdata: {e}"));
                 return Err(e);
             }
         }
@@ -93,12 +99,14 @@ impl LevelEditor {
     pub fn write_mapdata(&mut self) {
         match self.mapdata.as_ref().unwrap().write() {
             Ok(data) => {
-                self.log_context.log(LogCategory::File, "Successfully wrote mapdata.".to_string());
+                self.log_context
+                    .log(LogCategory::File, "Successfully wrote mapdata.".to_string());
                 self.writable_data = Some(data);
             }
-            
+
             Err(e) => {
-                self.log_context.log_error(format!("Could not write mapdata: {e}"));
+                self.log_context
+                    .log_error(format!("Could not write mapdata: {e}"));
             }
         }
     }

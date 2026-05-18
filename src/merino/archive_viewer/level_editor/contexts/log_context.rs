@@ -22,15 +22,12 @@ impl LogCategory {
 
 pub struct LogMessage {
     category: LogCategory,
-    content: String
+    content: String,
 }
 
 impl LogMessage {
     fn new(category: LogCategory, content: String) -> Self {
-        Self {
-            category,
-            content
-        }
+        Self { category, content }
     }
 
     pub fn category(&self) -> &'static str {
@@ -55,7 +52,7 @@ impl LogContext {
     pub fn new() -> Self {
         Self {
             log_messages: Vec::new(),
-            current_written_log: None
+            current_written_log: None,
         }
     }
 
@@ -91,7 +88,7 @@ impl LogContext {
         if self.current_written_log.is_some() {
             return; // don't override the current one
         }
-        
+
         self.current_written_log = Some(LogMessage::new(category, message));
     }
 
@@ -117,7 +114,7 @@ impl LogContext {
     pub fn log_started(&self) -> bool {
         self.current_written_log.is_some()
     }
-    
+
     pub fn current_written_log(&self) -> Option<&LogMessage> {
         self.current_written_log.as_ref()
     }
