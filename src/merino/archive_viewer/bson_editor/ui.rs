@@ -46,17 +46,15 @@ impl BSONEditor {
                                 }
                             }
                         }
-                    } else {
-                        if ui.button("Save to Archive").clicked() {
-                            match self.write_bson() {
-                                Ok(data) => {
-                                    self.writable_data = Some(data);
-                                    self.show_error_popup = false;
-                                }
-                                Err(e) => {
-                                    self.error_message = Some(e.to_string());
-                                    self.show_error_popup = true;
-                                }
+                    } else if ui.button("Save to Archive").clicked() {
+                        match self.write_bson() {
+                            Ok(data) => {
+                                self.writable_data = Some(data);
+                                self.show_error_popup = false;
+                            }
+                            Err(e) => {
+                                self.error_message = Some(e.to_string());
+                                self.show_error_popup = true;
                             }
                         }
                     }

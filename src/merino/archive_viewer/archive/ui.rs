@@ -28,7 +28,7 @@ impl ArchiveViewer {
                     // file submenu
                     ui.menu_button("File", |ui| {
                         if ui.button("Open Archive").clicked() {
-                            if let Ok(_) = self.file_context.open_archive() {
+                            if self.file_context.open_archive().is_ok() {
                                 self.bson_editor.clear();
                             }
 
@@ -58,7 +58,7 @@ impl ArchiveViewer {
                             )
                             .clicked()
                         {
-                            if let Ok(_) = self.file_context.save_archive() {
+                            if self.file_context.save_archive().is_ok() {
                                 self.bson_editor.set_is_individual_file(false);
                             }
                             ui.close();
