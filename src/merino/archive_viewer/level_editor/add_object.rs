@@ -52,7 +52,7 @@ impl LevelEditor {
                         ui.end_row();
 
                         for param_obj in self.parameter_context.parameter_objects() {
-                            let canon_name = param_obj.name.to_lowercase();
+                            let canon_name = param_obj.name.clone();
 
                             let display_name = param_obj
                                 .display_name
@@ -61,7 +61,7 @@ impl LevelEditor {
                                 .to_lowercase();
 
                             let matches = search.is_empty()
-                                || canon_name.contains(&search)
+                                || canon_name.to_lowercase().contains(&search)
                                 || display_name.contains(&search);
 
                             if !matches {
