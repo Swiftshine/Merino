@@ -5,6 +5,7 @@ impl LevelEditor {
         if ui.button(EmojiMessage::discard_msg("Clear Logs")).clicked() {
             self.log_context.clear_logs();
         }
+        ui.separator();
 
         egui::ScrollArea::vertical()
             .stick_to_bottom(true)
