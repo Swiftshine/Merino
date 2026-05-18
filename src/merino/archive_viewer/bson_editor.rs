@@ -5,6 +5,8 @@ use anyhow::Result;
 pub struct BSONEditor {
     pub json_string: String,
     pub writable_data: Option<Vec<u8>>,
+    pub error_message: Option<String>,
+    pub show_error_popup: bool,
 }
 
 impl BSONEditor {
@@ -12,6 +14,8 @@ impl BSONEditor {
         Self {
             json_string: String::new(),
             writable_data: None,
+            error_message: None,
+            show_error_popup: false,
         }
     }
 
