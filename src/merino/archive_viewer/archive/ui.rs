@@ -1,9 +1,21 @@
-use crate::merino::archive_viewer::{docking::ArchiveViewerTab, viewer::ArchiveViewer};
+use crate::merino::archive_viewer::{contexts::file_context::FileType, docking::ArchiveViewerTab, viewer::ArchiveViewer};
 
 impl ArchiveViewer {
     pub fn show_archive_ui(&mut self, ui: &mut egui::Ui) {
         self.show_top_menu(ui);
-        self.show_archive_files(ui);
+        
+        if self.file_context.has_archive_contents() {
+            self.show_archive_files(ui);
+        } else if self.file_context.has_file() {
+            // single file
+            ui.centered_and_justified(|ui|{
+                ui.label("See the appropriate editor.");
+            });
+        } else {
+            ui.centered_and_justified(|ui|{
+                ui.label("Open a file to get started.");
+            });
+        }
     }
 
     fn show_top_menu(&mut self, ui: &mut egui::Ui) {
@@ -14,18 +26,37 @@ impl ArchiveViewer {
                     // file submenu
                     ui.menu_button("File", |ui| {
                         if ui.button("Open Archive").clicked() {
-                            let _ = self.file_context.open_archive();
+                            if let Ok(_) = self.file_context.open_archive() {
+                                self.bson_editor.clear();
+                            }
+
+                            ui.close();
+                        }
+
+                        if ui.button("Open File").clicked() {
+                            if let Ok(file_type) = self.file_context.open_file() {
+                                match file_type {
+                                    FileType::BSON => {
+                                        self.bson_editor.set_is_individual_file(true);
+                                        self.schedule_open_tab(ArchiveViewerTab::BSONEditor);
+                                        let _ = self.bson_editor.load_bson(self.file_context.file_contents().unwrap());
+                                    }
+                                    FileType::None => {}
+                                }
+                            }
                             ui.close();
                         }
 
                         if ui
                             .add_enabled(
-                                self.file_context.has_files(),
+                                self.file_context.has_archive_contents(),
                                 egui::Button::new("Save Archive"),
                             )
                             .clicked()
                         {
-                            let _ = self.file_context.save_archive();
+                            if let Ok(_) = self.file_context.save_archive() {
+                                self.bson_editor.set_is_individual_file(false);
+                            }
                             ui.close();
                         }
                     });
@@ -35,7 +66,7 @@ impl ArchiveViewer {
 
     /// Lists every file open in the current archive.
     fn show_archive_files(&mut self, ui: &mut egui::Ui) {
-        if !self.file_context.has_files() {
+        if !self.file_context.has_archive_contents() {
             return;
         }
 

@@ -3,10 +3,18 @@ use gfarch::gfarch;
 use rfd::FileDialog;
 use std::{collections::BTreeMap, fs};
 
+pub enum FileType {
+    None,
+    BSON
+}
+
 /// Contains files.
 pub struct FileContext {
+    // archive
     archive_contents: BTreeMap<String, Vec<u8>>,
     selected_file: Option<String>,
+    // single file
+    file_contents: Option<Vec<u8>>,
 }
 
 impl FileContext {
@@ -14,12 +22,17 @@ impl FileContext {
         Self {
             archive_contents: Default::default(),
             selected_file: None,
+            file_contents: None,
         }
     }
 
-    pub fn has_files(&self) -> bool {
+    pub fn has_archive_contents(&self) -> bool {
         !self.archive_contents.is_empty()
     }
+
+    // pub fn has_file(&self) -> bool {
+    //     self.file_contents.is_some()
+    // }
 
     pub fn archive_contents(&self) -> &BTreeMap<String, Vec<u8>> {
         &self.archive_contents
@@ -33,32 +46,55 @@ impl FileContext {
         self.selected_file = selected_file;
     }
 
+    pub fn file_contents(&self) -> Option<&Vec<u8>> {
+        self.file_contents.as_ref()
+    }
+
+    pub fn has_file(&self) -> bool {
+        self.file_contents.is_some()
+    }
+    
     // pub fn is_file_selected(&self) -> bool {
     //     self.selected_file.is_some()
     // }
 }
 
 impl FileContext {
-    pub fn open_archive(&mut self) -> Result<bool> {
+    pub fn open_archive(&mut self) -> Result<()> {
         let Some(path) = FileDialog::new()
             .add_filter("Good-Feel Archive", &["gfa"])
             .pick_file()
         else {
-            return Ok(false); // user exited
+            return Ok(());
         };
 
         let data = fs::read(path)?;
 
         self.archive_contents = gfarch::extract(&data)?.into_iter().collect();
+        self.selected_file = None;
+        self.file_contents = None;
 
+        Ok(())
+    }
+
+    pub fn open_file(&mut self) -> Result<FileType> {
+        let Some(path) = FileDialog::new()
+        .add_filter("Good-Feel BSON File", &["bson", "mappath", "MapScene"])
+        .pick_file() else {
+            return Ok(FileType::None);
+        };
+
+        self.file_contents = Some(fs::read(path)?);
+        self.archive_contents = Default::default();
         self.selected_file = None;
 
-        Ok(true)
+        // change this if any other individual file types need to be supported
+        Ok(FileType::BSON)
     }
 
     pub fn save_archive(&self) -> Result<()> {
         let Some(path) = FileDialog::new()
-            .add_filter("Good-Feel ARchive", &["gfa"])
+            .add_filter("Good-Feel Archive", &["gfa"])
             .save_file()
         else {
             return Ok(());

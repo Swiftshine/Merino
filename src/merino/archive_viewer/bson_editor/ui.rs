@@ -33,15 +33,30 @@ impl BSONEditor {
             .resizable(false)
             .show_inside(ui, |ui| {
                 egui::MenuBar::new().ui(ui, |ui| {
-                    if ui.button("Save to Archive").clicked() {
-                        match self.write_bson() {
-                            Ok(data) => {
-                                self.writable_data = Some(data);
-                                self.show_error_popup = false;
+                    if self.is_individual_file {
+                        if ui.button("Save As").clicked() {
+                            match self.write_bson_to_file() {
+                                Ok(_) => {
+                                    self.show_error_popup = false;
+                                }
+
+                                Err(e) => {
+                                    self.error_message = Some(e.to_string());
+                                    self.show_error_popup = true;
+                                }
                             }
-                            Err(e) => {
-                                self.error_message = Some(e.to_string());
-                                self.show_error_popup = true;
+                        }
+                    } else {
+                        if ui.button("Save to Archive").clicked() {
+                            match self.write_bson() {
+                                Ok(data) => {
+                                    self.writable_data = Some(data);
+                                    self.show_error_popup = false;
+                                }
+                                Err(e) => {
+                                    self.error_message = Some(e.to_string());
+                                    self.show_error_popup = true;
+                                }
                             }
                         }
                     }
