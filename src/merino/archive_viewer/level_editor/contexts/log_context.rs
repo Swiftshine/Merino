@@ -4,6 +4,7 @@ pub enum LogCategory {
     Parse,
     Error,
     Command,
+    File,
 }
 
 impl LogCategory {
@@ -13,7 +14,8 @@ impl LogCategory {
             Self::Load => "Load",
             Self::Parse => "Parse",
             Self::Error => "Error",
-            Self::Command => "Command"
+            Self::Command => "Command",
+            Self::File => "File",
         }
     }
 }
