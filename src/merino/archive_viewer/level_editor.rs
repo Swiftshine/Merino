@@ -115,6 +115,20 @@ impl LevelEditor {
         self.mapdata.is_some()
     }
 
+    pub fn on_start(&mut self) {
+        // no need to log a "failure"
+
+        // load parameter data
+        if let Ok(json) = Self::load_params() {
+            let _ = self.parse_params(json);
+        }
+
+        // load image data
+        if let Ok(json) = Self::load_image_data() {
+            let _ = self.parse_image_data(json);
+        }
+    }
+
     pub fn on_exit(&mut self) {
         // save settings
         let _ = self.canvas_context.settings().write();

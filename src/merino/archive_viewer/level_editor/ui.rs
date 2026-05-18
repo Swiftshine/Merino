@@ -55,7 +55,6 @@ impl LevelEditor {
                     });
 
                     ui.menu_button("Load", |ui| {
-                        // todo! make this also happen on startup
                         if ui.button("Object Parameters").clicked() {
                             match Self::load_params() {
                                 Ok(string) => {

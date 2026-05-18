@@ -15,15 +15,18 @@ pub struct ArchiveViewer {
 
 impl ArchiveViewer {
     pub fn new() -> Self {
-        // todo! load state from file
         let dock_state = Some(Self::default_dock());
 
-        Self {
+        let mut viewer = Self {
             level_editor: LevelEditor::new(),
             file_context: FileContext::new(),
             dock_state,
             tab_to_open: None,
-        }
+        };
+
+        viewer.on_start();
+
+        viewer
     }
 
     pub fn show_ui(&mut self, ui: &mut egui::Ui) {
@@ -35,6 +38,10 @@ impl ArchiveViewer {
         }
 
         self.update_dock(ui);
+    }
+
+    fn on_start(&mut self) {
+        self.level_editor.on_start();
     }
 
     pub fn on_exit(&mut self) {
