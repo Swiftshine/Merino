@@ -31,70 +31,80 @@ impl LevelEditor {
         let extract_path = get_merino_folder()?;
 
         self.runtime.spawn(async move {
-            // helper
             let send_progress = |value: f32| {
                 let _ = tx.send(DownloadMessage::Progress(value));
             };
-
-            fn strip_first_component(path: &str) -> Option<&str> {
-                let mut parts = path.splitn(2, '/');
-                parts.next()?; // drop repo root folder
-                parts.next()
-            }
-
-            // download
-            send_progress(10.0);
-            let response = reqwest::get(url).await.unwrap();
-
-            send_progress(30.0);
-            let bytes = response.bytes().await.unwrap();
-
-            // extract
-            send_progress(50.0);
-
-            let result = tokio::task::spawn_blocking(move || {
-                let reader = Cursor::new(bytes);
-                let mut archive = ZipArchive::new(reader).unwrap();
-
-                for i in 0..archive.len() {
-                    let mut file = archive.by_index(i).unwrap();
-
-                    let original_path = file.name();
-
-                    // skip root
-                    let Some(stripped) = strip_first_component(original_path) else {
-                        continue;
-                    };
-
-                    let outpath = Path::new(&extract_path).join(stripped);
-
-                    if file.name().ends_with('/') {
-                        fs::create_dir_all(&outpath).unwrap();
-                    } else {
-                        if let Some(parent) = outpath.parent() {
-                            fs::create_dir_all(parent).unwrap();
-                        }
-
-                        let mut outfile = std::fs::File::create(&outpath).unwrap();
-                        std::io::copy(&mut file, &mut outfile).unwrap();
-                    }
+        
+            async fn do_download(
+                url: &'static str,
+                extract_path: std::path::PathBuf,
+                send_progress: impl Fn(f32),
+            ) -> anyhow::Result<()> {
+                fn strip_first_component(path: &str) -> Option<&str> {
+                    let mut parts = path.splitn(2, '/');
+                    parts.next()?;
+                    parts.next()
                 }
-            })
-            .await;
-
-            // done
-
-            match result {
+        
+                // download
+                send_progress(10.0);
+        
+                let response = reqwest::get(url).await?;
+                let response = response.error_for_status()?;
+        
+                send_progress(30.0);
+        
+                let bytes = response.bytes().await?;
+        
+                // extract
+                send_progress(50.0);
+        
+                tokio::task::spawn_blocking(move || -> anyhow::Result<()> {
+                    let reader = Cursor::new(bytes);
+                    let mut archive = ZipArchive::new(reader)?;
+        
+                    for i in 0..archive.len() {
+                        let mut file = archive.by_index(i)?;
+        
+                        let original_path = file.name();
+        
+                        let Some(stripped) = strip_first_component(original_path) else {
+                            continue;
+                        };
+        
+                        let outpath = Path::new(&extract_path).join(stripped);
+        
+                        if file.name().ends_with('/') {
+                            fs::create_dir_all(&outpath)?;
+                        } else {
+                            if let Some(parent) = outpath.parent() {
+                                fs::create_dir_all(parent)?;
+                            }
+        
+                            let mut outfile = std::fs::File::create(&outpath)?;
+                            std::io::copy(&mut file, &mut outfile)?;
+                        }
+                    }
+        
+                    Ok(())
+                })
+                .await??;
+        
+                Ok(())
+            }
+        
+            match do_download(url, extract_path, send_progress).await {
                 Ok(_) => {
                     send_progress(100.0);
                     let _ = tx.send(DownloadMessage::Finished);
                 }
-
+        
                 Err(e) => {
                     let _ = tx.send(DownloadMessage::Error(e.to_string()));
                 }
             }
         });
+
         Ok(())
     }
 
