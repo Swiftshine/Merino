@@ -5,7 +5,7 @@ use std::{collections::BTreeMap, fs};
 
 pub enum FileType {
     None,
-    BSON
+    BSON,
 }
 
 /// Contains files.
@@ -53,7 +53,7 @@ impl FileContext {
     pub fn has_file(&self) -> bool {
         self.file_contents.is_some()
     }
-    
+
     // pub fn is_file_selected(&self) -> bool {
     //     self.selected_file.is_some()
     // }
@@ -79,8 +79,9 @@ impl FileContext {
 
     pub fn open_file(&mut self) -> Result<FileType> {
         let Some(path) = FileDialog::new()
-        .add_filter("Good-Feel BSON File", &["bson", "mappath", "MapScene"])
-        .pick_file() else {
+            .add_filter("Good-Feel BSON File", &["bson", "mappath", "MapScene"])
+            .pick_file()
+        else {
             return Ok(FileType::None);
         };
 

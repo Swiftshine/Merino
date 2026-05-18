@@ -1,18 +1,20 @@
-use crate::merino::archive_viewer::{contexts::file_context::FileType, docking::ArchiveViewerTab, viewer::ArchiveViewer};
+use crate::merino::archive_viewer::{
+    contexts::file_context::FileType, docking::ArchiveViewerTab, viewer::ArchiveViewer,
+};
 
 impl ArchiveViewer {
     pub fn show_archive_ui(&mut self, ui: &mut egui::Ui) {
         self.show_top_menu(ui);
-        
+
         if self.file_context.has_archive_contents() {
             self.show_archive_files(ui);
         } else if self.file_context.has_file() {
             // single file
-            ui.centered_and_justified(|ui|{
+            ui.centered_and_justified(|ui| {
                 ui.label("See the appropriate editor.");
             });
         } else {
-            ui.centered_and_justified(|ui|{
+            ui.centered_and_justified(|ui| {
                 ui.label("Open a file to get started.");
             });
         }
@@ -39,7 +41,9 @@ impl ArchiveViewer {
                                     FileType::BSON => {
                                         self.bson_editor.set_is_individual_file(true);
                                         self.schedule_open_tab(ArchiveViewerTab::BSONEditor);
-                                        let _ = self.bson_editor.load_bson(self.file_context.file_contents().unwrap());
+                                        let _ = self
+                                            .bson_editor
+                                            .load_bson(self.file_context.file_contents().unwrap());
                                     }
                                     FileType::None => {}
                                 }

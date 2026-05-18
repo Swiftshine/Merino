@@ -27,7 +27,7 @@ impl BSONEditor {
     pub fn clear(&mut self) {
         self.json_string.clear();
     }
-    
+
     pub fn load_bson(&mut self, data: &[u8]) -> Result<()> {
         let bson = gfbson::read(data, gfbson::Endianness::Auto)?;
         self.json_string = gfbson::to_json(&bson, true)?;
@@ -42,8 +42,9 @@ impl BSONEditor {
 
     pub fn write_bson_to_file(&self) -> Result<()> {
         let Some(path) = FileDialog::new()
-        .add_filter("Good-Feel BSON File", &["bson", "mappath", "MapScene"])
-        .save_file() else {
+            .add_filter("Good-Feel BSON File", &["bson", "mappath", "MapScene"])
+            .save_file()
+        else {
             return Ok(());
         };
 
@@ -60,7 +61,7 @@ impl BSONEditor {
     pub fn take_writable_data(&mut self) -> Option<Vec<u8>> {
         self.writable_data.take()
     }
-    
+
     pub fn set_is_individual_file(&mut self, individual_file: bool) {
         self.is_individual_file = individual_file;
     }
