@@ -54,10 +54,23 @@ impl BSONEditor {
         Ok(())
     }
 
+    pub fn import_json(&mut self) -> Result<()> {
+        let Some(path) = FileDialog::new()
+            .add_filter("JSON File", &["json"])
+            .pick_file()
+        else {
+            return Ok(());
+        };
+
+        self.json_string = fs::read_to_string(path)?;
+
+        Ok(())
+    }
+    
     pub fn export_json(&self) -> Result<()> {
         let Some(path) = FileDialog::new()
-        .add_filter("JSON File", &["json"])
-        .save_file()
+            .add_filter("JSON File", &["json"])
+            .save_file()
         else {
             return Ok(());
         };
