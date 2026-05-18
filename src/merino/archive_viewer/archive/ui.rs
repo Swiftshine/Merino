@@ -16,9 +16,10 @@ impl ArchiveViewer {
         } else {
             ui.centered_and_justified(|ui| {
                 if self.special {
-                    ui.label("2026 Swiftshine");
+                    ui.label("2026 Swiftshine\nOpen a file to get started.");
+                } else {
+                    ui.label("Open a file to get started.");
                 }
-                ui.label("Open a file to get started.");
             });
         }
     }
