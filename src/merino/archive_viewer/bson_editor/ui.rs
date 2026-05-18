@@ -35,25 +35,46 @@ impl BSONEditor {
                 egui::MenuBar::new().ui(ui, |ui| {
                     if self.is_individual_file {
                         if ui.button("Save BSON As").clicked() {
-                            match self.write_bson_to_file() {
+                            match self.validate() {
                                 Ok(_) => {
-                                    self.show_error_popup = false;
+                                    match self.write_bson_to_file() {
+                                        Ok(_) => {
+                                            self.error_message = None;
+                                            self.show_error_popup = false;
+                                        }
+                    
+                                        Err(e) => {
+                                            self.error_message = Some(e.to_string());
+                                            self.show_error_popup = true;
+                                        }
+                                    }
                                 }
-
+                    
                                 Err(e) => {
-                                    self.error_message = Some(e.to_string());
+                                    self.error_message = Some(format!("Validation failed:\n{e}"));
                                     self.show_error_popup = true;
                                 }
                             }
                         }
                     } else if ui.button("Save BSON to Archive").clicked() {
-                        match self.write_bson() {
-                            Ok(data) => {
-                                self.writable_data = Some(data);
-                                self.show_error_popup = false;
+                        match self.validate() {
+                            Ok(_) => {
+                                match self.write_bson() {
+                                    Ok(data) => {
+                                        self.writable_data = Some(data);
+                                        self.error_message = None;
+                                        self.show_error_popup = false;
+                                    }
+                    
+                                    Err(e) => {
+                                        self.error_message = Some(e.to_string());
+                                        self.show_error_popup = true;
+                                    }
+                                }
                             }
+                    
                             Err(e) => {
-                                self.error_message = Some(e.to_string());
+                                self.error_message = Some(format!("Validation failed:\n{e}"));
                                 self.show_error_popup = true;
                             }
                         }
@@ -65,6 +86,12 @@ impl BSONEditor {
 
                     if ui.button("Export JSON").clicked() {
                         let _ = self.export_json();
+                    }
+
+                    if ui.button("Validate JSON").clicked() {
+                        if let Err(e) = self.validate() {
+                            self.error_message = Some(e.to_string());
+                        }
                     }
                 });
             });

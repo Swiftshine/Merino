@@ -34,9 +34,15 @@ impl BSONEditor {
         Ok(())
     }
 
-    pub fn write_bson(&self) -> Result<Vec<u8>> {
+    pub fn validate(&self) -> Result<gfbson::Root> {
         let bson = gfbson::from_json(&self.json_string)?;
+        Ok(bson)
+    }
+    
+    pub fn write_bson(&self) -> Result<Vec<u8>> {
+        let bson = self.validate()?;
         let bytes = gfbson::write(&bson, 3, gfbson::Endianness::Big)?;
+    
         Ok(bytes)
     }
 
