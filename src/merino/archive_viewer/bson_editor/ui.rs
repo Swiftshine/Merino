@@ -11,11 +11,10 @@ impl BSONEditor {
             .resizable(false)
             .show_inside(ui, |ui| {
                 egui::MenuBar::new().ui(ui, |ui| {
-                    if ui.button("Save to Archive").clicked() {
-                        if let Ok(data) = self.write_bson() {
+                    if ui.button("Save to Archive").clicked()
+                        && let Ok(data) = self.write_bson() {
                             self.writable_data = Some(data);
                         }
-                    }
                 });
             });
     }
