@@ -225,6 +225,12 @@ impl MapDataNode {
             _ => return,
         };
 
+        if !canvas_context.settings().show_dummy_terrain() {
+            if name == "dummy_terrain" {
+                return;
+            }
+        }
+
         let square_size = 1.0;
 
         let draw_pos =

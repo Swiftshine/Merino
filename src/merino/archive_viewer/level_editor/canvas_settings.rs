@@ -46,6 +46,7 @@ impl LevelEditor {
                 "Display Squares for Images",
             );
             ui.checkbox(settings.snap_to_start_mut(), "Snap to \"START\"");
+            ui.checkbox(settings.show_dummy_terrain_mut(), "Show \"dummy_terrain\"");
         }
 
         if prune {

@@ -20,6 +20,7 @@ pub struct CanvasSettings {
     snap_to_grid: bool,
     display_squares_for_images: bool,
     snap_to_start: bool,
+    show_dummy_terrain: bool,
 }
 
 impl CanvasSettings {
@@ -89,6 +90,14 @@ impl CanvasSettings {
 
     pub fn snap_to_start(&self) -> bool {
         self.snap_to_start
+    }
+    
+    pub fn show_dummy_terrain_mut(&mut self) -> &mut bool {
+        &mut self.show_dummy_terrain
+    }
+    
+    pub fn show_dummy_terrain(&self) -> bool {
+        self.show_dummy_terrain
     }
 }
 pub enum CanvasTarget {
