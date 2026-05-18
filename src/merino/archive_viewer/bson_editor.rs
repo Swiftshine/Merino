@@ -54,6 +54,19 @@ impl BSONEditor {
         Ok(())
     }
 
+    pub fn export_json(&self) -> Result<()> {
+        let Some(path) = FileDialog::new()
+        .add_filter("JSON File", &["json"])
+        .save_file()
+        else {
+            return Ok(());
+        };
+
+        fs::write(path, self.json_string.as_bytes())?;
+
+        Ok(())
+    }
+
     pub fn has_writable_data(&self) -> bool {
         self.writable_data.is_some()
     }

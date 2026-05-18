@@ -34,7 +34,7 @@ impl BSONEditor {
             .show_inside(ui, |ui| {
                 egui::MenuBar::new().ui(ui, |ui| {
                     if self.is_individual_file {
-                        if ui.button("Save As").clicked() {
+                        if ui.button("Save BSON As").clicked() {
                             match self.write_bson_to_file() {
                                 Ok(_) => {
                                     self.show_error_popup = false;
@@ -46,7 +46,7 @@ impl BSONEditor {
                                 }
                             }
                         }
-                    } else if ui.button("Save to Archive").clicked() {
+                    } else if ui.button("Save BSON to Archive").clicked() {
                         match self.write_bson() {
                             Ok(data) => {
                                 self.writable_data = Some(data);
@@ -57,6 +57,10 @@ impl BSONEditor {
                                 self.show_error_popup = true;
                             }
                         }
+                    }
+
+                    if ui.button("Export JSON").clicked() {
+                        let _ = self.export_json();
                     }
                 });
             });
