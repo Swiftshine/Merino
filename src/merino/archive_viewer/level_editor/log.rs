@@ -6,18 +6,26 @@ impl LevelEditor {
             self.log_context.clear_logs();
         }
 
-        for (index, log) in self.log_context.logs().enumerate() {
-            ui.push_id(index, |ui|{
-                ui.collapsing(log.category(), |ui|{
-                    ui.label(log.content());
-                });
-            });
-        }
+        egui::ScrollArea::vertical()
+            .stick_to_bottom(true)
+            .show(ui, |ui| {
+                for (index, log) in self.log_context.logs().enumerate() {
+                    ui.push_id(index, |ui| {
+                        ui.horizontal_wrapped(|ui| {
+                            ui.strong(format!("[{}]", log.category()));
+                            ui.label(log.content());
+                        });
 
-        if let Some(log) = self.log_context.current_written_log() {
-            ui.collapsing(log.category(), |ui|{
-                ui.label(log.content());
+                        ui.separator();
+                    });
+                }
+
+                if let Some(log) = self.log_context.current_written_log() {
+                    ui.horizontal_wrapped(|ui| {
+                        ui.strong(format!("[{}]", log.category()));
+                        ui.label(log.content());
+                    });
+                }
             });
-        }
     }
 }
