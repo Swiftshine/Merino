@@ -62,7 +62,7 @@ impl BSONEditor {
                     if ui.button("Import JSON").clicked() {
                         let _ = self.import_json();
                     }
-                    
+
                     if ui.button("Export JSON").clicked() {
                         let _ = self.export_json();
                     }

@@ -66,7 +66,7 @@ impl BSONEditor {
 
         Ok(())
     }
-    
+
     pub fn export_json(&self) -> Result<()> {
         let Some(path) = FileDialog::new()
             .add_filter("JSON File", &["json"])
