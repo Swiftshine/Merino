@@ -9,7 +9,7 @@ impl BSONEditor {
 
     pub fn show_error_box(&mut self, ui: &mut egui::Ui) {
         let error_text = self.error_message.clone();
-    
+
         if let Some(err) = error_text {
             egui::Frame::new()
                 .fill(egui::Color32::from_rgb(60, 20, 20))
@@ -18,13 +18,13 @@ impl BSONEditor {
                 .show(ui, |ui| {
                     ui.colored_label(egui::Color32::LIGHT_RED, "JSON Error:");
                     ui.label(err);
-    
+
                     if ui.button("Clear").clicked() {
                         self.error_message = None;
                     }
                 });
         }
-    
+
         ui.add_space(6.0);
     }
 
