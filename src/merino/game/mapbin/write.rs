@@ -143,7 +143,7 @@ impl MapdataWriter {
         // temporarily take
         let mut root = std::mem::take(&mut mapdata.root);
 
-        let write_root = (|| root.write(&mut self, mapdata, mapdata.version))();
+        let write_root = root.write(&mut self, mapdata, mapdata.version);
 
         // always restore root, even on error
         mapdata.root = root;
