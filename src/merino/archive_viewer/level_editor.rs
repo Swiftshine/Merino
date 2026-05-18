@@ -104,7 +104,7 @@ impl LevelEditor {
     }
 
     pub fn write_mapdata(&mut self) {
-        match self.mapdata.as_ref().unwrap().write() {
+        match self.mapdata.as_mut().unwrap().write() {
             Ok(data) => {
                 self.log_context
                     .log(LogCategory::File, "Successfully wrote mapdata.".to_string());
