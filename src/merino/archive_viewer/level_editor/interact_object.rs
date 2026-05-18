@@ -237,6 +237,8 @@ impl MapDataNode {
             &params,
         );
 
+        let old_color = color;
+
         // make color transparent if settings specify
         if resolved.is_some() && !canvas_context.settings().display_squares_for_images() {
             color = egui::Color32::TRANSPARENT;
@@ -257,6 +259,9 @@ impl MapDataNode {
             &current_path,
             canvas_response,
         );
+
+        // restore to draw names
+        color = old_color;
 
         // draw name
         let painter = ui.painter_at(canvas_rect);
