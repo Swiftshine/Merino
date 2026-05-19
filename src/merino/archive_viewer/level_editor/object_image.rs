@@ -35,15 +35,54 @@ pub struct ImageVariant {
     pub action: VariantAction,
 }
 
+#[derive(Default, Debug, Clone, Copy)]
+pub enum ImageAnchor {
+    #[default]
+    Center,
+    TopLeft,
+    TopCenter,
+    TopRight,
+    LeftCenter,
+    RightCenter,
+    BottomLeft,
+    BottomCenter,
+    BottomRight,
+}
+
+impl ImageAnchor {
+    pub fn from_str(value: &str) -> Result<Self> {
+        Ok(match value {
+            "center" => Self::Center,
+            "top_left" => Self::TopLeft,
+            "top_center" => Self::TopCenter,
+            "top_right" => Self::TopRight,
+            "left_center" => Self::LeftCenter,
+            "right_center" => Self::RightCenter,
+            "bottom_left" => Self::BottomLeft,
+            "bottom_center" => Self::BottomCenter,
+            "bottom_right" => Self::BottomRight,
+
+            _ => {
+                return Err(anyhow!(
+                    "invalid image anchor `{}`",
+                    value
+                ));
+            }
+        })
+    }
+}
+
 #[derive(Debug, Clone, Default)]
 pub struct ImageDefinition {
     pub display_image: Option<String>,
     pub variants: Vec<ImageVariant>,
+    pub anchor: ImageAnchor,
 }
 
 pub struct ResolvedImage {
     pub image_path: String,
     pub rotation_degrees: f32,
+    pub anchor: ImageAnchor,
 }
 
 #[derive(Default)]
@@ -83,7 +122,7 @@ impl ImageBank {
         node_type: MapNodeType,
         name: &str,
         params: &AnyParams<'_>, // Changed from &Params<N>
-    ) -> Option<(egui::TextureHandle, f32)> {
+    ) -> Option<(egui::TextureHandle, f32, ImageAnchor)> {
         let def = self.image_objects.get(&(node_type, name.to_string()))?;
 
         let resolved = def.resolve(params)?;
@@ -99,7 +138,7 @@ impl ImageBank {
         let _ = self.load_texture(ctx, &asset_id, &file_path);
         let texture = self.textures.get(&asset_id)?;
 
-        Some((texture.clone(), resolved.rotation_degrees))
+        Some((texture.clone(), resolved.rotation_degrees, resolved.anchor))
     }
 
     fn clear_image_objects(&mut self) {
@@ -129,6 +168,7 @@ impl ImageDefinition {
         let mut resolved = ResolvedImage {
             image_path: self.display_image.clone()?,
             rotation_degrees: 0.0,
+            anchor: self.anchor
         };
 
         for variant in &self.variants {
@@ -255,6 +295,13 @@ impl LevelEditor {
                     .and_then(|v| v.as_str())
                     .map(String::from);
 
+                image_def.anchor = obj_data
+                    .get("anchor")
+                    .and_then(|v| v.as_str())
+                    .map(ImageAnchor::from_str)
+                    .transpose()?
+                    .unwrap_or_default();
+                
                 if let Some(variants) = obj_data.get("variants").and_then(|v| v.as_array()) {
                     for variant in variants {
                         let when = variant
