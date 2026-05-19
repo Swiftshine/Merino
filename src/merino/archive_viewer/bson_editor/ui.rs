@@ -85,9 +85,10 @@ impl BSONEditor {
                     }
 
                     if ui.button("Validate JSON").clicked()
-                        && let Err(e) = self.validate() {
-                            self.error_message = Some(e.to_string());
-                        }
+                        && let Err(e) = self.validate()
+                    {
+                        self.error_message = Some(e.to_string());
+                    }
                 });
             });
     }

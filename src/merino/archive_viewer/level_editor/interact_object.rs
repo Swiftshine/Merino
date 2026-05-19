@@ -4,7 +4,8 @@ use crate::merino::{
         contexts::{
             canvas_context::{CanvasContext, CanvasTarget},
             message_context::{Command, MessageContext},
-        }, object_image::ImageAnchor,
+        },
+        object_image::ImageAnchor,
     },
     game::mapbin::{
         MapDataNode, MapNodeType, NodeData, NodePath,
@@ -285,7 +286,15 @@ impl MapDataNode {
         if let Some((tex, rotation, anchor)) = resolved {
             let pixels_per_tile = 64.0;
             let image_size = (tex.size_vec2() / pixels_per_tile) * canvas_context.camera_zoom();
-            draw_rotated_image(&painter, tex.id(), rect, image_size, anchor, rotation, egui::Color32::WHITE);
+            draw_rotated_image(
+                &painter,
+                tex.id(),
+                rect,
+                image_size,
+                anchor,
+                rotation,
+                egui::Color32::WHITE,
+            );
         }
 
         if selected {
@@ -842,11 +851,7 @@ fn draw_rotated_image(
     let center = anchor_rect.center();
 
     // actual image rect
-    let image_rect = anchored_rect(
-        center,
-        image_size,
-        anchor,
-    );
+    let image_rect = anchored_rect(center, image_size, anchor);
 
     let rotation = egui::emath::Rot2::from_angle(-rotation_degrees.to_radians());
 
@@ -893,47 +898,25 @@ fn draw_rotated_image(
     painter.add(egui::Shape::mesh(mesh));
 }
 
-fn anchored_rect(
-    anchor_pos: egui::Pos2,
-    size: egui::Vec2,
-    anchor: ImageAnchor,
-) -> egui::Rect {
+fn anchored_rect(anchor_pos: egui::Pos2, size: egui::Vec2, anchor: ImageAnchor) -> egui::Rect {
     let min = match anchor {
-        ImageAnchor::Center => {
-            (anchor_pos - size * 0.5).to_vec2()
-        }
+        ImageAnchor::Center => (anchor_pos - size * 0.5).to_vec2(),
 
-        ImageAnchor::TopLeft => {
-            anchor_pos.to_vec2()
-        }
+        ImageAnchor::TopLeft => anchor_pos.to_vec2(),
 
-        ImageAnchor::TopCenter => {
-            anchor_pos.to_vec2() - egui::vec2(size.x * 0.5, 0.0)
-        }
+        ImageAnchor::TopCenter => anchor_pos.to_vec2() - egui::vec2(size.x * 0.5, 0.0),
 
-        ImageAnchor::TopRight => {
-            anchor_pos.to_vec2() - egui::vec2(size.x, 0.0)
-        }
+        ImageAnchor::TopRight => anchor_pos.to_vec2() - egui::vec2(size.x, 0.0),
 
-        ImageAnchor::LeftCenter => {
-            anchor_pos.to_vec2() - egui::vec2(0.0, size.y * 0.5)
-        }
+        ImageAnchor::LeftCenter => anchor_pos.to_vec2() - egui::vec2(0.0, size.y * 0.5),
 
-        ImageAnchor::RightCenter => {
-            anchor_pos.to_vec2() - egui::vec2(size.x, size.y * 0.5)
-        }
+        ImageAnchor::RightCenter => anchor_pos.to_vec2() - egui::vec2(size.x, size.y * 0.5),
 
-        ImageAnchor::BottomLeft => {
-            anchor_pos.to_vec2() - egui::vec2(0.0, size.y)
-        }
+        ImageAnchor::BottomLeft => anchor_pos.to_vec2() - egui::vec2(0.0, size.y),
 
-        ImageAnchor::BottomCenter => {
-            anchor_pos.to_vec2() - egui::vec2(size.x * 0.5, size.y)
-        }
+        ImageAnchor::BottomCenter => anchor_pos.to_vec2() - egui::vec2(size.x * 0.5, size.y),
 
-        ImageAnchor::BottomRight => {
-            anchor_pos.to_vec2() - size
-        }
+        ImageAnchor::BottomRight => anchor_pos.to_vec2() - size,
     };
 
     egui::Rect::from_min_size(min.to_pos2(), size)

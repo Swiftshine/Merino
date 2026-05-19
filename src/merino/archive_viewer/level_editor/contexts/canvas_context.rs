@@ -91,11 +91,11 @@ impl CanvasSettings {
     pub fn snap_to_start(&self) -> bool {
         self.snap_to_start
     }
-    
+
     pub fn show_dummy_terrain_mut(&mut self) -> &mut bool {
         &mut self.show_dummy_terrain
     }
-    
+
     pub fn show_dummy_terrain(&self) -> bool {
         self.show_dummy_terrain
     }

@@ -63,10 +63,7 @@ impl ImageAnchor {
             "bottom_right" => Self::BottomRight,
 
             _ => {
-                return Err(anyhow!(
-                    "invalid image anchor `{}`",
-                    value
-                ));
+                return Err(anyhow!("invalid image anchor `{}`", value));
             }
         })
     }
@@ -168,7 +165,7 @@ impl ImageDefinition {
         let mut resolved = ResolvedImage {
             image_path: self.display_image.clone()?,
             rotation_degrees: 0.0,
-            anchor: self.anchor
+            anchor: self.anchor,
         };
 
         for variant in &self.variants {
@@ -301,7 +298,7 @@ impl LevelEditor {
                     .map(ImageAnchor::from_str)
                     .transpose()?
                     .unwrap_or_default();
-                
+
                 if let Some(variants) = obj_data.get("variants").and_then(|v| v.as_array()) {
                     for variant in variants {
                         let when = variant

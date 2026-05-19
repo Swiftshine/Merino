@@ -73,7 +73,7 @@ impl MerinoApp {
         }));
 
         let title = format!("Merino {}", env!("CARGO_PKG_VERSION"));
-        
+
         eframe::run_native(
             &title,
             options,
