@@ -283,7 +283,9 @@ impl MapDataNode {
 
         // draw image if present
         if let Some((tex, rotation)) = resolved {
-            draw_rotated_image(&painter, tex.id(), rect, rotation, egui::Color32::WHITE);
+            let pixels_per_tile = 64.0;
+            let image_size = (tex.size_vec2() / pixels_per_tile) * canvas_context.camera_zoom();
+            draw_rotated_image(&painter, tex.id(), rect, image_size, rotation, egui::Color32::WHITE);
         }
 
         if selected {
@@ -824,7 +826,8 @@ fn draw_text_above_point(
 fn draw_rotated_image(
     painter: &egui::Painter,
     texture_id: egui::TextureId,
-    rect: egui::Rect,
+    anchor_rect: egui::Rect,
+    image_size: egui::Vec2,
     rotation_degrees: f32,
     tint: egui::Color32,
 ) {
@@ -835,16 +838,19 @@ fn draw_rotated_image(
 
     let mut mesh = Mesh::with_texture(texture_id);
 
-    let center = rect.center();
+    let center = anchor_rect.center();
+
+    // actual image rect
+    let image_rect = egui::Rect::from_center_size(center, image_size);
 
     let rotation = egui::emath::Rot2::from_angle(-rotation_degrees.to_radians());
 
     let rotate = |p: Pos2| center + rotation * (p - center);
 
-    let p0 = rotate(rect.left_top());
-    let p1 = rotate(rect.right_top());
-    let p2 = rotate(rect.right_bottom());
-    let p3 = rotate(rect.left_bottom());
+    let p0 = rotate(image_rect.left_top());
+    let p1 = rotate(image_rect.right_top());
+    let p2 = rotate(image_rect.right_bottom());
+    let p3 = rotate(image_rect.left_bottom());
 
     let uv0 = Pos2::new(0.0, 0.0);
     let uv1 = Pos2::new(1.0, 0.0);
