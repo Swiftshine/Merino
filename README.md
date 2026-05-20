@@ -7,7 +7,7 @@ A *Yoshi's Woolly World* editor.
 - [x] BSON editor
 
 ### Roadmap
-- [ ] 3DS Support
+- [ ] 3DS support
 
 ## ![image|20](assets/bonus_icon_0.png) Level Editor
 ### Features
@@ -28,8 +28,11 @@ Zoom:
 - pinch (touchpad)
 
 Camera pan: right-click
+
 Drag/interact: left-click
+
 Reset camera: right-click + `R`
+
 Deselect: `Esc`
 
 ## ![image|20](assets/bonus_icon_6.png) BSON Editor
