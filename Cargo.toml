@@ -3,6 +3,13 @@ name = "merino"
 version = "1.0.1"
 edition = "2024"
 
+[profile.release]
+opt-level = "z"
+strip = true
+lto = true
+codegen-units = 1
+panic = "abort"
+
 [dependencies]
 anyhow = "1.0.102"
 byteorder = "1.5.0"
