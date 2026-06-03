@@ -298,6 +298,88 @@ impl Mapdata {
             .get_or_insert_with(Vec::new)
             .push(child_node);
     }
+
+    pub fn rebuild_string_tables(&mut self) {
+        self.object_types.clear();
+        self.item_types.clear();
+        self.collision_types.clear();
+        self.rect_types.clear();
+        self.enemy_types.clear();
+        self.unk_types_1.clear();
+
+        fn insert_unique(table: &mut Vec<String32>, value: &String32) {
+            if !table.contains(value) {
+                table.push(value.clone());
+            }
+        }
+
+        fn visit(node: &MapDataNode, map: &mut Mapdata) {
+            match &node.node_data {
+                NodeData::MapPolySet {
+                    collision_type,
+                    ..
+                } => {
+                    insert_unique(&mut map.collision_types, collision_type);
+                }
+
+                NodeData::MapObjSet {
+                    name,
+                    unk5,
+                    unk7,
+                    ..
+                } => {
+                    insert_unique(&mut map.object_types, name);
+                    insert_unique(&mut map.unk_types_1, unk5);
+
+                    if let Some(s) = unk7 {
+                        insert_unique(&mut map.unk_types_1, s);
+                    }
+                }
+
+                NodeData::MapItemSet {
+                    name,
+                    unk5,
+                    unk7,
+                    ..
+                } => {
+                    insert_unique(&mut map.item_types, name);
+                    insert_unique(&mut map.unk_types_1, unk5);
+
+                    if let Some(s) = unk7 {
+                        insert_unique(&mut map.unk_types_1, s);
+                    }
+                }
+
+                // etc...
+                _ => {}
+            }
+
+            macro_rules! recurse {
+                ($field:ident) => {
+                    if let Some(children) = &node.$field {
+                        for child in children {
+                            visit(child, map);
+                        }
+                    }
+                };
+            }
+
+            recurse!(children_mappolyset);
+            recurse!(children_mapobjset);
+            recurse!(children_mapitemset);
+            recurse!(children_mapenemyset);
+            recurse!(children_maplocator);
+            recurse!(children_mappath);
+            recurse!(children_maprect);
+            recurse!(children_mapcircle);
+            recurse!(children_mapterrain);
+        }
+
+        // avoid borrow issues
+        let root = std::mem::take(&mut self.root);
+        visit(&root, self);
+        self.root = root;
+    }
 }
 
 #[derive(Debug, Default)]

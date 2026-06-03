@@ -106,6 +106,9 @@ impl MapdataWriter {
     // custom
 
     fn write_level(mut self, mapdata: &mut Mapdata) -> Result<Vec<u8>> {
+        // collect any new strings
+        mapdata.rebuild_string_tables();
+
         // filesize
         self.write_u32(PLACEHOLDER_VALUE)?;
         self.write_u32(PLACEHOLDER_VALUE)?;
