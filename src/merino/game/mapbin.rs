@@ -324,33 +324,25 @@ impl Mapdata {
 
                 NodeData::MapObjSet {
                     name,
-                    unk5,
-                    unk7,
                     ..
                 } => {
                     insert_unique(&mut map.object_types, name);
-                    insert_unique(&mut map.unk_types_1, unk5);
-
-                    if let Some(s) = unk7 {
-                        insert_unique(&mut map.unk_types_1, s);
-                    }
                 }
 
                 NodeData::MapItemSet {
                     name,
-                    unk5,
-                    unk7,
                     ..
                 } => {
                     insert_unique(&mut map.item_types, name);
-                    insert_unique(&mut map.unk_types_1, unk5);
-
-                    if let Some(s) = unk7 {
-                        insert_unique(&mut map.unk_types_1, s);
-                    }
                 }
 
-                // etc...
+                NodeData::MapEnemySet { name, ..} => {
+                    insert_unique(&mut map.enemy_types, name);
+                }
+
+                NodeData::MapTerrain { collision_type, ..} => {
+                    insert_unique(&mut map.collision_types, collision_type);
+                }
                 _ => {}
             }
 
