@@ -300,12 +300,15 @@ impl Mapdata {
     }
 
     pub fn rebuild_string_tables(&mut self) {
-        self.object_types.clear();
-        self.item_types.clear();
-        self.collision_types.clear();
-        self.rect_types.clear();
-        self.enemy_types.clear();
-        self.unk_types_1.clear();
+        // note to self: i want to retain values that are used in the future
+        // but im too lazy to do that rn
+        
+        // self.object_types.clear();
+        // self.item_types.clear();
+        // self.collision_types.clear();
+        // self.rect_types.clear();
+        // self.enemy_types.clear();
+        // self.unk_types_1.clear();
 
         fn insert_unique(table: &mut Vec<String32>, value: &String32) {
             if !table.contains(value) {
